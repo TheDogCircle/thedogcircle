@@ -914,31 +914,30 @@ async function loadEvents() {
     if (estInscrit) {
       btnHtml = '<button class="btn" style="padding:7px 16px;font-size:12px;background:#d1fae5;color:#065f46;cursor:default;">✓ Inscrit</button>';
     } else if (enAttente) {
-      btnHtml = '<button class="btn" style="padding:7px 16px;font-size:12px;background:#fef3c7;color:#92400e;cursor:default;">⏳ Liste d'attente</button>';
+      btnHtml = '<button class="btn" style="padding:7px 16px;font-size:12px;background:#fef3c7;color:#92400e;cursor:default;">⏳ Liste d\'attente</button>';
     } else if (complet) {
       const btnIdAttente = 'btn-attente-' + e.id;
       const btnId = 'btn-inscr-' + e.id;
-      btnHtml = '<button id="' + btnIdAttente + '" class="btn btn-o" style="padding:7px 16px;font-size:12px;" onclick="sInscrire(this, '' + e.id + '', '' + e.titre.replace(/'/g, '') + '', true)">S'inscrire en liste d'attente</button>';
+      btnHtml = `<button class="btn btn-o" style="padding:7px 16px;font-size:12px;" onclick="sInscrire(this, '${e.id}', '${e.titre.replace(/'/g,'')}', true)">S'inscrire en liste d'attente</button>`;
     } else {
-      const btnId2 = 'btn-inscr-' + e.id;
-      btnHtml = '<button id="' + btnId2 + '" class="btn btn-p" style="padding:7px 16px;font-size:12px;" onclick="sInscrire(this, '' + e.id + '', '' + e.titre.replace(/'/g, '') + '', false)">S'inscrire</button>';
+      btnHtml = `<button class="btn btn-p" style="padding:7px 16px;font-size:12px;" onclick="sInscrire(this, '${e.id}', '${e.titre.replace(/'/g,'')}', false)">S'inscrire</button>`;
     }
 
     const spotsTag = complet 
       ? '<span class="ev-tag ev-tag-red">Complet</span>'
       : '<span class="ev-tag ev-tag-' + (placesRestantes <= 3 ? 'red' : 'green') + '">' + placesRestantes + ' place' + (placesRestantes > 1 ? 's' : '') + ' restante' + (placesRestantes > 1 ? 's' : '') + '</span>';
 
-    return '<div class="ev-card">' +
-      '<div class="ev-date"><div class="ev-day">' + day + '</div><div class="ev-month">' + month + '</div></div>' +
-      '<div class="ev-body">' +
-        '<div class="ev-title">' + e.titre + '</div>' +
-        '<div class="ev-detail">' + (e.ville || '') + ' · ' + (e.prix || 'Gratuit membres') + '</div>' +
-        '<div class="ev-tags">' +
-          '<span class="ev-tag ev-tag-gold">' + (e.prix || 'Gratuit') + '</span>' +
-          spotsTag +
-        '</div>' +
-        btnHtml +
-      '</div></div>';
+    return `<div class="ev-card">
+      <div class="ev-date"><div class="ev-day">${day}</div><div class="ev-month">${month}</div></div>
+      <div class="ev-body">
+        <div class="ev-title">${e.titre}</div>
+        <div class="ev-detail">${e.ville || ''} · ${e.prix || 'Gratuit membres'}</div>
+        <div class="ev-tags">
+          <span class="ev-tag ev-tag-gold">${e.prix || 'Gratuit'}</span>
+          ${spotsTag}
+        </div>
+        ${btnHtml}
+      </div></div>`;
   }).join('');
 }
 
@@ -1017,7 +1016,7 @@ async function loadMesInscriptions() {
     .order('created_at', { ascending: false });
 
   if (error || !data || data.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--t3);">Tu n'es inscrit(e) à aucun event pour le moment 🐾</div>';
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--t3);">Tu n'\''es inscrit(e) à aucun event pour le moment 🐾</div>';
     return;
   }
 
