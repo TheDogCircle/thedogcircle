@@ -547,7 +547,8 @@ function showTab(name, el){
   document.querySelectorAll('.tc').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tc-' + name).classList.add('active');
-  el.classList.add('active');
+  if(el) el.classList.add('active');
+  if(name === 'events') loadEvents();
 }
 
 // === DATA ===
@@ -560,16 +561,7 @@ const posts = [
   {bg:'#D4CEB8',e:'🐾',dog:'Oscar',breed:'Labrador',city:'Rennes',cap:'Garde chez Emma ce weekend 🙏 Merci le club !',lk:29},
 ];
 
-const events = [
-  {d:'22',m:'Mar',t:'🌲 Balade — Forêt de Fontainebleau',det:'Samedi 22 mars · 9h00 · RDV parking principale',price:'Gratuit membres',spots:'8 places restantes',type:'green'},
-  {d:'05',m:'Avr',t:'🍽️ Dîner dog-friendly — Le Bon Georges',det:'Vendredi 5 avril · 20h00 · Restaurant avec salon privé chiens · Paris 9e · Menu 4 plats inclus pour les maîtres + repas gastronomique spécial pour vos chiens (chef animalier)',price:'85€/personne membres',spots:'6 tables restantes',type:'gold'},
-  {d:'09',m:'Avr',t:'🎓 Atelier éducation positive (en ligne)',det:'Mercredi 9 avril · 19h00 · Via Zoom — lien envoyé par email',price:'15€ membres',spots:'12 places',type:'gold'},
-  {d:'20',m:'Avr',t:'🌊 Évasion mer — Plage de Deauville',det:'Dimanche 20 avril · Bus privatisé depuis Paris (Gare St-Lazare 8h) · Photographe inclus · Pique-nique partagé',price:'39€ membres',spots:'5 places restantes',type:'red'},
-  {d:'03',m:'Mai',t:'🐾 Brunch canin — Chez Loulou',det:'Dimanche 3 mai · 11h00 · Terrasse privatisée dog-friendly · Brunch pour les maîtres + menu bien-être pour les chiens (croquettes premium, friandises artisanales, eau aromatisée) · Paris 11e',price:'45€/personne membres',spots:'10 places restantes',type:'green'},
-  {d:'04',m:'Mai',t:'🍷 Apéro canin — Jardin secret Paris 11e',det:'Vendredi 4 mai · 18h30 · Adresse communiquée aux inscrits',price:'Gratuit membres',spots:'15 places',type:'green'},
-  {d:'17',m:'Mai',t:'🎂 Anniversaire collectif des chiens de mai',det:'Samedi 17 mai · 15h00 · Parc privatisé · Gâteaux d\'anniversaire pour chiens, animations, photographe · Pour tous les chiens dont l\'anniversaire est en mai !',price:'25€ membres',spots:'12 places',type:'gold'},
-  {d:'18',m:'Mai',t:'📸 Shooting photo — Bois de Boulogne',det:'Dimanche 18 mai · 10h00 · Photographe professionnel offert',price:'Gratuit membres',spots:'10 places',type:'gold'},
-];
+
 
 const spots = [
   {icon:'🏖️',name:'Plage de Deauville',type:'Plage dog-friendly',rating:'★★★★★',city:'Deauville (14)'},
@@ -874,9 +866,8 @@ function renderVille(){
       </div>
     </div>`;
 }
-</script>
 
-<script>
+
 // Email du membre connecté (récupéré au login)
 let currentMemberEmail = '';
 let currentMemberPrenom = '';
@@ -944,7 +935,7 @@ async function loadEvents() {
 // S'inscrire à un event
 async function sInscrire(btn, eventId, eventTitre, listeAttente) {
   if (!currentMemberEmail) {
-    alert('Tu dois être connecté pour t'inscrire.');
+    alert('Tu dois être connecté pour t\'inscrire.');
     return;
   }
 
@@ -1043,7 +1034,7 @@ function switchEvTab(tab) {
   document.getElementById('mesInscriptionsList').style.display = tab === 'mes' ? 'block' : 'none';
   if (tab === 'mes') loadMesInscriptions();
 }
+
 </script>
 
-</body>
-</html>
+</body></html>
