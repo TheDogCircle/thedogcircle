@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dog Circle — Back Office</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F6F0E4;--green:#3B5E3F;--greenm:#587A5C;--greenp:#EBF0E8;
+  --gold:#B8882A;--goldp:#F5E8C4;
+  --t:#2A1C0C;--t2:#6B5240;--t3:#9C8472;
+  --w:#FEFCF7;--b:rgba(90,56,32,0.12);
+  --red:#C0392B;--redp:#FCEBEB;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#F5F5F3;color:var(--t);font-size:14px;line-height:1.5;}
+.page{display:none;}.page.active{display:block;}
+
+/* LOGIN */
+#pg-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cream);}
+.login-box{background:var(--w);border-radius:16px;padding:36px;width:100%;max-width:380px;border:1px solid var(--b);}
+.login-logo{text-align:center;margin-bottom:24px;}
+.login-brand{font-size:18px;font-weight:500;color:var(--t);}
+.login-brand span{color:var(--gold);}
+.login-tag{font-size:11px;color:var(--t3);background:var(--cream);padding:3px 10px;border-radius:100px;display:inline-block;margin-top:4px;}
+.fg{margin-bottom:14px;}
+label{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:5px;}
+input,select,textarea{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--b);background:var(--w);font-family:inherit;font-size:13px;color:var(--t);outline:none;transition:border-color 0.2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--green);}
+textarea{resize:vertical;min-height:72px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all 0.2s;}
+.btn-p{background:var(--green);color:var(--cream);}.btn-p:hover{background:var(--greenm);}
+.btn-o{background:transparent;color:var(--green);border:1.5px solid var(--green);}.btn-o:hover{background:var(--greenp);}
+.btn-r{background:var(--redp);color:var(--red);border:1px solid #F09595;}.btn-r:hover{background:#F7C1C1;}
+.btn-g{background:var(--goldp);color:var(--gold);border:1px solid #EF9F27;}.btn-g:hover{opacity:0.85;}
+.login-err{background:var(--redp);border:1px solid #F09595;border-radius:8px;padding:9px 12px;font-size:12px;color:var(--red);display:none;margin-bottom:12px;}
+.hint{font-size:11px;color:var(--t3);text-align:center;margin-top:12px;}
+
+/* APP */
+#pg-app{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+.sidebar{background:var(--w);border-right:1px solid var(--b);display:flex;flex-direction:column;}
+.sb-logo{padding:16px 18px;border-bottom:1px solid var(--b);}
+.sb-brand{font-size:15px;font-weight:500;color:var(--t);}
+.sb-brand span{color:var(--gold);}
+.sb-sub{font-size:11px;color:var(--t3);margin-top:2px;}
+.sb-nav{flex:1;padding:8px 0;}
+.sb-sec{font-size:10px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:0.08em;padding:12px 18px 4px;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:9px 18px;font-size:13px;color:var(--t2);cursor:pointer;transition:all 0.15s;border-left:2.5px solid transparent;}
+.sb-item:hover{background:var(--cream);color:var(--t);}
+.sb-item.active{background:var(--greenp);color:var(--green);border-left-color:var(--green);font-weight:500;}
+.sb-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:500;padding:1px 6px;border-radius:10px;}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--b);}
+.logout-btn{font-size:12px;color:var(--t3);cursor:pointer;display:flex;align-items:center;gap:6px;}
+.logout-btn:hover{color:var(--red);}
+
+/* MAIN */
+.main-content{padding:24px;overflow-y:auto;}
+.sec{display:none;}.sec.active{display:block;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.page-title{font-size:20px;font-weight:500;color:var(--t);}
+.page-sub{font-size:13px;color:var(--t3);margin-top:2px;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--w);border-radius:12px;padding:14px 16px;border:1px solid var(--b);}
+.stat-label{font-size:11px;color:var(--t3);margin-bottom:4px;}
+.stat-val{font-size:24px;font-weight:500;color:var(--t);}
+.stat-trend{font-size:11px;color:var(--green);margin-top:3px;}
+.stat-trend.neg{color:var(--red);}
+
+/* CARDS */
+.card{background:var(--w);border-radius:12px;border:1px solid var(--b);margin-bottom:16px;overflow:hidden;}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:14px;font-weight:500;color:var(--t);}
+.card-sub{font-size:11px;color:var(--t3);margin-top:1px;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:0.05em;padding:10px 16px;text-align:left;background:var(--cream);border-bottom:1px solid var(--b);}
+.tbl td{padding:11px 16px;border-bottom:1px solid var(--b);font-size:13px;color:var(--t2);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--cream);}
+.tbl-name{font-weight:500;color:var(--t)!important;}
+.pill{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:100px;}
+.pill-green{background:var(--greenp);color:var(--green);}
+.pill-amber{background:var(--goldp);color:var(--gold);}
+.pill-red{background:var(--redp);color:var(--red);}
+.pill-blue{background:#E6F1FB;color:#185FA5;}
+.pill-gray{background:#F1EFE8;color:#5F5E5A;}
+.actions{display:flex;gap:6px;}
+.btn-xs{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--b);cursor:pointer;background:var(--w);color:var(--t2);font-family:inherit;transition:all 0.15s;}
+.btn-xs:hover{background:var(--cream);}
+.btn-xs-g{background:var(--greenp);color:var(--green);border-color:#97C459;}.btn-xs-g:hover{background:#C0DD97;}
+.btn-xs-r{background:var(--redp);color:var(--red);border-color:#F09595;}.btn-xs-r:hover{background:#F7C1C1;}
+.btn-xs-e{background:#E6F1FB;color:#185FA5;border-color:#85B7EB;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--w);border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:500;color:var(--t);margin-bottom:16px;}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--b);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* PHOTOS */
+.photos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.photo-card{border:1px solid var(--b);border-radius:10px;overflow:hidden;background:var(--w);}
+.photo-img{height:90px;display:flex;align-items:center;justify-content:center;font-size:36px;}
+.photo-info{padding:8px 10px;}
+.photo-name{font-size:12px;font-weight:500;color:var(--t);}
+.photo-meta{font-size:10px;color:var(--t3);margin-bottom:6px;}
+.photo-actions{display:flex;gap:4px;}
+
+/* EMPTY */
+.empty{padding:36px;text-align:center;color:var(--t3);font-size:13px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:var(--cream);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;}
+.toast.show{transform:translateY(0);opacity:1;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://bmqyysilivmxndwhmovw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcXl5c2lsaXZteG5kd2htb3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDc2MDYsImV4cCI6MjA4OTUyMzYwNn0.95uvAOXwBEes1lbYti872OErXb6OOwEBt9dQ-mR4MFE';
+const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<div id="pg-login" class="page active">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-brand">The Dog <span>Circle</span></div>
+      <div class="login-tag">Back Office Admin</div>
+    </div>
+    <div class="login-err" id="loginErr">Identifiants incorrects.</div>
+    <div class="fg"><label>Email admin</label><input type="email" id="adminEmail" placeholder="admin@thedogcircle.fr"></div>
+    <div class="fg"><label>Mot de passe</label><input type="password" id="adminPwd" placeholder="••••••••"></div>
+    <button class="btn btn-p" onclick="doLogin()" style="width:100%;padding:11px;justify-content:center;">Accéder au back office</button>
+    <p class="hint">Démo : admin@thedogcircle.fr / admin2026</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="pg-app" class="page">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-brand">The Dog <span>Circle</span></div>
+      <div class="sb-sub">Back Office</div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-sec">Général</div>
+      <div class="sb-item active" onclick="showSec('dashboard',this)"><span class="sb-icon">📊</span> Dashboard</div>
+      <div class="sb-sec">Club</div>
+      <div class="sb-item" onclick="showSec('candidatures',this)"><span class="sb-icon">📬</span> Candidatures <span class="sb-badge" id="nb-cands">3</span></div>
+      <div class="sb-item" onclick="showSec('membres',this)"><span class="sb-icon">🐾</span> Membres</div>
+      <div class="sb-item" onclick="showSec('events',this)"><span class="sb-icon">🎉</span> Events</div>
+      <div class="sb-item" onclick="showSec('partenaires',this)"><span class="sb-icon">🤝</span> Partenaires</div>
+      <div class="sb-sec">Contenu</div>
+      <div class="sb-item" onclick="showSec('photos',this)"><span class="sb-icon">📸</span> Photos Instadog</div>
+      <div class="sb-item" onclick="showSec('villes',this)"><span class="sb-icon">📍</span> Villes</div>
+    </div>
+    <div class="sb-footer">
+      <div class="logout-btn" onclick="doLogout()">↩ Déconnexion</div>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- DASHBOARD -->
+    <div id="sec-dashboard" class="sec active">
+      <div class="page-header">
+        <div><div class="page-title">Dashboard 📊</div><div class="page-sub">Vue d'ensemble de The Dog Circle</div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Membres actifs</div><div class="stat-val" id="stat-membres">47</div><div class="stat-trend">+3 ce mois</div></div>
+        <div class="stat-card"><div class="stat-label">Candidatures en attente</div><div class="stat-val" id="stat-cands">3</div><div class="stat-trend">À traiter</div></div>
+        <div class="stat-card"><div class="stat-label">Events à venir</div><div class="stat-val">5</div><div class="stat-trend">2 complets</div></div>
+        <div class="stat-card"><div class="stat-label">CA mensuel</div><div class="stat-val">587€</div><div class="stat-trend">+12% vs mois passé</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Dernières candidatures</div><div class="card-sub">À valider rapidement</div></div><button class="btn btn-o" style="font-size:12px;padding:6px 14px;" onclick="showSec('candidatures',document.querySelectorAll('.sb-item')[2])">Voir tout →</button></div>
+        <table class="tbl" id="dash-cands"></table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Prochains events</div></div></div>
+        <table class="tbl" id="dash-events"></table>
+      </div>
+    </div>
+
+    <!-- CANDIDATURES -->
+    <div id="sec-candidatures" class="sec">
+      <div class="page-header">
+        <div><div class="page-title">Candidatures 📬</div><div class="page-sub" id="sub-cands">3 en attente</div></div>
+      </div>
+      <div class="card">
+        <table class="tbl" id="tbl-cands"></table>
+      </div>
+    </div>
+
+    <!-- MEMBRES -->
+    <div id="sec-membres" class="sec">
+      <div class="page-header">
+        <div><div class="page-title">Membres 🐾</div><div class="page-sub" id="sub-membres">47 membres actifs</div></div>
+        <button class="btn btn-p" onclick="openModal('modal-membre')">+ Ajouter un membre</button>
+      </div>
+      <div class="card">
+        <table class="tbl" id="tbl-membres"></table>
+      </div>
+    </div>
+
+    <!-- EVENTS -->
+    <div id="sec-events" class="sec">
+      <div class="page-header">
+        <div><div class="page-title">Events 🎉</div><div class="page-sub">Gérer les événements du club</div></div>
+        <button class="btn btn-p" onclick="openModal('modal-event')">+ Nouvel event</button>
+      </div>
+      <div class="card">
+        <table class="tbl" id="tbl-events"></table>
+      </div>
+    </div>
+
+    <!-- PARTENAIRES -->
+    <div id="sec-partenaires" class="sec">
+      <div class="page-header">
+        <div><div class="page-title">Partenaires 🤝</div><div class="page-sub">Codes et offres exclusives membres</div></div>
+        <button class="btn btn-p" onclick="openModal('modal-partenaire')">+ Nouveau partenaire</button>
+      </div>
+      <div class="card">
+        <table class="tbl" id="tbl-partenaires"></table>
+      </div>
+    </div>
+
+    <!-- PHOTOS -->
+    <div id="sec-photos" class="sec">
+      <div class="page-header">
+        <div><div class="page-title">Photos Instadog 📸</div><div class="page-sub">Modérer les publications</div></div>
+      </div>
+      <div class="photos-grid" id="photos-grid"></div>
+    </div>
+
+    <!-- VILLES -->
+    <div id="sec-villes" class="sec">
+      <div class="page-header">
+        <div><div class="page-title">Villes 📍</div><div class="page-sub">Communautés locales</div></div>
+        <button class="btn btn-p" onclick="openModal('modal-ville')">+ Ajouter une ville</button>
+      </div>
+      <div class="card">
+        <table class="tbl" id="tbl-villes"></table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-event">
+  <div class="modal">
+    <div class="modal-title">Nouvel event</div>
+    <div class="fg"><label>Titre</label><input type="text" id="ev-title" placeholder="Ex: Balade Forêt de Fontainebleau"></div>
+    <div class="frow">
+      <div class="fg"><label>Date</label><input type="date" id="ev-date"></div>
+      <div class="fg"><label>Heure</label><input type="time" id="ev-time" value="10:00"></div>
+    </div>
+    <div class="fg"><label>Lieu / Détails</label><input type="text" id="ev-lieu" placeholder="Ex: RDV parking principale, Fontainebleau"></div>
+    <div class="frow">
+      <div class="fg"><label>Prix membres</label><input type="text" id="ev-prix" placeholder="Ex: Gratuit ou 39€"></div>
+      <div class="fg"><label>Nombre de places</label><input type="number" id="ev-places" placeholder="Ex: 12"></div>
+    </div>
+    <div class="fg"><label>Type</label>
+      <select id="ev-type">
+        <option>Balade</option>
+        <option>Évasion</option>
+        <option>Apéro canin</option>
+        <option>Atelier éducation</option>
+        <option>Shooting photo</option>
+        <option>Dîner dog-friendly</option>
+        <option>Autre</option>
+      </select>
+    </div>
+    <div class="fg"><label>Ville</label>
+      <select id="ev-ville">
+        <option>Paris</option><option>Lyon</option><option>Bordeaux</option><option>Nantes</option><option>Marseille</option><option>Lille</option><option>National</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-o" onclick="closeModal('modal-event')">Annuler</button>
+      <button class="btn btn-p" onclick="saveEvent()">Créer l'event</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-partenaire">
+  <div class="modal">
+    <div class="modal-title">Nouveau partenaire</div>
+    <div class="fg"><label>Nom du partenaire</label><input type="text" id="pt-nom" placeholder="Ex: Mimi & Minoux"></div>
+    <div class="fg"><label>Type de service</label>
+      <select id="pt-type">
+        <option>Toilettage</option><option>Promenades canines</option><option>Boutique</option><option>Vétérinaire</option><option>Éducation canine</option><option>Hôtel pet-friendly</option><option>Restaurant</option><option>Autre</option>
+      </select>
+    </div>
+    <div class="fg"><label>Offre exclusive membres</label><textarea id="pt-offre" placeholder="Ex: 25% de réduction sur toutes les prestations de toilettage"></textarea></div>
+    <div class="frow">
+      <div class="fg"><label>Code promo</label><input type="text" id="pt-code" placeholder="Ex: CIRCLE25" style="text-transform:uppercase;"></div>
+      <div class="fg"><label>Ville</label><input type="text" id="pt-ville" placeholder="Ex: Paris ou National"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-o" onclick="closeModal('modal-partenaire')">Annuler</button>
+      <button class="btn btn-p" onclick="savePartenaire()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-membre">
+  <div class="modal">
+    <div class="modal-title">Ajouter un membre</div>
+    <div class="frow">
+      <div class="fg"><label>Prénom maître</label><input type="text" id="mb-prenom" placeholder="Sophie"></div>
+      <div class="fg"><label>Prénom chien</label><input type="text" id="mb-chien" placeholder="Noisette"></div>
+    </div>
+    <div class="fg"><label>Email</label><input type="email" id="mb-email" placeholder="sophie@email.com"></div>
+    <div class="frow">
+      <div class="fg"><label>Race</label><input type="text" id="mb-race" placeholder="Cocker Spaniel"></div>
+      <div class="fg"><label>Ville</label>
+        <select id="mb-ville"><option>Paris</option><option>Lyon</option><option>Bordeaux</option><option>Nantes</option><option>Marseille</option><option>Lille</option><option>Autre</option></select>
+      </div>
+    </div>
+    <div class="fg"><label>Formule</label>
+      <select id="mb-formule">
+        <option>Fondateur — 79€ la 1ère année</option>
+        <option selected>Annuel — 149€/an</option>
+        <option>Mensuel — 14,90€/mois</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-o" onclick="closeModal('modal-membre')">Annuler</button>
+      <button class="btn btn-p" onclick="saveMembre()">Ajouter le membre</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ville">
+  <div class="modal">
+    <div class="modal-title">Ajouter une ville</div>
+    <div class="fg"><label>Nom de la ville</label><input type="text" id="vl-nom" placeholder="Ex: Toulouse"></div>
+    <div class="fg"><label>Emoji représentatif</label><input type="text" id="vl-emoji" placeholder="Ex: 🌸"></div>
+    <div class="modal-footer">
+      <button class="btn btn-o" onclick="closeModal('modal-ville')">Annuler</button>
+      <button class="btn btn-p" onclick="saveVille()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// === AUTH ===
+function doLogin(){
+  const e = document.getElementById('adminEmail').value;
+  const p = document.getElementById('adminPwd').value;
+  if(e==='admin@thedogcircle.fr' && p==='admin2026'){
+    document.getElementById('pg-login').classList.remove('active');
+    document.getElementById('pg-app').classList.add('active');
+    buildAll();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+function doLogout(){
+  document.getElementById('pg-app').classList.remove('active');
+  document.getElementById('pg-login').classList.add('active');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// === DATA ===
+let candidatures = [
+  {id:1,prenom:'Marie D.',ville:'Paris',chien:'Caramel',race:'Cocker',email:'marie@email.com',formule:'Annuel — 149€/an',message:'Je cherche une communauté de confiance pour partager des balades avec mon cocker !'},
+  {id:2,prenom:'Julien B.',ville:'Lyon',chien:'Rocky',race:'Labrador',email:'julien@email.com',formule:'Fondateur — 79€ la 1ère année',message:'Grand passionné de chiens, j\'organise déjà des balades à Lyon.'},
+  {id:3,prenom:'Clara M.',ville:'Bordeaux',chien:'Luna',race:'Golden',email:'clara@email.com',formule:'Mensuel — 14,90€/mois',message:'Luna adore les autres chiens, on cherche une vraie communauté !'},
+];
+
+let membres = [
+  {id:1,prenom:'Sophie M.',ville:'Paris',chien:'Noisette',race:'Cocker',email:'sophie@email.com',formule:'Fondateur',expire:'Mar 2027',statut:'Actif'},
+  {id:2,prenom:'Emma L.',ville:'Paris',chien:'Rocky',race:'Labrador',email:'emma@email.com',formule:'Annuel',expire:'Fév 2027',statut:'Actif'},
+  {id:3,prenom:'Pierre M.',ville:'Lyon',chien:'Bruno',race:'Boxer',email:'pierre@email.com',formule:'Mensuel',expire:'Avr 2026',statut:'Actif'},
+  {id:4,prenom:'Léa M.',ville:'Nantes',chien:'Bella',race:'Bichon',email:'lea@email.com',formule:'Fondateur',expire:'Mar 2027',statut:'Expire bientôt'},
+  {id:5,prenom:'Karim B.',ville:'Marseille',chien:'Zeus',race:'Berger',email:'karim@email.com',formule:'Annuel',expire:'Jan 2027',statut:'Actif'},
+];
+
+let events = [
+  {id:1,titre:'Balade Forêt de Fontainebleau',date:'22/03/2026',prix:'Gratuit',places:8,inscrits:6,ville:'National',statut:'Ouvert'},
+  {id:2,titre:'Évasion mer — Plage de Deauville',date:'20/04/2026',prix:'39€',places:7,inscrits:7,ville:'National',statut:'Complet'},
+  {id:3,titre:'Atelier éducation positive (Zoom)',date:'09/04/2026',prix:'15€',places:12,inscrits:4,ville:'National',statut:'Ouvert'},
+  {id:4,titre:'Apéro canin Paris 11e',date:'04/05/2026',prix:'Gratuit',places:15,inscrits:2,ville:'Paris',statut:'Ouvert'},
+];
+
+let partenaires = [
+  {id:1,nom:'Mimi & Minoux',type:'Toilettage',offre:'25% de réduction sur toutes les prestations',code:'CIRCLE25',ville:'Paris',statut:'Actif'},
+  {id:2,nom:'Balades & Co',type:'Promenades',offre:'30% de réduction sur les promenades',code:'CIRCLE30',ville:'National',statut:'Actif'},
+  {id:3,nom:'VetTel',type:'Vétérinaire',offre:'1ère téléconsultation offerte, puis -15%',code:'CIRCLEVET',ville:'National',statut:'Actif'},
+  {id:4,nom:'La Boutique du Chien',type:'Boutique',offre:'20% de réduction sur tout le site',code:'CIRCLE20',ville:'National',statut:'En pause'},
+];
+
+let villes = [
+  {nom:'Paris',emoji:'🗼',membres:34,events:2},
+  {nom:'Lyon',emoji:'🦁',membres:18,events:2},
+  {nom:'Bordeaux',emoji:'🍷',membres:12,events:1},
+  {nom:'Nantes',emoji:'🐘',membres:9,events:1},
+  {nom:'Marseille',emoji:'⛵',membres:7,events:1},
+  {nom:'Lille',emoji:'🍺',membres:5,events:1},
+];
+
+const photos = [
+  {emoji:'🐕',bg:'#C8DEB8',dog:'Noisette',city:'Paris',cap:'Balade matinale 🌿'},
+  {emoji:'🐩',bg:'#D4C5A9',dog:'Bella',city:'Nantes',cap:'Toilettage ✨'},
+  {emoji:'🐕‍🦺',bg:'#B8C9D4',dog:'Thor',city:'Lyon',cap:'Agility 🎓'},
+  {emoji:'🦮',bg:'#D4B8B8',dog:'Luna',city:'Bordeaux',cap:'Évasion mer 🌊'},
+  {emoji:'🐶',bg:'#C5C8D4',dog:'Max',city:'Strasbourg',cap:'Neige ❄️'},
+  {emoji:'🐾',bg:'#D4CEB8',dog:'Oscar',city:'Rennes',cap:'Garde membres 🙏'},
+  {emoji:'🐕',bg:'#C8DEB8',dog:'Caramel',city:'Paris',cap:'Apéro canin 🍷'},
+  {emoji:'🦮',bg:'#EBF0E8',dog:'Zeus',city:'Marseille',cap:'Calanques 🏔️'},
+];
+
+// === BUILD ===
+function buildAll(){
+  buildDashboard();
+  buildCandidatures();
+  buildMembres();
+  buildEvents();
+  buildPartenaires();
+  buildPhotos();
+  buildVilles();
+}
+
+function pillStatut(s){
+  if(s==='Actif'||s==='Ouvert') return `<span class="pill pill-green">${s}</span>`;
+  if(s==='Complet'||s==='Expire bientôt') return `<span class="pill pill-red">${s}</span>`;
+  if(s==='En pause') return `<span class="pill pill-amber">${s}</span>`;
+  return `<span class="pill pill-gray">${s}</span>`;
+}
+
+function pillFormule(f){
+  if(f.includes('Fondateur')) return `<span class="pill pill-amber">${f}</span>`;
+  if(f.includes('Annuel')||f==='Annuel') return `<span class="pill pill-blue">${f}</span>`;
+  return `<span class="pill pill-gray">${f}</span>`;
+}
+
+function buildDashboard(){
+  document.getElementById('stat-membres').textContent = membres.length;
+  document.getElementById('stat-cands').textContent = candidatures.length;
+  document.getElementById('nb-cands').textContent = candidatures.length;
+  document.getElementById('sub-cands').textContent = candidatures.length + ' en attente';
+
+  document.getElementById('dash-cands').innerHTML = `
+    <tr><th>Candidat</th><th>Chien</th><th>Formule</th><th>Action</th></tr>
+    ${candidatures.slice(0,3).map(c=>`<tr>
+      <td class="tbl-name">${c.prenom} · ${c.ville}</td>
+      <td>${c.chien} · ${c.race}</td>
+      <td>${pillFormule(c.formule)}</td>
+      <td><div class="actions"><button class="btn-xs btn-xs-g" onclick="acceptCandidature('${c.id}')">Accepter</button><button class="btn-xs btn-xs-r" onclick="rejectCandidature('${c.id}')">Refuser</button></div></td>
+    </tr>`).join('')}`;
+
+  document.getElementById('dash-events').innerHTML = `
+    <tr><th>Event</th><th>Date</th><th>Places</th><th>Statut</th></tr>
+    ${events.map(e=>`<tr>
+      <td class="tbl-name">${e.titre}</td>
+      <td>${e.date}</td>
+      <td>${e.inscrits} / ${e.places}</td>
+      <td>${pillStatut(e.statut)}</td>
+    </tr>`).join('')}`;
+}
+
+function buildCandidatures(){
+  document.getElementById('tbl-cands').innerHTML = candidatures.length === 0
+    ? `<tr><td colspan="5"><div class="empty">Aucune candidature en attente 🎉</div></td></tr>`
+    : `<tr><th>Candidat</th><th>Chien</th><th>Formule</th><th>Message</th><th>Action</th></tr>
+    ${candidatures.map(c=>`<tr>
+      <td><div class="tbl-name">${c.prenom}</div><div style="font-size:11px;color:var(--t3);">${c.ville} · ${c.email}</div></td>
+      <td>${c.chien} · ${c.race}</td>
+      <td>${pillFormule(c.formule)}</td>
+      <td style="max-width:180px;font-size:11px;color:var(--t3);">"${c.message.substring(0,60)}..."</td>
+      <td><div class="actions"><button class="btn-xs btn-xs-g" onclick="acceptCandidature('${c.id}')">✓ Accepter</button><button class="btn-xs btn-xs-r" onclick="rejectCandidature('${c.id}')">✗ Refuser</button></div></td>
+    </tr>`).join('')}`;
+}
+
+function buildMembres(){
+  document.getElementById('sub-membres').textContent = membres.length + ' membres actifs';
+  document.getElementById('tbl-membres').innerHTML = `
+    <tr><th>Membre</th><th>Chien</th><th>Formule</th><th>Expire</th><th>Statut</th><th>Action</th></tr>
+    ${membres.map(m=>`<tr>
+      <td><div class="tbl-name">${m.prenom}</div><div style="font-size:11px;color:var(--t3);">${m.ville} · ${m.email}</div></td>
+      <td>${m.chien} · ${m.race}</td>
+      <td>${pillFormule(m.formule)}</td>
+      <td style="font-size:12px;">${m.expire}</td>
+      <td>${pillStatut(m.statut)}</td>
+      <td><button class="btn-xs btn-xs-r" onclick="supprimerMembre(${m.id})">Suppr.</button></td>
+    </tr>`).join('')}`;
+}
+
+function buildEvents(){
+  document.getElementById('tbl-events').innerHTML = `
+    <tr><th>Event</th><th>Date</th><th>Ville</th><th>Prix</th><th>Places</th><th>Statut</th><th>Action</th></tr>
+    ${events.map(e=>`<tr>
+      <td class="tbl-name">${e.titre}</td>
+      <td>${e.date}</td>
+      <td><span class="pill pill-gray">${e.ville}</span></td>
+      <td>${e.prix}</td>
+      <td>${e.inscrits} / ${e.places}</td>
+      <td>${pillStatut(e.statut)}</td>
+      <td><button class="btn-xs btn-xs-r" onclick="supprimerEvent(${e.id})">Suppr.</button></td>
+    </tr>`).join('')}`;
+}
+
+function buildPartenaires(){
+  document.getElementById('tbl-partenaires').innerHTML = `
+    <tr><th>Partenaire</th><th>Type</th><th>Offre</th><th>Code</th><th>Ville</th><th>Statut</th><th>Action</th></tr>
+    ${partenaires.map(p=>`<tr>
+      <td class="tbl-name">${p.nom}</td>
+      <td><span class="pill pill-gray">${p.type}</span></td>
+      <td style="font-size:11px;color:var(--t3);max-width:160px;">${p.offre}</td>
+      <td style="font-family:monospace;font-size:12px;">${p.code}</td>
+      <td>${p.ville}</td>
+      <td>${pillStatut(p.statut)}</td>
+      <td><button class="btn-xs btn-xs-r" onclick="supprimerPartenaire(${p.id})">Suppr.</button></td>
+    </tr>`).join('')}`;
+}
+
+function buildPhotos(){
+  document.getElementById('photos-grid').innerHTML = photos.map((p,i)=>`
+    <div class="photo-card">
+      <div class="photo-img" style="background:${p.bg};">${p.emoji}</div>
+      <div class="photo-info">
+        <div class="photo-name">${p.dog}</div>
+        <div class="photo-meta">${p.city} · "${p.cap}"</div>
+        <div class="photo-actions">
+          <button class="btn-xs btn-xs-g" onclick="this.closest('.photo-card').style.opacity='0.4';toast('Photo validée ✓')">✓ Valider</button>
+          <button class="btn-xs btn-xs-r" onclick="this.closest('.photo-card').remove();toast('Photo supprimée')">✗ Suppr.</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function buildVilles(){
+  document.getElementById('tbl-villes').innerHTML = `
+    <tr><th>Ville</th><th>Membres</th><th>Events locaux</th><th>Statut</th><th>Action</th></tr>
+    ${villes.map(v=>`<tr>
+      <td class="tbl-name">${v.emoji} ${v.nom}</td>
+      <td>${v.membres}</td>
+      <td>${v.events}</td>
+      <td>${pillStatut(v.membres >= 10 ? 'Actif' : 'Peu actif')}</td>
+      <td><button class="btn-xs btn-xs-r" onclick="supprimerVille('${v.nom}')">Suppr.</button></td>
+    </tr>`).join('')}`;
+}
+
+// === ACTIONS ===
+function acceptCand(id){
+  acceptCandidature(id); return;
+  // legacy below
+  const c = candidatures.find(x=>x.id===id);
+  if(!c) return;
+  membres.push({id:Date.now(),prenom:c.prenom,ville:c.ville,chien:c.chien,race:c.race,email:c.email,formule:c.formule.split('—')[0].trim(),expire:'Mar 2027',statut:'Actif'});
+  candidatures = candidatures.filter(x=>x.id!==id);
+  buildAll();
+  toast('✓ '+c.prenom+' accepté·e ! Un email lui sera envoyé.');
+}
+
+function refuserCand(id){
+  const c = candidatures.find(x=>x.id===id);
+  candidatures = candidatures.filter(x=>x.id!==id);
+  buildAll();
+  toast('Candidature de '+(c?c.prenom:'')+ ' refusée.');
+}
+
+function supprimerMembre(id){
+  if(!confirm('Supprimer ce membre ?')) return;
+  membres = membres.filter(x=>x.id!==id);
+  buildMembres();
+  buildDashboard();
+  toast('Membre supprimé.');
+}
+
+function supprimerEvent(id){
+  if(!confirm('Supprimer cet event ?')) return;
+  events = events.filter(x=>x.id!==id);
+  buildEvents();
+  buildDashboard();
+  toast('Event supprimé.');
+}
+
+function supprimerPartenaire(id){
+  if(!confirm('Supprimer ce partenaire ?')) return;
+  partenaires = partenaires.filter(x=>x.id!==id);
+  buildPartenaires();
+  toast('Partenaire supprimé.');
+}
+
+function supprimerVille(nom){
+  if(!confirm('Supprimer la ville '+nom+' ?')) return;
+  villes = villes.filter(v=>v.nom!==nom);
+  buildVilles();
+  toast('Ville supprimée.');
+}
+
+function saveEvent(){
+  const titre = document.getElementById('ev-title').value.trim();
+  const date = document.getElementById('ev-date').value;
+  if(!titre||!date){toast('Titre et date obligatoires.');return;}
+  const d = new Date(date);
+  const dateStr = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  events.push({
+    id:Date.now(),
+    titre,
+    date:dateStr,
+    prix:document.getElementById('ev-prix').value||'Gratuit',
+    places:parseInt(document.getElementById('ev-places').value)||10,
+    inscrits:0,
+    ville:document.getElementById('ev-ville').value,
+    statut:'Ouvert'
+  });
+  closeModal('modal-event');
+  buildEvents();
+  buildDashboard();
+  document.getElementById('ev-title').value='';
+  document.getElementById('ev-date').value='';
+  document.getElementById('ev-prix').value='';
+  document.getElementById('ev-places').value='';
+  toast('Event créé avec succès ! 🎉');
+}
+
+function savePartenaire(){
+  const nom = document.getElementById('pt-nom').value.trim();
+  const code = document.getElementById('pt-code').value.trim().toUpperCase();
+  if(!nom||!code){toast('Nom et code obligatoires.');return;}
+  partenaires.push({
+    id:Date.now(),
+    nom,
+    type:document.getElementById('pt-type').value,
+    offre:document.getElementById('pt-offre').value,
+    code,
+    ville:document.getElementById('pt-ville').value||'National',
+    statut:'Actif'
+  });
+  closeModal('modal-partenaire');
+  buildPartenaires();
+  ['pt-nom','pt-offre','pt-code','pt-ville'].forEach(id=>document.getElementById(id).value='');
+  toast('Partenaire ajouté ! 🤝');
+}
+
+function saveMembre(){
+  const prenom = document.getElementById('mb-prenom').value.trim();
+  const email = document.getElementById('mb-email').value.trim();
+  if(!prenom||!email){toast('Prénom et email obligatoires.');return;}
+  membres.push({
+    id:Date.now(),
+    prenom:prenom+' (nouveau)',
+    ville:document.getElementById('mb-ville').value,
+    chien:document.getElementById('mb-chien').value||'—',
+    race:document.getElementById('mb-race').value||'—',
+    email,
+    formule:document.getElementById('mb-formule').value.split('—')[0].trim(),
+    expire:'Mar 2027',
+    statut:'Actif'
+  });
+  closeModal('modal-membre');
+  buildMembres();
+  buildDashboard();
+  ['mb-prenom','mb-chien','mb-email','mb-race'].forEach(id=>document.getElementById(id).value='');
+  toast('Membre ajouté ! 🐾');
+}
+
+function saveVille(){
+  const nom = document.getElementById('vl-nom').value.trim();
+  const emoji = document.getElementById('vl-emoji').value.trim()||'📍';
+  if(!nom){toast('Nom obligatoire.');return;}
+  villes.push({nom,emoji,membres:0,events:0});
+  closeModal('modal-ville');
+  buildVilles();
+  document.getElementById('vl-nom').value='';
+  document.getElementById('vl-emoji').value='';
+  toast('Ville ajoutée ! 📍');
+}
+
+// === UI ===
+function showSec(name,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
+});
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+
+<script>
+// ====== SUPABASE ADMIN FUNCTIONS ======
+
+// Charger les candidatures depuis Supabase
+async function loadCandidatures() {
+  const { data, error } = await supa.from('candidatures').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  candidatures = data.map(c => ({
+    id: c.id,
+    prenom: c.prenom,
+    email: c.email,
+    ville: c.ville,
+    chien: c.chien,
+    race: c.race,
+    formule: c.formule,
+    message: c.message,
+    statut: c.statut,
+    created_at: c.created_at
+  }));
+  document.getElementById('stat-cands').textContent = candidatures.filter(c=>c.statut==='en_attente').length;
+  document.getElementById('nb-cands').textContent = candidatures.filter(c=>c.statut==='en_attente').length;
+  document.getElementById('sub-cands').textContent = candidatures.filter(c=>c.statut==='en_attente').length + ' en attente';
+  renderCandidatures();
+  renderDashboardCands();
+}
+
+// Accepter une candidature
+async function acceptCandidature(id) {
+  const c = candidatures.find(x => x.id === id);
+  if (!c) return;
+
+  // 1. Marquer comme acceptée dans Supabase
+  const { error: e1 } = await supa.from('candidatures').update({ statut: 'accepte' }).eq('id', id);
+  if (e1) { alert('Erreur: ' + e1.message); return; }
+
+  // 2. Créer le membre dans la table membres
+  const { error: e2 } = await supa.from('membres').insert([{
+    prenom: c.prenom,
+    email: c.email,
+    ville: c.ville,
+    chien: c.chien,
+    race: c.race,
+    formule: c.formule,
+    statut: 'actif'
+  }]);
+  if (e2) { alert('Erreur création membre: ' + e2.message); return; }
+
+  // 3. Envoyer l'email de bienvenue via Resend
+  try {
+    const emailRes = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer re_PbvhbeQA_7FZYaxw5DsaJCqvgJdiUD2wT',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'The Dog Circle <onboarding@resend.dev>',
+        to: [c.email],
+        subject: '🐾 Bienvenue dans The Dog Circle, ' + c.prenom + ' !',
+        html: `
+          <div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;background:#F6F0E4;border-radius:16px;overflow:hidden;">
+            <div style="background:#3B5E3F;padding:32px;text-align:center;">
+              <div style="font-size:40px;margin-bottom:8px;">🐾</div>
+              <h1 style="color:#F6F0E4;font-size:28px;font-weight:400;margin:0;">The Dog Circle</h1>
+              <div style="color:#B8882A;font-size:12px;letter-spacing:0.15em;margin-top:6px;">CLUB PRIVÉ CANIN</div>
+            </div>
+            <div style="padding:36px 40px;">
+              <h2 style="color:#2A1C0C;font-size:22px;font-weight:400;margin-bottom:16px;">
+                Félicitations ${c.prenom} ! 🎉
+              </h2>
+              <p style="color:#6B5240;font-size:15px;line-height:1.7;margin-bottom:20px;">
+                Ta candidature a été <strong style="color:#3B5E3F;">acceptée</strong>. Tu fais désormais partie du cercle. Bienvenue à toi et à <strong>${c.chien}</strong> !
+              </p>
+              <div style="background:#3B5E3F;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+                <div style="color:#B8882A;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">Tes accès membres</div>
+                <div style="color:#F6F0E4;font-size:14px;margin-bottom:6px;">🔗 <strong>thedogcircle.fr/membres</strong></div>
+                <div style="color:#F6F0E4;font-size:14px;margin-bottom:6px;">📧 Login : <strong>${c.email}</strong></div>
+                <div style="color:#F6F0E4;font-size:14px;">🔑 Mot de passe : <strong>thedogcircle</strong></div>
+              </div>
+              <a href="https://thedogcircle.fr/membres" style="display:block;background:#B8882A;color:#F6F0E4;text-align:center;padding:14px;border-radius:100px;font-size:15px;text-decoration:none;font-weight:500;margin-bottom:24px;">
+                Accéder à mon espace membre →
+              </a>
+              <p style="color:#9C8472;font-size:13px;line-height:1.7;">
+                Formule choisie : <strong>${c.formule}</strong><br>
+                Tu peux inviter jusqu'à 3 amis maîtres à rejoindre le cercle.
+              </p>
+            </div>
+            <div style="background:#2A1C0C;padding:20px;text-align:center;">
+              <div style="color:rgba(246,240,228,0.4);font-size:11px;letter-spacing:0.1em;">thedogcircle.fr · Club Privé Canin · France</div>
+            </div>
+          </div>
+        `
+      })
+    });
+
+    if (emailRes.ok) {
+      alert('✅ ' + c.prenom + ' accepté(e) et email de bienvenue envoyé à ' + c.email + ' !');
+    } else {
+      const err = await emailRes.json();
+      console.error('Erreur Resend:', err);
+      alert('✅ ' + c.prenom + ' accepté(e) ! (Email non envoyé : ' + (err.message || 'erreur') + ')');
+    }
+  } catch(err) {
+    console.error('Erreur email:', err);
+    alert('✅ ' + c.prenom + ' accepté(e) ! (Email non envoyé)');
+  }
+
+  await loadCandidatures();
+  await loadMembres();
+}
+
+// Refuser une candidature
+async function rejectCandidature(id) {
+  const { error } = await supa.from('candidatures').update({ statut: 'refuse' }).eq('id', id);
+  if (error) { alert('Erreur: ' + error.message); return; }
+  await loadCandidatures();
+}
+
+// Charger les membres depuis Supabase
+async function loadMembres() {
+  const { data, error } = await supa.from('membres').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  membres = data;
+  document.getElementById('stat-members').textContent = membres.length;
+  document.getElementById('nb-members').textContent = membres.length;
+  renderMembres();
+}
+
+// Render candidatures dans le tableau
+function renderCandidatures() {
+  const pending = candidatures.filter(c => c.statut === 'en_attente');
+  const tbl = document.getElementById('tbl-cands');
+  if (!tbl) return;
+  tbl.innerHTML = pending.length === 0
+    ? '<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:30px;">Aucune candidature en attente</td></tr>'
+    : pending.map(c => `<tr>
+        <td><strong>${c.prenom}</strong><br><small style="color:var(--t3)">${c.email}</small></td>
+        <td>${c.ville || '-'}</td>
+        <td>${c.chien || '-'} ${c.race ? '· ' + c.race : ''}</td>
+        <td>${c.formule || '-'}</td>
+        <td><span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;">En attente</span></td>
+        <td style="display:flex;gap:6px;">
+          <button class="btn btn-o" style="font-size:11px;padding:5px 12px;" onclick="showCand('${c.id}')">Voir</button>
+          <button class="btn btn-p" style="font-size:11px;padding:5px 12px;" onclick="acceptCandidature('${c.id}')">Accepter</button>
+          <button class="btn" style="font-size:11px;padding:5px 12px;background:#fee2e2;color:#dc2626;" onclick="rejectCandidature('${c.id}')">Refuser</button>
+        </td>
+      </tr>`).join('');
+}
+
+// Render membres
+function renderMembres() {
+  const tbl = document.getElementById('tbl-members');
+  if (!tbl) return;
+  tbl.innerHTML = membres.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:30px;">Aucun membre</td></tr>'
+    : membres.map(m => `<tr>
+        <td><strong>${m.prenom}</strong><br><small style="color:var(--t3)">${m.email}</small></td>
+        <td>${m.ville || '-'}</td>
+        <td>${m.chien || '-'}</td>
+        <td>${m.formule || '-'}</td>
+        <td><span style="background:#d1fae5;color:#065f46;padding:3px 10px;border-radius:100px;font-size:11px;">Actif</span></td>
+      </tr>`).join('');
+}
+
+// Render dashboard candidatures (3 dernières)
+function renderDashboardCands() {
+  const tbl = document.getElementById('tbl-dash-cands');
+  if (!tbl) return;
+  const pending = candidatures.filter(c => c.statut === 'en_attente').slice(0, 3);
+  tbl.innerHTML = pending.length === 0
+    ? '<tr><td colspan="4" style="text-align:center;color:var(--t3);padding:20px;">Aucune candidature</td></tr>'
+    : pending.map(c => `<tr>
+        <td><strong>${c.prenom}</strong></td>
+        <td>${c.ville || '-'}</td>
+        <td>${c.formule || '-'}</td>
+        <td>
+          <button class="btn btn-p" style="font-size:11px;padding:4px 10px;" onclick="acceptCandidature('${c.id}')">Accepter</button>
+        </td>
+      </tr>`).join('');
+}
+
+// Voir détail candidature
+function showCand(id) {
+  const c = candidatures.find(x => x.id === id);
+  if (!c) return;
+  alert(`📋 Candidature de ${c.prenom}\n\n📧 ${c.email}\n📍 ${c.ville}\n🐾 ${c.chien} (${c.race})\n💳 ${c.formule}\n\n💬 "${c.message}"`);
+}
+
+// Initialisation au chargement
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadCandidatures();
+  await loadMembres();
+
+  // Actualisation toutes les 30 secondes
+  setInterval(async () => {
+    await loadCandidatures();
+    await loadMembres();
+  }, 30000);
+});
+</script>
+
+</body>
+</html>
