@@ -22,7 +22,7 @@
     g.innerHTML = '<div class="loading" style="grid-column:1/-1;">Chargement...</div>';
 
     window.TDC.db
-      .from('gardes')
+      .from('garde')
       .select('*')
       .eq('statut', 'actif')
       .order('created_at', { ascending: false })
