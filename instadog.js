@@ -112,11 +112,11 @@
       // 1. Upload Storage
       var ext      = file.name.split('.').pop().toLowerCase();
       var fileName = Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + ext;
-      var up = await db.storage.from('photos').upload(fileName, file, { cacheControl: '3600', upsert: false });
+      var up = await db.storage.from('Photos').upload(fileName, file, { cacheControl: '3600', upsert: false });
       if (up.error) throw up.error;
 
       // 2. URL publique
-      var publicUrl = db.storage.from('photos').getPublicUrl(fileName).data.publicUrl;
+      var publicUrl = db.storage.from('Photos').getPublicUrl(fileName).data.publicUrl;
 
       // 3. Insert en base
       var ins = await db.from('photos').insert([{
