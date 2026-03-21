@@ -379,33 +379,10 @@ function doLogout(){
 document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
 // === DATA ===
-let candidatures = [
-  {id:1,prenom:'Marie D.',ville:'Paris',chien:'Caramel',race:'Cocker',email:'marie@email.com',formule:'Annuel — 149€/an',message:'Je cherche une communauté de confiance pour partager des balades avec mon cocker !'},
-  {id:2,prenom:'Julien B.',ville:'Lyon',chien:'Rocky',race:'Labrador',email:'julien@email.com',formule:'Fondateur — 79€ la 1ère année',message:'Grand passionné de chiens, j\'organise déjà des balades à Lyon.'},
-  {id:3,prenom:'Clara M.',ville:'Bordeaux',chien:'Luna',race:'Golden',email:'clara@email.com',formule:'Mensuel — 14,90€/mois',message:'Luna adore les autres chiens, on cherche une vraie communauté !'},
-];
-
-let membres = [
-  {id:1,prenom:'Sophie M.',ville:'Paris',chien:'Noisette',race:'Cocker',email:'sophie@email.com',formule:'Fondateur',expire:'Mar 2027',statut:'Actif'},
-  {id:2,prenom:'Emma L.',ville:'Paris',chien:'Rocky',race:'Labrador',email:'emma@email.com',formule:'Annuel',expire:'Fév 2027',statut:'Actif'},
-  {id:3,prenom:'Pierre M.',ville:'Lyon',chien:'Bruno',race:'Boxer',email:'pierre@email.com',formule:'Mensuel',expire:'Avr 2026',statut:'Actif'},
-  {id:4,prenom:'Léa M.',ville:'Nantes',chien:'Bella',race:'Bichon',email:'lea@email.com',formule:'Fondateur',expire:'Mar 2027',statut:'Expire bientôt'},
-  {id:5,prenom:'Karim B.',ville:'Marseille',chien:'Zeus',race:'Berger',email:'karim@email.com',formule:'Annuel',expire:'Jan 2027',statut:'Actif'},
-];
-
-let events = [
-  {id:1,titre:'Balade Forêt de Fontainebleau',date:'22/03/2026',prix:'Gratuit',places:8,inscrits:6,ville:'National',statut:'Ouvert'},
-  {id:2,titre:'Évasion mer — Plage de Deauville',date:'20/04/2026',prix:'39€',places:7,inscrits:7,ville:'National',statut:'Complet'},
-  {id:3,titre:'Atelier éducation positive (Zoom)',date:'09/04/2026',prix:'15€',places:12,inscrits:4,ville:'National',statut:'Ouvert'},
-  {id:4,titre:'Apéro canin Paris 11e',date:'04/05/2026',prix:'Gratuit',places:15,inscrits:2,ville:'Paris',statut:'Ouvert'},
-];
-
-let partenaires = [
-  {id:1,nom:'Mimi & Minoux',type:'Toilettage',offre:'25% de réduction sur toutes les prestations',code:'CIRCLE25',ville:'Paris',statut:'Actif'},
-  {id:2,nom:'Balades & Co',type:'Promenades',offre:'30% de réduction sur les promenades',code:'CIRCLE30',ville:'National',statut:'Actif'},
-  {id:3,nom:'VetTel',type:'Vétérinaire',offre:'1ère téléconsultation offerte, puis -15%',code:'CIRCLEVET',ville:'National',statut:'Actif'},
-  {id:4,nom:'La Boutique du Chien',type:'Boutique',offre:'20% de réduction sur tout le site',code:'CIRCLE20',ville:'National',statut:'En pause'},
-];
+let candidatures = [];
+let membres = [];
+let events = [];
+let partenaires = [];
 
 let villes = [
   {nom:'Paris',emoji:'🗼',membres:34,events:2},
@@ -471,7 +448,7 @@ function buildDashboard(){
     ${events.map(e=>`<tr>
       <td class="tbl-name">${e.titre}</td>
       <td>${e.date}</td>
-      <td>${e.inscrits} / ${e.places}</td>
+      <td>${e.inscrits || 0} / ${e.places}</td>
       <td>${pillStatut(e.statut)}</td>
     </tr>`).join('')}`;
 }
@@ -484,7 +461,7 @@ function buildCandidatures(){
       <td><div class="tbl-name">${c.prenom}</div><div style="font-size:11px;color:var(--t3);">${c.ville} · ${c.email}</div></td>
       <td>${c.chien} · ${c.race}</td>
       <td>${pillFormule(c.formule)}</td>
-      <td style="max-width:180px;font-size:11px;color:var(--t3);">"${c.message.substring(0,60)}..."</td>
+      <td style="max-width:180px;font-size:11px;color:var(--t3);">"${(c.message || '').substring(0,60)}..."</td>
       <td><div class="actions"><button class="btn-xs btn-xs-g" onclick="acceptCandidature('${c.id}')">✓ Accepter</button><button class="btn-xs btn-xs-r" onclick="rejectCandidature('${c.id}')">✗ Refuser</button></div></td>
     </tr>`).join('')}`;
 }
@@ -499,22 +476,49 @@ function buildMembres(){
       <td>${pillFormule(m.formule)}</td>
       <td style="font-size:12px;">${m.expire}</td>
       <td>${pillStatut(m.statut)}</td>
-      <td><button class="btn-xs btn-xs-r" onclick="supprimerMembre(${m.id})">Suppr.</button></td>
+      <td><button class="btn-xs btn-xs-r" onclick="supprimerMembre('${m.id}')">Suppr.</button></td>
     </tr>`).join('')}`;
 }
 
 function buildEvents(){
   document.getElementById('tbl-events').innerHTML = `
-    <tr><th>Event</th><th>Date</th><th>Ville</th><th>Prix</th><th>Places</th><th>Statut</th><th>Action</th></tr>
-    ${events.map(e=>`<tr>
-      <td class="tbl-name">${e.titre}</td>
-      <td>${e.date}</td>
-      <td><span class="pill pill-gray">${e.ville}</span></td>
-      <td>${e.prix}</td>
-      <td>${e.inscrits} / ${e.places}</td>
-      <td>${pillStatut(e.statut)}</td>
-      <td><button class="btn-xs btn-xs-r" onclick="supprimerEvent(${e.id})">Suppr.</button></td>
-    </tr>`).join('')}`;
+    <tr><th>Event</th><th>Date</th><th>Ville</th><th>Prix</th><th>Inscrits</th><th>Places restantes</th><th>Statut</th><th>Actions</th></tr>
+    ${events.map(e=>{
+      const restantes = e.places - (e.inscrits || 0);
+      const complet = restantes <= 0;
+      const spotsColor = complet ? 'color:#dc2626;font-weight:600;' : restantes <= 3 ? 'color:#d97706;font-weight:600;' : 'color:#059669;';
+      return `<tr>
+        <td class="tbl-name">${e.titre}</td>
+        <td>${e.date}</td>
+        <td><span class="pill pill-gray">${e.ville || '-'}</span></td>
+        <td>${e.prix || 'Gratuit'}</td>
+        <td><strong>${e.inscrits || 0}</strong> / ${e.places}</td>
+        <td style="${spotsColor}">${complet ? 'COMPLET' : restantes + ' restante' + (restantes > 1 ? 's' : '')}</td>
+        <td>${pillStatut(e.statut)}</td>
+        <td style="display:flex;gap:6px;">
+          <button class="btn-xs btn-xs-g" onclick="voirInscrits('${e.id}', '${e.titre}')">Inscrits</button>
+          <button class="btn-xs btn-xs-r" onclick="supprimerEvent('${e.id}')">Suppr.</button>
+        </td>
+      </tr>`;
+    }).join('')}`;
+}
+
+async function voirInscrits(eventId, eventTitre) {
+  const { data, error } = await supa.from('inscriptions').select('*').eq('event_id', eventId).order('created_at', { ascending: true });
+  if (error) { alert('Erreur: ' + error.message); return; }
+  if (!data || data.length === 0) { alert('Aucun inscrit pour cet event.'); return; }
+
+  const confirmes = data.filter(i => i.statut === 'confirme');
+  const attente = data.filter(i => i.statut === 'liste_attente');
+
+  let msg = '📋 Inscrits pour "' + eventTitre + '"\n\n';
+  msg += '✅ CONFIRMÉS (' + confirmes.length + ') :\n';
+  confirmes.forEach((i,n) => { msg += (n+1) + '. ' + i.membre_prenom + ' — ' + i.membre_email + '\n'; });
+  if (attente.length > 0) {
+    msg += '\n⏳ LISTE D'ATTENTE (' + attente.length + ') :\n';
+    attente.forEach((i,n) => { msg += (n+1) + '. ' + i.membre_prenom + ' — ' + i.membre_email + '\n'; });
+  }
+  alert(msg);
 }
 
 function buildPartenaires(){
