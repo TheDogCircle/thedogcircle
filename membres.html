@@ -243,6 +243,12 @@ input:focus{border-color:var(--green);}
   .app-tabs{padding:0 8px;}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://bmqyysilivmxndwhmovw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcXl5c2lsaXZteG5kd2htb3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDc2MDYsImV4cCI6MjA4OTUyMzYwNn0.95uvAOXwBEes1lbYti872OErXb6OOwEBt9dQ-mR4MFE';
+const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
 </head>
 <body>
 
@@ -374,7 +380,15 @@ input:focus{border-color:var(--green);}
     <div id="tc-events" class="tc">
       <div class="sec-title">Events & Évasions 🎉</div>
       <div class="sec-sub">Réservés aux membres The Dog Circle</div>
+      
+      <!-- Sous-onglets -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;">
+        <button class="ville-subtab active" id="ev-subtab-all" onclick="switchEvTab('all')">🎉 Tous les events</button>
+        <button class="ville-subtab" id="ev-subtab-mes" onclick="switchEvTab('mes')">✅ Mes inscriptions</button>
+      </div>
+
       <div id="evList"></div>
+      <div id="mesInscriptionsList" style="display:none;"></div>
     </div>
 
     <!-- MA VILLE & CARTE -->
@@ -495,6 +509,8 @@ function doLogin(){
   const err = document.getElementById('loginErr');
   if(email === 'membre@thedogcircle.fr' && pwd === 'thedogcircle'){
     err.style.display = 'none';
+    currentMemberEmail = email;
+    currentMemberPrenom = email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1);
     document.getElementById('pg-login').style.display = 'none';
     document.getElementById('pg-app').style.display = 'block';
     window.scrollTo(0, 0);
@@ -598,20 +614,8 @@ function buildAll(){
       </div>
     </div>`).join('');
 
-  // EVENTS
-  document.getElementById('evList').innerHTML = events.map(e => `
-    <div class="ev-card">
-      <div class="ev-date"><div class="ev-day">${e.d}</div><div class="ev-month">${e.m}</div></div>
-      <div class="ev-body">
-        <div class="ev-title">${e.t}</div>
-        <div class="ev-detail">${e.det}</div>
-        <div class="ev-tags">
-          <span class="ev-tag ev-tag-gold">${e.price}</span>
-          <span class="ev-tag ev-tag-${e.type === 'red' ? 'red' : 'green'}">${e.spots}</span>
-        </div>
-        <button class="btn btn-p" style="padding:7px 16px;font-size:12px;" onclick="alert('Inscription confirmée ! Vous recevrez un email de confirmation.')">S'inscrire</button>
-      </div>
-    </div>`).join('');
+  // EVENTS — chargés depuis Supabase
+  loadEvents();
 
   // SPOTS (also called from switchSubtab)
   buildSpots();
@@ -871,5 +875,176 @@ function renderVille(){
     </div>`;
 }
 </script>
+
+<script>
+// Email du membre connecté (récupéré au login)
+let currentMemberEmail = '';
+let currentMemberPrenom = '';
+let mesInscriptions = []; // IDs des events auxquels je suis inscrit
+
+// Charger les events depuis Supabase
+async function loadEvents() {
+  const container = document.getElementById('evList');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3);">Chargement...</div>';
+
+  const { data: eventsData, error } = await supa.from('events').select('*').order('date_raw', { ascending: true });
+  if (error) { container.innerHTML = '<div style="color:red;">Erreur chargement events</div>'; return; }
+  if (!eventsData || eventsData.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--t3);">Aucun event pour le moment — revenez bientôt 🐾</div>';
+    return;
+  }
+
+  // Charger mes inscriptions
+  const { data: inscData } = await supa.from('inscriptions').select('event_id, statut').eq('membre_email', currentMemberEmail);
+  mesInscriptions = inscData || [];
+
+  container.innerHTML = eventsData.map(e => {
+    const placesRestantes = e.places - (e.inscrits || 0);
+    const complet = placesRestantes <= 0;
+    const monInscription = mesInscriptions.find(i => i.event_id === e.id);
+    const estInscrit = monInscription && monInscription.statut === 'confirme';
+    const enAttente = monInscription && monInscription.statut === 'liste_attente';
+
+    const d = new Date(e.date_raw || Date.now());
+    const day = d.getDate().toString().padStart(2,'0');
+    const month = d.toLocaleString('fr-FR', {month:'short'}).replace('.','');
+
+    let btnHtml = '';
+    if (estInscrit) {
+      btnHtml = '<button class="btn" style="padding:7px 16px;font-size:12px;background:#d1fae5;color:#065f46;cursor:default;">✓ Inscrit</button>';
+    } else if (enAttente) {
+      btnHtml = '<button class="btn" style="padding:7px 16px;font-size:12px;background:#fef3c7;color:#92400e;cursor:default;">⏳ Liste d'attente</button>';
+    } else if (complet) {
+      const btnIdAttente = 'btn-attente-' + e.id;
+      const btnId = 'btn-inscr-' + e.id;
+      btnHtml = '<button id="' + btnIdAttente + '" class="btn btn-o" style="padding:7px 16px;font-size:12px;" onclick="sInscrire(this, '' + e.id + '', '' + e.titre.replace(/'/g, '') + '', true)">S'inscrire en liste d'attente</button>';
+    } else {
+      const btnId2 = 'btn-inscr-' + e.id;
+      btnHtml = '<button id="' + btnId2 + '" class="btn btn-p" style="padding:7px 16px;font-size:12px;" onclick="sInscrire(this, '' + e.id + '', '' + e.titre.replace(/'/g, '') + '', false)">S'inscrire</button>';
+    }
+
+    const spotsTag = complet 
+      ? '<span class="ev-tag ev-tag-red">Complet</span>'
+      : '<span class="ev-tag ev-tag-' + (placesRestantes <= 3 ? 'red' : 'green') + '">' + placesRestantes + ' place' + (placesRestantes > 1 ? 's' : '') + ' restante' + (placesRestantes > 1 ? 's' : '') + '</span>';
+
+    return '<div class="ev-card">' +
+      '<div class="ev-date"><div class="ev-day">' + day + '</div><div class="ev-month">' + month + '</div></div>' +
+      '<div class="ev-body">' +
+        '<div class="ev-title">' + e.titre + '</div>' +
+        '<div class="ev-detail">' + (e.ville || '') + ' · ' + (e.prix || 'Gratuit membres') + '</div>' +
+        '<div class="ev-tags">' +
+          '<span class="ev-tag ev-tag-gold">' + (e.prix || 'Gratuit') + '</span>' +
+          spotsTag +
+        '</div>' +
+        btnHtml +
+      '</div></div>';
+  }).join('');
+}
+
+// S'inscrire à un event
+async function sInscrire(btn, eventId, eventTitre, listeAttente) {
+  if (!currentMemberEmail) {
+    alert('Tu dois être connecté pour t'inscrire.');
+    return;
+  }
+
+  // Désactiver le bouton immédiatement
+  btn.disabled = true;
+  btn.textContent = 'Inscription en cours...';
+
+  const statut = listeAttente ? 'liste_attente' : 'confirme';
+
+  // Vérifier si déjà inscrit
+  const { data: existing } = await supa.from('inscriptions')
+    .select('id').eq('event_id', eventId).eq('membre_email', currentMemberEmail);
+  
+  if (existing && existing.length > 0) {
+    btn.textContent = '✓ Déjà inscrit';
+    btn.style.background = '#d1fae5';
+    btn.style.color = '#065f46';
+    return;
+  }
+
+  // Ajouter l'inscription
+  const { error: e1 } = await supa.from('inscriptions').insert([{
+    event_id: eventId,
+    membre_email: currentMemberEmail,
+    membre_prenom: currentMemberPrenom,
+    statut: statut
+  }]);
+
+  if (e1) { 
+    btn.disabled = false;
+    btn.textContent = listeAttente ? 'Liste d'attente' : 'S'inscrire';
+    alert('Erreur: ' + e1.message); 
+    return; 
+  }
+
+  // Incrémenter le compteur inscrits si confirmé
+  if (!listeAttente) {
+    const { data: ev } = await supa.from('events').select('inscrits').eq('id', eventId).single();
+    if (ev) {
+      await supa.from('events').update({ inscrits: (ev.inscrits || 0) + 1 }).eq('id', eventId);
+    }
+  }
+
+  // Mettre à jour le bouton visuellement
+  if (listeAttente) {
+    btn.textContent = '⏳ En liste d'attente';
+    btn.style.background = '#fef3c7';
+    btn.style.color = '#92400e';
+    btn.style.border = 'none';
+  } else {
+    btn.textContent = '✓ Inscrit !';
+    btn.style.background = '#d1fae5';
+    btn.style.color = '#065f46';
+    btn.style.border = 'none';
+  }
+
+  // Rafraichir la liste des inscriptions
+  await loadMesInscriptions();
+}
+
+// Charger mes inscriptions
+async function loadMesInscriptions() {
+  const container = document.getElementById('mesInscriptionsList');
+  if (!container) return;
+
+  const { data, error } = await supa.from('inscriptions')
+    .select('*, events(*)')
+    .eq('membre_email', currentMemberEmail)
+    .order('created_at', { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--t3);">Tu n'es inscrit(e) à aucun event pour le moment 🐾</div>';
+    return;
+  }
+
+  container.innerHTML = data.map(i => {
+    const e = i.events;
+    if (!e) return '';
+    const statutBadge = i.statut === 'confirme' 
+      ? '<span style="background:#d1fae5;color:#065f46;padding:3px 10px;border-radius:100px;font-size:11px;">✓ Confirmé</span>'
+      : '<span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:100px;font-size:11px;">⏳ Liste d'attente</span>';
+    return '<div class="ev-card">' +
+      '<div class="ev-date"><div class="ev-day">' + (e.date || '').split('/')[0] + '</div><div class="ev-month">' + (e.date || '').split('/')[1] + '</div></div>' +
+      '<div class="ev-body">' +
+        '<div class="ev-title">' + (e.titre || '') + '</div>' +
+        '<div class="ev-detail">' + (e.ville || '') + ' · ' + (e.prix || 'Gratuit') + '</div>' +
+        '<div class="ev-tags">' + statutBadge + '</div>' +
+      '</div></div>';
+  }).filter(Boolean).join('');
+}
+
+function switchEvTab(tab) {
+  document.getElementById('ev-subtab-all').classList.toggle('active', tab === 'all');
+  document.getElementById('ev-subtab-mes').classList.toggle('active', tab === 'mes');
+  document.getElementById('evList').style.display = tab === 'all' ? 'block' : 'none';
+  document.getElementById('mesInscriptionsList').style.display = tab === 'mes' ? 'block' : 'none';
+  if (tab === 'mes') loadMesInscriptions();
+}
+</script>
+
 </body>
 </html>
