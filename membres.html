@@ -17,7 +17,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',system-ui,sans-serif;background:var(--w);color:var(--t);font-size:15px;line-height:1.65;}
 h1,h2,h3{font-family:'Playfair Display',Georgia,serif;}
-.page{display:none;}.page.active{display:block;}
+#pg-login{display:flex;}#pg-app{display:none;}
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 24px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all 0.2s;text-decoration:none;}
 .btn-p{background:var(--green);color:var(--cream);}.btn-p:hover{background:var(--greenm);color:var(--cream);}
 .btn-o{background:transparent;color:var(--green);border:1.5px solid var(--green);}.btn-o:hover{background:var(--greenp);}
@@ -495,16 +495,18 @@ function doLogin(){
   const err = document.getElementById('loginErr');
   if(email === 'membre@thedogcircle.fr' && pwd === 'thedogcircle'){
     err.style.display = 'none';
-    document.getElementById('pg-login').classList.remove('active');
-    document.getElementById('pg-app').classList.add('active');
+    document.getElementById('pg-login').style.display = 'none';
+    document.getElementById('pg-app').style.display = 'block';
+    window.scrollTo(0, 0);
     buildAll();
   } else {
     err.style.display = 'block';
   }
 }
 function doLogout(){
-  document.getElementById('pg-app').classList.remove('active');
-  document.getElementById('pg-login').classList.add('active');
+  document.getElementById('pg-app').style.display = 'none';
+  document.getElementById('pg-login').style.display = 'flex';
+  window.scrollTo(0, 0);
 }
 function toggleProfile(){
   const d = document.getElementById('profileDropdown');
