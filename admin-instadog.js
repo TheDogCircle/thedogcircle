@@ -2,73 +2,84 @@
  * =====================================================
  *  THE DOG CIRCLE — Admin Instadog
  *  Fichier : admin-instadog.js
- *  Écoute  : TDCA:section(instadog)
+ *  Table   : photos
+ *  Écoute  : TDCA:login · TDCA:section(instadog)
  * =====================================================
  */
 (function () {
 
-  // Données statiques pour l'instant — à connecter à une table Supabase "photos"
-  var photos = [
-    { emoji:'🐕',    bg:'#C8DEB8', dog:'Noisette', city:'Paris',      cap:'Balade matinale 🌿',   statut:'en_attente' },
-    { emoji:'🐩',    bg:'#D4C5A9', dog:'Bella',    city:'Nantes',     cap:'Toilettage ✨',          statut:'en_attente' },
-    { emoji:'🐕‍🦺', bg:'#B8C9D4', dog:'Thor',     city:'Lyon',       cap:'Agility 🎓',            statut:'valide'     },
-    { emoji:'🦮',    bg:'#D4B8B8', dog:'Luna',     city:'Bordeaux',   cap:'Évasion mer 🌊',        statut:'valide'     },
-    { emoji:'🐶',    bg:'#C5C8D4', dog:'Max',      city:'Strasbourg', cap:'Neige ❄️',              statut:'en_attente' },
-    { emoji:'🐾',    bg:'#D4CEB8', dog:'Oscar',    city:'Rennes',     cap:'Garde membres 🙏',      statut:'valide'     },
-    { emoji:'🐕',    bg:'#C8DEB8', dog:'Caramel',  city:'Paris',      cap:'Apéro canin 🍷',        statut:'en_attente' },
-    { emoji:'🦮',    bg:'#EBF0E8', dog:'Zeus',     city:'Marseille',  cap:'Calanques 🏔️',         statut:'valide'     },
-  ];
-
   document.addEventListener('TDCA:login', function () {
-    buildPhotos();
+    loadPhotos();
   });
 
   document.addEventListener('TDCA:section', function (e) {
-    if (e.detail.sec === 'instadog') buildPhotos();
+    if (e.detail.sec === 'instadog') loadPhotos();
   });
 
-  function buildPhotos() {
+  // ── Charger ────────────────────────────────────────
+  async function loadPhotos() {
+    var db   = window.TDCA.db;
     var grid = document.getElementById('photos-grid');
     if (!grid) return;
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--t3);">Chargement...</div>';
 
-    // Trier : en attente en premier
-    var sorted = photos.slice().sort(function (a, b) {
+    var res = await db.from('photos').select('*').order('created_at', { ascending: false });
+    if (res.error) {
+      grid.innerHTML = '<div style="grid-column:1/-1;color:var(--red);padding:20px;">Erreur : ' + res.error.message + '</div>';
+      return;
+    }
+
+    if (!res.data || res.data.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--t3);">Aucune photo pour le moment</div>';
+      return;
+    }
+
+    // En attente en premier
+    var sorted = res.data.slice().sort(function (a, b) {
       return a.statut === 'en_attente' ? -1 : 1;
     });
 
-    grid.innerHTML = sorted.map(function (p, i) {
-      var idx = photos.indexOf(p);
-      return '<div class="photo-card" id="photo-' + idx + '">'
-        + '<div class="photo-img" style="background:' + p.bg + ';">' + p.emoji + '</div>'
+    grid.innerHTML = sorted.map(function (p) {
+      var bg    = p.bg_color || '#C8DEB8';
+      var emoji = p.emoji    || '🐾';
+      var badge = p.statut === 'en_attente'
+        ? '<span class="pill pill-amber">En attente</span>'
+        : '<span class="pill pill-green">Validé</span>';
+      return '<div class="photo-card" id="photo-' + p.id + '">'
+        + '<div class="photo-img" style="background:' + bg + ';">' + emoji + '</div>'
         + '<div class="photo-info">'
-          + '<div class="photo-name">' + p.dog + '</div>'
-          + '<div class="photo-meta">' + p.city + ' · "' + p.cap + '"</div>'
-          + '<div style="margin-bottom:6px;">'
-            + (p.statut === 'en_attente'
-              ? '<span class="pill pill-amber">En attente</span>'
-              : '<span class="pill pill-green">Validé</span>')
-          + '</div>'
+          + '<div class="photo-name">' + (p.chien || '—') + '</div>'
+          + '<div class="photo-meta">' + (p.membre_prenom || '') + (p.ville ? ' · ' + p.ville : '') + '</div>'
+          + '<div class="photo-meta">"' + (p.caption || '') + '"</div>'
+          + '<div style="margin:4px 0;">' + badge + '</div>'
           + '<div class="photo-actions">'
             + (p.statut === 'en_attente'
-              ? '<button class="btn-xs btn-xs-g" onclick="window.TDCA.instadog.validate(' + idx + ')">✓ Valider</button>'
+              ? '<button class="btn-xs btn-xs-g" onclick="window.TDCA.instadog.validate(\'' + p.id + '\')">✓ Valider</button>'
               : '<span style="font-size:11px;color:var(--t3);">✓ Publié</span>')
-            + '<button class="btn-xs btn-xs-r" onclick="window.TDCA.instadog.remove(' + idx + ')">✗ Suppr.</button>'
+            + '<button class="btn-xs btn-xs-r" onclick="window.TDCA.instadog.remove(\'' + p.id + '\')">✗ Suppr.</button>'
           + '</div>'
         + '</div>'
       + '</div>';
     }).join('');
   }
 
-  function validatePhoto(idx) {
-    photos[idx].statut = 'valide';
-    buildPhotos();
+  // ── Valider une photo ──────────────────────────────
+  async function validatePhoto(id) {
+    var db  = window.TDCA.db;
+    var res = await db.from('photos').update({ statut: 'valide' }).eq('id', id);
+    if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
     window.TDCA.toast('Photo validée et publiée ✓');
+    await loadPhotos();
   }
 
-  function removePhoto(idx) {
-    photos.splice(idx, 1);
-    buildPhotos();
+  // ── Supprimer une photo ────────────────────────────
+  async function removePhoto(id) {
+    if (!confirm('Supprimer cette photo ?')) return;
+    var db  = window.TDCA.db;
+    var res = await db.from('photos').delete().eq('id', id);
+    if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
     window.TDCA.toast('Photo supprimée.');
+    await loadPhotos();
   }
 
   window.TDCA = window.TDCA || {};
