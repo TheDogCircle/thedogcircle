@@ -502,6 +502,11 @@ const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </div>
 
 <script>
+// === VARIABLES GLOBALES ===
+let currentMemberEmail = '';
+let currentMemberPrenom = '';
+let mesInscriptions = [];
+
 // === AUTH ===
 function doLogin(){
   const email = document.getElementById('loginEmail').value;
@@ -869,9 +874,6 @@ function renderVille(){
 
 
 // Email du membre connecté (récupéré au login)
-let currentMemberEmail = '';
-let currentMemberPrenom = '';
-let mesInscriptions = []; // IDs des events auxquels je suis inscrit
 
 // Charger les events depuis Supabase
 async function loadEvents() {
