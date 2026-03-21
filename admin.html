@@ -18,7 +18,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#F5F5F3;color:var(--t
 
 
 /* LOGIN */
-#pg-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cream);}
+#pg-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cream);}#pg-app{display:none;grid-template-columns:220px 1fr;min-height:100vh;}
 .login-box{background:var(--w);border-radius:16px;padding:36px;width:100%;max-width:380px;border:1px solid var(--b);}
 .login-logo{text-align:center;margin-bottom:24px;}
 .login-brand{font-size:18px;font-weight:500;color:var(--t);}
@@ -133,7 +133,7 @@ const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 <div class="toast" id="toast"></div>
 
 <!-- LOGIN -->
-<div id="pg-login" class="page active">
+  <div id="pg-login" style="display:flex;">
   <div class="login-box">
     <div class="login-logo">
       <div class="login-brand">The Dog <span>Circle</span></div>
@@ -148,7 +148,7 @@ const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </div>
 
 <!-- APP -->
-<div id="pg-app" class="page">
+<div id="pg-app" style="display:none;">
   <div class="sidebar">
     <div class="sb-logo">
       <div class="sb-brand">The Dog <span>Circle</span></div>
