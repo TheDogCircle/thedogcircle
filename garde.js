@@ -142,8 +142,20 @@
           g.innerHTML = '<div class="loading" style="grid-column:1/-1;">Aucune demande en cours 🐾<br><small>Sois le premier à en faire une !</small></div>';
           return;
         }
-        var bgColors = ['#C8DEB8','#D4C5A9','#B8C9D4','#D4B8B8','#C5C8D4','#D4CEB8'];
-        g.innerHTML = res.data.map(function (d, i) {
+        // Stocker les données pour edit
+        window._gardeDemandesData = res.data;
+
+        // Délégation clics
+        var grid = document.getElementById('demandes-grid');
+        grid.onclick = function (e) {
+          var btnEdit   = e.target.closest('[data-garde-edit]');
+          var btnDelete = e.target.closest('[data-garde-delete]');
+          if (btnEdit) {
+            var d = window._gardeDemandesData.find(function (x) { return String(x.id) === btnEdit.dataset.gardeEdit; });
+            if (d) editDemande(d);
+          }
+          if (btnDelete) deleteDemande(btnDelete.dataset.gardeDelete);
+        };
           var isOwn = d.membre_email === window.TDC.userEmail;
           return '<div class="garde-card">'
             + '<div class="garde-av" style="background:' + bgColors[i%6] + '">🐾</div>'
@@ -154,8 +166,8 @@
             + (d.message ? '<div style="font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:10px;">"' + d.message.substring(0,80) + (d.message.length>80?'...':'') + '"</div>' : '')
             + (isOwn
               ? '<div style="display:flex;gap:6px;">'
-                  + '<button class="btn btn-o" style="flex:1;padding:6px;font-size:11px;" onclick="window.TDC.garde.editDemande(' + JSON.stringify(d).replace(/"/g,'&quot;') + ')">✏️ Modifier</button>'
-                  + '<button class="btn btn-danger" style="flex:1;padding:6px;font-size:11px;" onclick="window.TDC.garde.deleteDemande(\'' + d.id + '\')">🗑️ Supprimer</button>'
+                  + '<button class="btn btn-o"     style="flex:1;padding:6px;font-size:11px;" data-garde-edit="' + d.id + '">✏️ Modifier</button>'
+                  + '<button class="btn btn-danger" style="flex:1;padding:6px;font-size:11px;" data-garde-delete="' + d.id + '">🗑️ Supprimer</button>'
                 + '</div>'
               : '<button class="btn btn-p" style="padding:6px 14px;font-size:12px;width:100%;justify-content:center;" onclick="window.location.href=\'mailto:' + (d.membre_email||'thedogcircleclub@gmail.com') + '?subject=Je suis dispo - Garde de ' + encodeURIComponent(d.chien||'votre chien') + '&body=Bonjour ' + encodeURIComponent(d.membre_prenom||'') + ', je suis disponible pour garder ' + encodeURIComponent(d.chien||'votre chien') + ' du ' + encodeURIComponent(d.dates||'') + '. Mon email : ' + encodeURIComponent(window.TDC.userEmail) + '\'">Je suis dispo !</button>')
           + '</div>';
