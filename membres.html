@@ -249,15 +249,12 @@ function doLogin() {
   var email = document.getElementById('loginEmail').value.trim();
   var pwd = document.getElementById('loginPwd').value.trim();
   var err = document.getElementById('loginErr');
-
   if (email === 'membre@thedogcircle.fr' && pwd === 'thedogcircle') {
     currentEmail = email;
     currentPrenom = 'Membre';
     err.style.display = 'none';
     document.getElementById('pg-login').style.display = 'none';
     document.getElementById('pg-app').style.display = 'block';
-    document.getElementById('avatarBtn').textContent = 'M';
-    document.getElementById('welcomeTitle').textContent = 'Bienvenue dans le cercle 🐾';
     window.scrollTo(0, 0);
     buildAll();
   } else {
@@ -278,15 +275,11 @@ function toggleProfile() {
 }
 
 document.addEventListener('click', function(e) {
-  var dropdown = document.getElementById('profileDropdown');
-  if (dropdown && !e.target.closest('.app-profile')) {
-    dropdown.style.display = 'none';
-  }
+  var dd = document.getElementById('profileDropdown');
+  if (dd && !e.target.closest('.app-profile')) dd.style.display = 'none';
 });
 
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') doLogin();
-});
+document.addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
 
 // ===== TABS =====
 function showTab(name, el) {
@@ -313,12 +306,12 @@ function buildAll() {
   loadEvents();
 }
 
-// ===== FEED (statique pour l'instant) =====
+// ===== FEED =====
 var posts = [
-  {bg:'#C8DEB8',e:'🐕',dog:'Noisette',breed:'Cocker',city:'Paris',cap:'Balade matinale au bois de Vincennes 🌿',lk:61},
-  {bg:'#D4C5A9',e:'🐩',dog:'Bella',breed:'Bichon',city:'Nantes',cap:'Toilettage chez notre partenaire CIRCLE25 !',lk:44},
-  {bg:'#B8C9D4',e:'🐕‍🦺',dog:'Thor',breed:'Husky',city:'Lyon',cap:'Premier cours education positive 🎓',lk:53},
-  {bg:'#D4B8B8',e:'🦮',dog:'Luna',breed:'Golden',city:'Bordeaux',cap:'Evasion mer a Arcachon 🌊',lk:72},
+  {bg:'#C8DEB8',e:'🐕',dog:'Noisette',breed:'Cocker',city:'Paris',cap:'Balade matinale au bois de Vincennes',lk:61},
+  {bg:'#D4C5A9',e:'🐩',dog:'Bella',breed:'Bichon',city:'Nantes',cap:'Toilettage chez notre partenaire - code CIRCLE25',lk:44},
+  {bg:'#B8C9D4',e:'🐕‍🦺',dog:'Thor',breed:'Husky',city:'Lyon',cap:'Premier cours education positive',lk:53},
+  {bg:'#D4B8B8',e:'🦮',dog:'Luna',breed:'Golden',city:'Bordeaux',cap:'Evasion mer a Arcachon',lk:72},
 ];
 
 function buildFeed() {
@@ -329,11 +322,11 @@ function buildFeed() {
       '<div class="feed-photo" style="background:' + p.bg + ';">' + p.e + '</div>' +
       '<div class="feed-info">' +
         '<div class="feed-dog">' + p.dog + '</div>' +
-        '<div class="feed-meta">' + p.breed + ' · ' + p.city + '</div>' +
+        '<div class="feed-meta">' + p.breed + ' - ' + p.city + '</div>' +
         '<div class="feed-cap">' + p.cap + '</div>' +
         '<div class="feed-actions">' +
-          '<span class="feed-like" id="lk' + i + '" onclick="toggleLike(' + i + ',' + p.lk + ')">♡ ' + p.lk + '</span>' +
-          '<span class="feed-comment">💬 Commenter</span>' +
+          '<span class="feed-like" id="lk' + i + '" onclick="toggleLike(' + i + ',' + p.lk + ')">coeur ' + p.lk + '</span>' +
+          '<span class="feed-comment">Commenter</span>' +
         '</div>' +
       '</div></div>';
   }).join('');
@@ -342,55 +335,60 @@ function buildFeed() {
 function toggleLike(i, base) {
   var el = document.getElementById('lk' + i);
   if (!el) return;
-  if (el.dataset.liked) {
-    el.textContent = '♡ ' + base;
-    delete el.dataset.liked;
-  } else {
-    el.textContent = '♥ ' + (base + 1);
-    el.style.color = '#dc2626';
-    el.dataset.liked = '1';
-  }
+  if (el.dataset.liked) { el.textContent = 'coeur ' + base; delete el.dataset.liked; }
+  else { el.textContent = 'coeur ' + (base + 1); el.style.color = '#dc2626'; el.dataset.liked = '1'; }
 }
 
-// ===== EVENTS (Supabase) =====
+// ===== EVENTS =====
 async function loadEvents() {
   var container = document.getElementById('evList');
   if (!container) return;
   container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3);">Chargement...</div>';
-
   try {
     var evRes = await supa.from('events').select('*').order('date_raw', { ascending: true });
     if (evRes.error) throw evRes.error;
-
     var inscRes = await supa.from('inscriptions').select('event_id,statut').eq('membre_email', currentEmail);
     mesInscriptions = inscRes.data || [];
-
     if (!evRes.data || evRes.data.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--t3);">Aucun event pour le moment 🐾</div>';
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--t3);">Aucun event pour le moment</div>';
       return;
     }
-
     container.innerHTML = evRes.data.map(function(e) {
       var placesRestantes = e.places - (e.inscrits || 0);
       var complet = placesRestantes <= 0;
       var monInscription = mesInscriptions.find(function(i) { return i.event_id === e.id; });
       var estInscrit = monInscription && monInscription.statut === 'confirme';
       var enAttente = monInscription && monInscription.statut === 'liste_attente';
-
-      var dateStr = e.date || '';
-      var parts = dateStr.split('/');
+      var parts = (e.date || '').split('/');
       var day = parts[0] || '--';
       var month = parts[1] || '--';
+      var eventPayant = e.prix && e.prix !== 'Gratuit' && e.prix !== 'Gratuit membres';
+      var dateEvent = new Date(e.date_raw);
+      var diffHeures = (dateEvent - new Date()) / (1000 * 60 * 60);
+      var moins24h = diffHeures < 24;
 
       var btnHtml;
       if (estInscrit) {
-        btnHtml = '<span style="display:inline-block;background:#d1fae5;color:#065f46;padding:6px 14px;border-radius:100px;font-size:12px;">Inscrit</span>';
+        if (eventPayant && moins24h) {
+          btnHtml = '<div style="display:flex;gap:8px;align-items:center;">' +
+            '<span style="background:#d1fae5;color:#065f46;padding:5px 12px;border-radius:100px;font-size:12px;">Inscrit</span>' +
+            '<button class="btn btn-o" style="padding:5px 12px;font-size:12px;color:#dc2626;border-color:#dc2626;" onclick="annulerPayant('" + e.titre.replace(/'/g,'') + "')">Annuler</button>' +
+            '</div>';
+        } else {
+          btnHtml = '<div style="display:flex;gap:8px;align-items:center;">' +
+            '<span style="background:#d1fae5;color:#065f46;padding:5px 12px;border-radius:100px;font-size:12px;">Inscrit</span>' +
+            '<button class="btn btn-o" style="padding:5px 12px;font-size:12px;color:#dc2626;border-color:#dc2626;" onclick="seDesinscrire(this,'' + e.id + '',false)">Se desinscrire</button>' +
+            '</div>';
+        }
       } else if (enAttente) {
-        btnHtml = '<span style="display:inline-block;background:#fef3c7;color:#92400e;padding:6px 14px;border-radius:100px;font-size:12px;">En liste attente</span>';
+        btnHtml = '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<span style="background:#fef3c7;color:#92400e;padding:5px 12px;border-radius:100px;font-size:12px;">Liste attente</span>' +
+          '<button class="btn btn-o" style="padding:5px 12px;font-size:12px;color:#dc2626;border-color:#dc2626;" onclick="seDesinscrire(this,'' + e.id + '',false)">Annuler</button>' +
+          '</div>';
       } else if (complet) {
-        btnHtml = '<button class="btn btn-o" style="padding:6px 14px;font-size:12px;" onclick="sInscrire(this,\'' + e.id + '\',true)">Liste attente</button>';
+        btnHtml = '<button class="btn btn-o" style="padding:6px 14px;font-size:12px;" onclick="sInscrire(this,'' + e.id + '',true)">Liste attente</button>';
       } else {
-        btnHtml = '<button class="btn btn-p" style="padding:6px 14px;font-size:12px;" onclick="sInscrire(this,\'' + e.id + '\',false)">S\'inscrire</button>';
+        btnHtml = '<button class="btn btn-p" style="padding:6px 14px;font-size:12px;" onclick="sInscrire(this,'' + e.id + '',false)">S'inscrire</button>';
       }
 
       var spotsColor = complet ? 'ev-tag-red' : (placesRestantes <= 3 ? 'ev-tag-red' : 'ev-tag-green');
@@ -400,7 +398,7 @@ async function loadEvents() {
         '<div class="ev-date"><div class="ev-day">' + day + '</div><div class="ev-month">' + month + '</div></div>' +
         '<div class="ev-body">' +
           '<div class="ev-title">' + e.titre + '</div>' +
-          '<div class="ev-detail">' + (e.ville || 'National') + ' · ' + (e.prix || 'Gratuit') + '</div>' +
+          '<div class="ev-detail">' + (e.ville || 'National') + ' - ' + (e.prix || 'Gratuit') + '</div>' +
           '<div class="ev-tags">' +
             '<span class="ev-tag ev-tag-gold">' + (e.prix || 'Gratuit') + '</span>' +
             '<span class="ev-tag ' + spotsColor + '">' + spotsText + '</span>' +
@@ -408,7 +406,6 @@ async function loadEvents() {
           btnHtml +
         '</div></div>';
     }).join('');
-
   } catch(err) {
     container.innerHTML = '<div style="color:red;padding:20px;">Erreur: ' + err.message + '</div>';
   }
@@ -418,9 +415,7 @@ async function sInscrire(btn, eventId, listeAttente) {
   if (!currentEmail) { alert('Tu dois etre connecte.'); return; }
   btn.disabled = true;
   btn.textContent = '...';
-
   try {
-    // Verifier si deja inscrit
     var check = await supa.from('inscriptions').select('id').eq('event_id', eventId).eq('membre_email', currentEmail);
     if (check.data && check.data.length > 0) {
       btn.textContent = 'Deja inscrit';
@@ -428,31 +423,21 @@ async function sInscrire(btn, eventId, listeAttente) {
       btn.style.color = '#065f46';
       return;
     }
-
-    // Ajouter inscription
     var ins = await supa.from('inscriptions').insert([{
-      event_id: eventId,
-      membre_email: currentEmail,
-      membre_prenom: currentPrenom,
+      event_id: eventId, membre_email: currentEmail, membre_prenom: currentPrenom,
       statut: listeAttente ? 'liste_attente' : 'confirme'
     }]);
     if (ins.error) throw ins.error;
-
-    // Incrementer si confirme
     if (!listeAttente) {
       var ev = await supa.from('events').select('inscrits').eq('id', eventId).single();
-      if (ev.data) {
-        await supa.from('events').update({ inscrits: (ev.data.inscrits || 0) + 1 }).eq('id', eventId);
-      }
+      if (ev.data) await supa.from('events').update({ inscrits: (ev.data.inscrits || 0) + 1 }).eq('id', eventId);
     }
-
     btn.textContent = listeAttente ? 'En liste attente' : 'Inscrit !';
     btn.style.background = listeAttente ? '#fef3c7' : '#d1fae5';
     btn.style.color = listeAttente ? '#92400e' : '#065f46';
     btn.style.border = 'none';
     btn.style.borderRadius = '100px';
-    btn.style.padding = '6px 14px';
-
+    setTimeout(function() { loadEvents(); }, 800);
   } catch(err) {
     btn.disabled = false;
     btn.textContent = "S'inscrire";
@@ -460,30 +445,108 @@ async function sInscrire(btn, eventId, listeAttente) {
   }
 }
 
+async function seDesinscrire(btn, eventId, listeAttente) {
+  if (!confirm('Tu veux vraiment te desinscrire de cet event ?')) return;
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    var ins = await supa.from('inscriptions').select('id,statut').eq('event_id', eventId).eq('membre_email', currentEmail).single();
+    if (!ins.data) { alert('Inscription introuvable.'); return; }
+    var del = await supa.from('inscriptions').delete().eq('id', ins.data.id);
+    if (del.error) throw del.error;
+    if (ins.data.statut === 'confirme') {
+      var ev = await supa.from('events').select('inscrits').eq('id', eventId).single();
+      if (ev.data && ev.data.inscrits > 0) {
+        await supa.from('events').update({ inscrits: ev.data.inscrits - 1 }).eq('id', eventId);
+      }
+    }
+    alert('Desinscription confirmee. A bientot !');
+    await loadEvents();
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Se desinscrire';
+    alert('Erreur: ' + err.message);
+  }
+}
+
+function annulerPayant(eventTitre) {
+  var msg = 'Cet evenement est payant et a lieu dans moins de 24h. Pour annuler, envoie un email a thedogcircleclub@gmail.com avec en objet : Annulation - ' + eventTitre + '. Veux-tu ouvrir ton client email ?';
+  if (confirm(msg)) {
+    var sujet = encodeURIComponent('Annulation - ' + eventTitre);
+    var corps = encodeURIComponent('Bonjour, je souhaite annuler mon inscription a : ' + eventTitre + '. Mon email : ' + currentEmail + '. Merci.');
+    window.open('mailto:thedogcircleclub@gmail.com?subject=' + sujet + '&body=' + corps);
+  }
+}
+
+async function seDesinscrire(btn, eventId) {
+  if (!confirm('Confirmer la desinscription ?')) return;
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    // Supprimer l'inscription
+    var del = await supa.from('inscriptions').delete().eq('event_id', eventId).eq('membre_email', currentEmail);
+    if (del.error) throw del.error;
+
+    // Decrementer le compteur
+    var ev = await supa.from('events').select('inscrits').eq('id', eventId).single();
+    if (ev.data && ev.data.inscrits > 0) {
+      await supa.from('events').update({ inscrits: ev.data.inscrits - 1 }).eq('id', eventId);
+    }
+
+    // Promouvoir le premier en liste attente si existe
+    var attente = await supa.from('inscriptions').select('*').eq('event_id', eventId).eq('statut', 'liste_attente').order('created_at', { ascending: true }).limit(1);
+    if (attente.data && attente.data.length > 0) {
+      await supa.from('inscriptions').update({ statut: 'confirme' }).eq('id', attente.data[0].id);
+      await supa.from('events').update({ inscrits: (ev.data ? ev.data.inscrits : 1) }).eq('id', eventId);
+    }
+
+    alert('Desinscription confirmee. Une place a ete liberee 🐾');
+    await loadEvents();
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Se desinscrire';
+    alert('Erreur: ' + err.message);
+  }
+}
+
+function demandeAnnulation(eventId, eventTitre) {
+  var sujet = encodeURIComponent('Demande annulation - ' + eventTitre);
+  var corps = encodeURIComponent(
+    'Bonjour,' +
+    '\n\nJe souhaite me desinscrire de l evenement "' + eventTitre + '" auquel je suis inscrit(e).' +
+    '\n\nEmail membre : ' + currentEmail +
+    '\n\nMerci de bien vouloir traiter ma demande d annulation.' +
+    '\n\nCordialement'
+  );
+  window.location.href = 'mailto:thedogcircleclub@gmail.com?subject=' + sujet + '&body=' + corps;
+  alert('Ton client email va s'ouvrir avec le message pre-rempli. L'annulation sera traitee sous 24h par l'equipe The Dog Circle.');
+}
+
 async function loadMesInscriptions() {
   var container = document.getElementById('mesList');
   if (!container) return;
   container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3);">Chargement...</div>';
-
   try {
     var res = await supa.from('inscriptions').select('*,events(*)').eq('membre_email', currentEmail).order('created_at', { ascending: false });
     if (!res.data || res.data.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--t3);">Aucune inscription pour le moment 🐾</div>';
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--t3);">Aucune inscription pour le moment</div>';
       return;
     }
     container.innerHTML = res.data.map(function(i) {
       var e = i.events;
       if (!e) return '';
-      var badgeStyle = i.statut === 'confirme'
-        ? 'background:#d1fae5;color:#065f46;'
-        : 'background:#fef3c7;color:#92400e;';
+      var badgeStyle = i.statut === 'confirme' ? 'background:#d1fae5;color:#065f46;' : 'background:#fef3c7;color:#92400e;';
       var badgeText = i.statut === 'confirme' ? 'Confirme' : 'Liste attente';
       return '<div class="ev-card">' +
-        '<div class="ev-date" style="min-width:52px;"><div class="ev-day">' + (e.date || '').split('/')[0] + '</div><div class="ev-month">' + (e.date || '').split('/')[1] + '</div></div>' +
+        '<div class="ev-date"><div class="ev-day">' + (e.date || '').split('/')[0] + '</div><div class="ev-month">' + (e.date || '').split('/')[1] + '</div></div>' +
         '<div class="ev-body">' +
           '<div class="ev-title">' + e.titre + '</div>' +
-          '<div class="ev-detail">' + (e.ville || '') + ' · ' + (e.prix || 'Gratuit') + '</div>' +
-          '<span style="display:inline-block;' + badgeStyle + 'padding:4px 12px;border-radius:100px;font-size:11px;">' + badgeText + '</span>' +
+          '<div class="ev-detail">' + (e.ville || '') + ' - ' + (e.prix || 'Gratuit') + '</div>' +
+          '<div style="display:flex;gap:8px;align-items:center;margin-top:6px;">' +
+            '<span style="' + badgeStyle + 'padding:4px 12px;border-radius:100px;font-size:11px;">' + badgeText + '</span>' +
+            '<button class="btn btn-o" style="padding:4px 12px;font-size:11px;color:#dc2626;border-color:#dc2626;" onclick="seDesinscrire(this,'' + e.id + '',false)">Annuler</button>' +
+          '</div>' +
         '</div></div>';
     }).filter(Boolean).join('');
   } catch(err) {
@@ -491,12 +554,12 @@ async function loadMesInscriptions() {
   }
 }
 
-// ===== PARTENAIRES (statique) =====
+// ===== PARTENAIRES =====
 var partners = [
   {bg:'#C8DEB8',icon:'✂️',name:'Woof & Clean',type:'Toiletteur Paris',offer:'-25% sur tous les soins pour les membres du club',code:'CIRCLE25'},
   {bg:'#D4C5A9',icon:'🦮',name:'BaladePaws',type:'Promeneur Paris',offer:'-30% sur les promenades quotidiennes',code:'CIRCLE30'},
   {bg:'#B8C9D4',icon:'🛍️',name:'PawStore',type:'Boutique premium',offer:'-20% sur toute la gamme nutrition et accessoires',code:'CIRCLE20'},
-  {bg:'#D4B8B8',icon:'🩺',name:'Veto Express',type:'Veterinaire',offer:'Consultation offerte + -15% sur les soins',code:'CIRCLEVET'},
+  {bg:'#D4B8B8',icon:'🩺',name:'Veto Express',type:'Veterinaire',offer:'Consultation offerte et -15% sur les soins',code:'CIRCLEVET'},
 ];
 
 function buildPartners() {
@@ -511,7 +574,7 @@ function buildPartners() {
       '<div class="partner-offer">' + p.offer + '</div>' +
       '<div class="partner-code">' +
         '<span>' + p.code + '</span>' +
-        '<span class="copy-btn" onclick="copyCode(this,\'' + p.code + '\')">Copier</span>' +
+        '<span class="copy-btn" onclick="copyCode(this,'' + p.code + '')">Copier</span>' +
       '</div></div>';
   }).join('');
 }
@@ -523,12 +586,12 @@ function copyCode(el, code) {
   });
 }
 
-// ===== GARDE (statique) =====
+// ===== GARDE =====
 var gardes = [
-  {bg:'#C8DEB8',av:'🐕',name:'Sophie R.',dog:'Noisette · Cocker',tags:['Paris 11e','Max 2 chiens'],dispo:'Disponible weekends'},
-  {bg:'#D4C5A9',av:'🐩',name:'Marc D.',dog:'Bella · Bichon',tags:['Lyon 2e','Petits gabarits'],dispo:'Disponible juillet'},
-  {bg:'#B8C9D4',av:'🦮',name:'Julie M.',dog:'Luna · Golden',tags:['Bordeaux','Grands gabarits'],dispo:'Disponible maintenant'},
-  {bg:'#D4B8B8',av:'🐕‍🦺',name:'Pierre V.',dog:'Thor · Husky',tags:['Paris 15e','Jardins'],dispo:'Disponible aout'},
+  {bg:'#C8DEB8',av:'🐕',name:'Sophie R.',dog:'Noisette - Cocker',tags:['Paris 11e','Max 2 chiens'],dispo:'Disponible weekends'},
+  {bg:'#D4C5A9',av:'🐩',name:'Marc D.',dog:'Bella - Bichon',tags:['Lyon 2e','Petits gabarits'],dispo:'Disponible juillet'},
+  {bg:'#B8C9D4',av:'🦮',name:'Julie M.',dog:'Luna - Golden',tags:['Bordeaux','Grands gabarits'],dispo:'Disponible maintenant'},
+  {bg:'#D4B8B8',av:'🐕‍🦺',name:'Pierre V.',dog:'Thor - Husky',tags:['Paris 15e','Jardins'],dispo:'Disponible aout'},
 ];
 
 function buildGarde() {
@@ -541,7 +604,7 @@ function buildGarde() {
       '<div class="garde-dog">' + g.dog + '</div>' +
       '<div class="garde-tags">' + g.tags.map(function(t) { return '<span class="garde-tag">' + t + '</span>'; }).join('') + '</div>' +
       '<div class="garde-dispo">● ' + g.dispo + '</div>' +
-      '<button class="btn btn-p" style="padding:6px 14px;font-size:12px;width:100%;justify-content:center;" onclick="alert(\'Message envoye a ' + g.name + ' !\')">Contacter</button>' +
+      '<button class="btn btn-p" style="padding:6px 14px;font-size:12px;width:100%;justify-content:center;">Contacter</button>' +
     '</div>';
   }).join('');
 }
