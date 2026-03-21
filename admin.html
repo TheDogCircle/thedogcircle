@@ -267,12 +267,11 @@ textarea{resize:vertical;min-height:72px;}
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcXl5c2lsaXZteG5kd2htb3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDc2MDYsImV4cCI6MjA4OTUyMzYwNn0.95uvAOXwBEes1lbYti872OErXb6OOwEBt9dQ-mR4MFE';
   var RESEND_KEY = 're_PbvhbeQA_7FZYaxw5DsaJCqvgJdiUD2wT';
 
-  // Objet global partagé avec tous les modules admin
-  window.TDCA = {
-    db:         null,
-    resendKey:  RESEND_KEY,
-    toast:      toast
-  };
+  // Étendre TDCA sans écraser les APIs déjà injectées par les modules
+  window.TDCA = window.TDCA || {};
+  window.TDCA.resendKey = RESEND_KEY;
+  window.TDCA.toast     = toast;
+  window.TDCA.db        = null;
 
   window.addEventListener('load', function () {
     window.TDCA.db = window.supabase.createClient(SB_URL, SB_KEY);
