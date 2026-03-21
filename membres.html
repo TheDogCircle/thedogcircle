@@ -372,7 +372,7 @@ async function loadEvents() {
         if (eventPayant && moins24h) {
           btnHtml = '<div style="display:flex;gap:8px;align-items:center;">' +
             '<span style="background:#d1fae5;color:#065f46;padding:5px 12px;border-radius:100px;font-size:12px;">Inscrit</span>' +
-            '<button class="btn btn-o" style="padding:5px 12px;font-size:12px;color:#dc2626;border-color:#dc2626;" onclick="annulerPayant('" + e.titre.replace(/'/g,'') + "')">Annuler</button>' +
+            '<button class="btn btn-o" style="padding:5px 12px;font-size:12px;color:#dc2626;border-color:#dc2626;" onclick="annulerPayant(this)">Annuler</button>' +
             '</div>';
         } else {
           btnHtml = '<div style="display:flex;gap:8px;align-items:center;">' +
@@ -469,11 +469,12 @@ async function seDesinscrire(btn, eventId, listeAttente) {
   }
 }
 
-function annulerPayant(eventTitre) {
-  var msg = 'Cet evenement est payant et a lieu dans moins de 24h. Pour annuler, envoie un email a thedogcircleclub@gmail.com avec en objet : Annulation - ' + eventTitre + '. Veux-tu ouvrir ton client email ?';
+function annulerPayant(btn) {
+  var titre = btn.closest('.ev-card').querySelector('.ev-title').textContent;
+  var msg = 'Cet evenement est payant et a lieu dans moins de 24h. Pour annuler, envoie un email a thedogcircleclub@gmail.com avec en objet : Annulation - ' + titre + '. Veux-tu ouvrir ton client email ?';
   if (confirm(msg)) {
-    var sujet = encodeURIComponent('Annulation - ' + eventTitre);
-    var corps = encodeURIComponent('Bonjour, je souhaite annuler mon inscription a : ' + eventTitre + '. Mon email : ' + currentEmail + '. Merci.');
+    var sujet = encodeURIComponent('Annulation - ' + titre);
+    var corps = encodeURIComponent('Bonjour, je souhaite annuler mon inscription a : ' + titre + '. Mon email : ' + currentEmail + '. Merci.');
     window.open('mailto:thedogcircleclub@gmail.com?subject=' + sujet + '&body=' + corps);
   }
 }
@@ -520,7 +521,7 @@ function demandeAnnulation(eventId, eventTitre) {
     '\n\nCordialement'
   );
   window.location.href = 'mailto:thedogcircleclub@gmail.com?subject=' + sujet + '&body=' + corps;
-  alert('Ton client email va s'ouvrir avec le message pre-rempli. L'annulation sera traitee sous 24h par l'equipe The Dog Circle.');
+  alert("Ton client email va s'ouvrir avec le message pre-rempli. L'annulation sera traitee sous 24h par l'equipe The Dog Circle.");
 }
 
 async function loadMesInscriptions() {
@@ -553,6 +554,229 @@ async function loadMesInscriptions() {
     container.innerHTML = '<div style="color:red;">Erreur: ' + err.message + '</div>';
   }
 }
+
+// ===== PARTENAIRES =====
+var partners = [
+  {bg:'#C8DEB8',icon:'✂️',name:'Woof & Clean',type:'Toiletteur Paris',offer:'-25% sur tous les soins pour les membres du club',code:'CIRCLE25'},
+  {bg:'#D4C5A9',icon:'🦮',name:'BaladePaws',type:'Promeneur Paris',offer:'-30% sur les promenades quotidiennes',code:'CIRCLE30'},
+  {bg:'#B8C9D4',icon:'🛍️',name:'PawStore',type:'Boutique premium',offer:'-20% sur toute la gamme nutrition et accessoires',code:'CIRCLE20'},
+  {bg:'#D4B8B8',icon:'🩺',name:'Veto Express',type:'Veterinaire',offer:'Consultation offerte et -15% sur les soins',code:'CIRCLEVET'},
+];
+
+function buildPartners() {
+  var grid = document.getElementById('partnersGrid');
+  if (!grid) return;
+  grid.innerHTML = partners.map(function(p) {
+    return '<div class="partner-card">' +
+      '<div class="partner-header">' +
+        '<div class="partner-icon" style="background:' + p.bg + ';">' + p.icon + '</div>' +
+        '<div><div class="partner-name">' + p.name + '</div><div class="partner-type">' + p.type + '</div></div>' +
+      '</div>' +
+      '<div class="partner-offer">' + p.offer + '</div>' +
+      '<div class="partner-code">' +
+        '<span>' + p.code + '</span>' +
+        '<span class="copy-btn" onclick="copyCode(this,'' + p.code + '')">Copier</span>' +
+      '</div></div>';
+  }).join('');
+}
+
+function copyCode(el, code) {
+  navigator.clipboard.writeText(code).then(function() {
+    el.textContent = 'Copie !';
+    setTimeout(function() { el.textContent = 'Copier'; }, 2000);
+  });
+}
+
+// ===== GARDE =====
+var gardes = [
+  {bg:'#C8DEB8',av:'🐕',name:'Sophie R.',dog:'Noisette - Cocker',tags:['Paris 11e','Max 2 chiens'],dispo:'Disponible weekends'},
+  {bg:'#D4C5A9',av:'🐩',name:'Marc D.',dog:'Bella - Bichon',tags:['Lyon 2e','Petits gabarits'],dispo:'Disponible juillet'},
+  {bg:'#B8C9D4',av:'🦮',name:'Julie M.',dog:'Luna - Golden',tags:['Bordeaux','Grands gabarits'],dispo:'Disponible maintenant'},
+  {bg:'#D4B8B8',av:'🐕‍🦺',name:'Pierre V.',dog:'Thor - Husky',tags:['Paris 15e','Jardins'],dispo:'Disponible aout'},
+];
+
+function buildGarde() {
+  var grid = document.getElementById('gardeGrid');
+  if (!grid) return;
+  grid.innerHTML = gardes.map(function(g) {
+    return '<div class="garde-card">' +
+      '<div class="garde-avatar" style="background:' + g.bg + ';">' + g.av + '</div>' +
+      '<div class="garde-name">' + g.name + '</div>' +
+      '<div class="garde-dog">' + g.dog + '</div>' +
+      '<div class="garde-tags">' + g.tags.map(function(t) { return '<span class="garde-tag">' + t + '</span>'; }).join('') + '</div>' +
+      '<div class="garde-dispo">● ' + g.dispo + '</div>' +
+      '<button class="btn btn-p" style="padding:6px 14px;font-size:12px;width:100%;justify-content:center;">Contacter</button>' +
+    '</div>';
+  }).join('');
+}
+</script>
+</body>
+</html// ===== EVENTS (Supabase) =====
+async function loadEvents() {
+  var container = document.getElementById('evList');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3);">Chargement...</div>';
+
+  try {
+    var evRes = await supa.from('events').select('*').order('date_raw', { ascending: true });
+    if (evRes.error) throw evRes.error;
+
+    var inscRes = await supa.from('inscriptions').select('event_id,statut').eq('membre_email', currentEmail);
+    mesInscriptions = inscRes.data || [];
+
+    if (!evRes.data || evRes.data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--t3);">Aucun event pour le moment 🐾</div>';
+      return;
+    }
+
+    var html = '';
+    evRes.data.forEach(function(e) {
+      var placesRestantes = e.places - (e.inscrits || 0);
+      var complet = placesRestantes <= 0;
+      var monInscription = mesInscriptions.find(function(i) { return i.event_id === e.id; });
+      var estInscrit = monInscription && monInscription.statut === 'confirme';
+      var enAttente = monInscription && monInscription.statut === 'liste_attente';
+      var eventPayant = e.prix && e.prix !== 'Gratuit' && e.prix !== 'Gratuit membres';
+      var eventDate = e.date_raw ? new Date(e.date_raw) : null;
+      var moins24h = eventDate && (eventDate - new Date()) < 24 * 60 * 60 * 1000;
+
+      var dateStr = e.date || '';
+      var parts = dateStr.split('/');
+      var day = parts[0] || '--';
+      var month = parts[1] || '--';
+
+      var spotsColor = complet ? 'ev-tag-red' : (placesRestantes <= 3 ? 'ev-tag-red' : 'ev-tag-green');
+      var spotsText = complet ? 'Complet' : (placesRestantes + ' place' + (placesRestantes > 1 ? 's' : '') + ' restante' + (placesRestantes > 1 ? 's' : ''));
+
+      var btnHtml = '';
+      if (estInscrit) {
+        if (eventPayant && moins24h) {
+          btnHtml = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+            '<span style="background:#d1fae5;color:#065f46;padding:5px 12px;border-radius:100px;font-size:12px;">Inscrit</span>' +
+            '<button class="btn" style="padding:5px 12px;font-size:11px;background:#fee2e2;color:#dc2626;border:none;" data-eid="' + e.id + '" data-titre="' + e.titre.replace(/"/g,'') + '" onclick="demandeAnnulation(this)">Demander annulation</button>' +
+            '</div>';
+        } else {
+          btnHtml = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+            '<span style="background:#d1fae5;color:#065f46;padding:5px 12px;border-radius:100px;font-size:12px;">Inscrit</span>' +
+            '<button class="btn" style="padding:5px 12px;font-size:11px;background:#fee2e2;color:#dc2626;border:none;" data-eid="' + e.id + '" onclick="seDesinscrire(this)">Se desinscrire</button>' +
+            '</div>';
+        }
+      } else if (enAttente) {
+        btnHtml = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+          '<span style="background:#fef3c7;color:#92400e;padding:5px 12px;border-radius:100px;font-size:12px;">Liste attente</span>' +
+          '<button class="btn" style="padding:5px 12px;font-size:11px;background:#fee2e2;color:#dc2626;border:none;" data-eid="' + e.id + '" onclick="seDesinscrire(this)">Annuler</button>' +
+          '</div>';
+      } else if (complet) {
+        btnHtml = '<button class="btn btn-o" style="padding:6px 14px;font-size:12px;" data-eid="' + e.id + '" onclick="sInscrire(this,true)">Liste attente</button>';
+      } else {
+        btnHtml = '<button class="btn btn-p" style="padding:6px 14px;font-size:12px;" data-eid="' + e.id + '" onclick="sInscrire(this,false)">S'inscrire</button>';
+      }
+
+      html += '<div class="ev-card">' +
+        '<div class="ev-date"><div class="ev-day">' + day + '</div><div class="ev-month">' + month + '</div></div>' +
+        '<div class="ev-body">' +
+          '<div class="ev-title">' + e.titre + '</div>' +
+          '<div class="ev-detail">' + (e.ville || 'National') + ' - ' + (e.prix || 'Gratuit') + '</div>' +
+          '<div class="ev-tags">' +
+            '<span class="ev-tag ev-tag-gold">' + (e.prix || 'Gratuit') + '</span>' +
+            '<span class="ev-tag ' + spotsColor + '">' + spotsText + '</span>' +
+          '</div>' +
+          btnHtml +
+        '</div></div>';
+    });
+    container.innerHTML = html;
+
+  } catch(err) {
+    container.innerHTML = '<div style="color:red;padding:20px;">Erreur: ' + err.message + '</div>';
+  }
+}
+
+async function sInscrire(btn, listeAttente) {
+  var eventId = btn.getAttribute('data-eid');
+  if (!currentEmail) { alert('Tu dois etre connecte.'); return; }
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    var check = await supa.from('inscriptions').select('id').eq('event_id', eventId).eq('membre_email', currentEmail);
+    if (check.data && check.data.length > 0) {
+      btn.textContent = 'Deja inscrit';
+      btn.style.background = '#d1fae5';
+      btn.style.color = '#065f46';
+      return;
+    }
+
+    var ins = await supa.from('inscriptions').insert([{
+      event_id: eventId,
+      membre_email: currentEmail,
+      membre_prenom: currentPrenom,
+      statut: listeAttente ? 'liste_attente' : 'confirme'
+    }]);
+    if (ins.error) throw ins.error;
+
+    if (!listeAttente) {
+      var ev = await supa.from('events').select('inscrits').eq('id', eventId).single();
+      if (ev.data) await supa.from('events').update({ inscrits: (ev.data.inscrits || 0) + 1 }).eq('id', eventId);
+    }
+
+    btn.textContent = listeAttente ? 'En liste attente' : 'Inscrit !';
+    btn.style.background = listeAttente ? '#fef3c7' : '#d1fae5';
+    btn.style.color = listeAttente ? '#92400e' : '#065f46';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '100px';
+
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = listeAttente ? 'Liste attente' : "S'inscrire";
+    alert('Erreur: ' + err.message);
+  }
+}
+
+async function seDesinscrire(btn) {
+  var eventId = btn.getAttribute('data-eid');
+  if (!confirm('Confirmer la desinscription ?')) return;
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    var del = await supa.from('inscriptions').delete().eq('event_id', eventId).eq('membre_email', currentEmail);
+    if (del.error) throw del.error;
+
+    var ev = await supa.from('events').select('inscrits').eq('id', eventId).single();
+    if (ev.data && ev.data.inscrits > 0) {
+      await supa.from('events').update({ inscrits: ev.data.inscrits - 1 }).eq('id', eventId);
+    }
+
+    var attente = await supa.from('inscriptions').select('*').eq('event_id', eventId).eq('statut', 'liste_attente').order('created_at', { ascending: true }).limit(1);
+    if (attente.data && attente.data.length > 0) {
+      await supa.from('inscriptions').update({ statut: 'confirme' }).eq('id', attente.data[0].id);
+      if (ev.data) await supa.from('events').update({ inscrits: ev.data.inscrits }).eq('id', eventId);
+    }
+
+    alert('Desinscription confirmee !');
+    await loadEvents();
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Se desinscrire';
+    alert('Erreur: ' + err.message);
+  }
+}
+
+function demandeAnnulation(btn) {
+  var titre = btn.getAttribute('data-titre') || 'cet evenement';
+  var sujet = encodeURIComponent('Demande annulation - ' + titre);
+  var corps = encodeURIComponent('Bonjour,
+
+Je souhaite me desinscrire de l evenement "' + titre + '".
+
+Email membre : ' + currentEmail + '
+
+Merci de traiter ma demande.
+
+Cordialement');
+  window.location.href = 'mailto:thedogcircleclub@gmail.com?subject=' + sujet + '&body=' + corps;
+}
+
 
 // ===== PARTENAIRES =====
 var partners = [
