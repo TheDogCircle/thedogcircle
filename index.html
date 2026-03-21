@@ -312,6 +312,48 @@ footer p{font-size:12px;line-height:1.8;}
   <p style="margin-top:16px;font-size:11px;opacity:0.4;">© 2026 The Dog Circle · Tous droits réservés</p>
 </footer>
 
+<script>
+
+
+<script>
+const _supa = window.supabase.createClient(
+  'https://bmqyysilivmxndwhmovw.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcXl5c2lsaXZteG5kd2htb3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDc2MDYsImV4cCI6MjA4OTUyMzYwNn0.95uvAOXwBEes1lbYti872OErXb6OOwEBt9dQ-mR4MFE'
+);
+
+document.getElementById('candidatureForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('submitBtn');
+  const msg = document.getElementById('smsg');
+
+  btn.textContent = 'Envoi en cours...';
+  btn.disabled = true;
+
+  const data = {
+    prenom:  form.querySelector('[name="prenom"]').value,
+    email:   form.querySelector('[name="email"]').value,
+    ville:   form.querySelector('[name="ville"]').value,
+    chien:   form.querySelector('[name="prenom_chien"]').value,
+    race:    form.querySelector('[name="race"]').value,
+    formule: form.querySelector('[name="formule"]').value,
+    message: form.querySelector('[name="motivation"]').value,
+    statut:  'en_attente'
+  };
+
+  const { error } = await _supa.from('candidatures').insert([data]);
+
+  if (error) {
+    console.error(error);
+    btn.textContent = 'Erreur — réessaie';
+    btn.disabled = false;
+  } else {
+    msg.style.display = 'block';
+    form.reset();
+    btn.textContent = 'Candidature envoyée ✓';
+  }
+});
+</script>
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
