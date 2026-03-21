@@ -583,16 +583,20 @@ function supprimerMembre(id){
   toast('Membre supprimé.');
 }
 
-function supprimerEvent(id){
+async function supprimerEvent(id){
   if(!confirm('Supprimer cet event ?')) return;
+  const { error } = await supa.from('events').delete().eq('id', id);
+  if(error){ toast('Erreur: ' + error.message); return; }
   events = events.filter(x=>x.id!==id);
   buildEvents();
   buildDashboard();
   toast('Event supprimé.');
 }
 
-function supprimerPartenaire(id){
+async function supprimerPartenaire(id){
   if(!confirm('Supprimer ce partenaire ?')) return;
+  const { error } = await supa.from('partenaires').delete().eq('id', id);
+  if(error){ toast('Erreur: ' + error.message); return; }
   partenaires = partenaires.filter(x=>x.id!==id);
   buildPartenaires();
   toast('Partenaire supprimé.');
@@ -605,22 +609,28 @@ function supprimerVille(nom){
   toast('Ville supprimée.');
 }
 
-function saveEvent(){
+async function saveEvent(){
   const titre = document.getElementById('ev-title').value.trim();
   const date = document.getElementById('ev-date').value;
   if(!titre||!date){toast('Titre et date obligatoires.');return;}
   const d = new Date(date);
   const dateStr = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
-  events.push({
-    id:Date.now(),
+
+  const newEvent = {
     titre,
-    date:dateStr,
-    prix:document.getElementById('ev-prix').value||'Gratuit',
-    places:parseInt(document.getElementById('ev-places').value)||10,
-    inscrits:0,
-    ville:document.getElementById('ev-ville').value,
-    statut:'Ouvert'
-  });
+    date: dateStr,
+    date_raw: date,
+    prix: document.getElementById('ev-prix').value || 'Gratuit',
+    places: parseInt(document.getElementById('ev-places').value) || 10,
+    inscrits: 0,
+    ville: document.getElementById('ev-ville').value,
+    statut: 'Ouvert'
+  };
+
+  const { data, error } = await supa.from('events').insert([newEvent]).select();
+  if(error){ toast('Erreur: ' + error.message); return; }
+
+  events.push({...newEvent, id: data[0].id});
   closeModal('modal-event');
   buildEvents();
   buildDashboard();
@@ -631,19 +641,23 @@ function saveEvent(){
   toast('Event créé avec succès ! 🎉');
 }
 
-function savePartenaire(){
+async function savePartenaire(){
   const nom = document.getElementById('pt-nom').value.trim();
   const code = document.getElementById('pt-code').value.trim().toUpperCase();
   if(!nom||!code){toast('Nom et code obligatoires.');return;}
-  partenaires.push({
-    id:Date.now(),
+  const newPart = {
     nom,
-    type:document.getElementById('pt-type').value,
-    offre:document.getElementById('pt-offre').value,
+    type: document.getElementById('pt-type').value,
+    offre: document.getElementById('pt-offre').value,
     code,
-    ville:document.getElementById('pt-ville').value||'National',
-    statut:'Actif'
-  });
+    ville: document.getElementById('pt-ville').value || 'National',
+    statut: 'Actif'
+  };
+
+  const { data, error } = await supa.from('partenaires').insert([newPart]).select();
+  if(error){ toast('Erreur: ' + error.message); return; }
+
+  partenaires.push({...newPart, id: data[0].id});
   closeModal('modal-partenaire');
   buildPartenaires();
   ['pt-nom','pt-offre','pt-code','pt-ville'].forEach(id=>document.getElementById(id).value='');
@@ -768,7 +782,7 @@ async function acceptCandidature(id) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'The Dog Circle <onboarding@resend.dev>',
+        from: 'The Dog Circle <hello@thedogcircle.fr>',
         to: [c.email],
         subject: '🐾 Bienvenue dans The Dog Circle, ' + c.prenom + ' !',
         html: `
@@ -900,15 +914,36 @@ function showCand(id) {
   alert(`📋 Candidature de ${c.prenom}\n\n📧 ${c.email}\n📍 ${c.ville}\n🐾 ${c.chien} (${c.race})\n💳 ${c.formule}\n\n💬 "${c.message}"`);
 }
 
+// Charger les events
+async function loadEvents() {
+  const { data, error } = await supa.from('events').select('*').order('date_raw', { ascending: true });
+  if(error){ console.error(error); return; }
+  events = data || [];
+  buildEvents();
+  buildDashboard();
+}
+
+// Charger les partenaires
+async function loadPartenaires() {
+  const { data, error } = await supa.from('partenaires').select('*').order('created_at', { ascending: false });
+  if(error){ console.error(error); return; }
+  partenaires = data || [];
+  buildPartenaires();
+}
+
 // Initialisation au chargement
 document.addEventListener('DOMContentLoaded', async () => {
   await loadCandidatures();
   await loadMembres();
+  await loadEvents();
+  await loadPartenaires();
 
   // Actualisation toutes les 30 secondes
   setInterval(async () => {
     await loadCandidatures();
     await loadMembres();
+    await loadEvents();
+    await loadPartenaires();
   }, 30000);
 });
 </script>
