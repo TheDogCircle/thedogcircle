@@ -2,7 +2,7 @@
  * =====================================================
  *  THE DOG CIRCLE — Module Instadog
  *  Fichier : instadog.js
- *  Tables  : photos · Storage bucket: photos
+ *  Tables  : photos · Storage bucket: Photos
  *  Écoute  : TDC:login · TDC:tab(feed)
  * =====================================================
  */
@@ -24,7 +24,6 @@
     var sec = document.getElementById('tc-feed');
     if (!sec || document.getElementById('btn-publier')) return;
 
-    // Bouton
     var btn = document.createElement('button');
     btn.id = 'btn-publier';
     btn.className = 'btn btn-p';
@@ -35,7 +34,6 @@
     });
     sec.insertBefore(btn, document.getElementById('feedGrid'));
 
-    // Modal
     var modal = document.createElement('div');
     modal.id = 'modal-instadog';
     modal.style = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:16px;';
@@ -118,19 +116,19 @@
       // 2. URL publique
       var publicUrl = db.storage.from('Photos').getPublicUrl(fileName).data.publicUrl;
 
-      // 3. Insert en base
+      // 3. Insert en base — statut 'valide' directement, pas de modération
       var ins = await db.from('photos').insert([{
         membre_email:  window.TDC.userEmail,
         membre_prenom: window.TDC.userPrenom,
         chien:         chien,
         caption:       cap,
         photo_url:     publicUrl,
-        statut:        'en_attente'
+        statut:        'valide'
       }]);
       if (ins.error) throw ins.error;
 
       closeModal();
-      toast('Photo envoyée ! Elle sera publiée après validation 🐾');
+      toast('Photo publiée ! 🐾');
       loadFeed();
 
     } catch (e) {
