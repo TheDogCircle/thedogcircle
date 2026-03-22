@@ -2,7 +2,7 @@
  * =====================================================
  *  THE DOG CIRCLE — Admin Candidatures
  *  Fichier : admin-candidatures.js
- *  Auth    : Supabase Auth — création compte à l'acceptation
+ *  Auth    : via Netlify Function accept-candidature
  *  Numéro  : auto-incrémenté (#001, #002...)
  *  Parrain : code unique TDC-XXXX
  * =====================================================
@@ -25,8 +25,8 @@
     candidatures = res.data || [];
     var pending  = candidatures.filter(function (c) { return c.statut === 'en_attente'; });
 
-    document.getElementById('nb-cands').textContent  = pending.length;
-    document.getElementById('sub-cands').textContent = pending.length + ' en attente';
+    document.getElementById('nb-cands').textContent   = pending.length;
+    document.getElementById('sub-cands').textContent  = pending.length + ' en attente';
     document.getElementById('stat-cands').textContent = pending.length;
 
     renderCandidatures(pending);
@@ -83,69 +83,61 @@
     var c  = candidatures.find(function (x) { return x.id === id; });
     if (!c) return;
 
-    if (!confirm('Accepter ' + c.prenom + ' ?\n\nUn compte sera créé et un email envoyé automatiquement.')) return;
+    if (!confirm('Accepter ' + c.prenom + ' ?\n\nUn compte sera créé et un email de bienvenue envoyé automatiquement.')) return;
 
     window.TDCA.toast('Création du compte en cours...');
 
     try {
-      // 1. Générer un mot de passe temporaire
-      var tempPassword = 'TDC-' + Math.random().toString(36).slice(2,8).toUpperCase() + '!';
-
-      // 2. Créer le compte Supabase Auth via Admin API
-      // (utilise signUp côté client — le membre devra valider son email)
-      var authRes = await db.auth.admin.createUser({
-        email:             c.email,
-        password:          tempPassword,
-        email_confirm:     true,
-        user_metadata:     { prenom: c.prenom, chien: c.chien }
-      });
-
-      // Fallback si pas d'accès admin API : signUp classique
-      if (authRes.error) {
-        authRes = await db.auth.signUp({
-          email:    c.email,
-          password: tempPassword,
-          options:  { data: { prenom: c.prenom } }
-        });
-      }
-      if (authRes.error) throw new Error('Auth: ' + authRes.error.message);
-
-      // 3. Numéro de membre auto-incrémenté
+      // 1. Numéro de membre auto-incrémenté
       var countRes = await db.from('membres').select('id', { count: 'exact', head: true });
       var numero   = (countRes.count || 0) + 1;
-      var numeroStr = String(numero).padStart(3, '0'); // "001"
 
-      // 4. Générer code parrain unique
-      var codeParrain = 'TDC-' + Math.random().toString(36).slice(2,6).toUpperCase();
+      // 2. Générer mot de passe temporaire et code parrain
+      var tempPassword = 'TDC-' + Math.random().toString(36).slice(2,8).toUpperCase() + '!';
+      var codeParrain  = 'TDC-' + Math.random().toString(36).slice(2,6).toUpperCase();
 
-      // 5. Créer le membre dans la table
+      // 3. Appeler la Netlify Function (crée Auth + envoie email)
+      var fnRes = await fetch('/.netlify/functions/accept-candidature', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidature:  c,
+          numero:       numero,
+          codeParrain:  codeParrain,
+          tempPassword: tempPassword
+        })
+      });
+
+      var fnData = await fnRes.json();
+      if (!fnRes.ok) throw new Error(fnData.error || 'Erreur fonction');
+
+      // 4. Créer le membre dans la table
       var memRes = await db.from('membres').insert([{
-        prenom:         c.prenom,
-        email:          c.email,
-        ville:          c.ville,
-        chien:          c.chien,
-        race:           c.race,
-        formule:        c.formule,
-        statut:         'actif',
-        numero_membre:  numero,
-        code_parrain:   codeParrain,
-        parrain1:       c.parrain1 || null,
-        parrain2:       c.parrain2 || null
+        prenom:        c.prenom,
+        email:         c.email,
+        ville:         c.ville,
+        chien:         c.chien,
+        race:          c.race,
+        formule:       c.formule,
+        statut:        'actif',
+        numero_membre: numero,
+        code_parrain:  codeParrain,
+        parrain1:      c.parrain1 || null,
+        parrain2:      c.parrain2 || null
       }]);
       if (memRes.error) throw new Error('Membre: ' + memRes.error.message);
 
-      // 6. Marquer candidature comme acceptée
+      // 5. Marquer candidature comme acceptée
       await db.from('candidatures').update({ statut: 'accepte' }).eq('id', id);
 
-      // 7. Envoyer l'email de bienvenue via Resend
-      await sendEmailBienvenue(c, tempPassword, numeroStr, codeParrain);
+      var numeroStr = String(numero).padStart(3, '0');
+      window.TDCA.toast('✅ ' + c.prenom + ' accepté(e) — membre #' + numeroStr + ' ! Email envoyé 📧');
 
-      window.TDCA.toast('✅ ' + c.prenom + ' accepté(e) — membre #' + numeroStr + ' !');
       await loadCandidatures();
       if (window.TDCA.membres) window.TDCA.membres.load();
 
     } catch (err) {
-      window.TDCA.toast('Erreur : ' + err.message);
+      window.TDCA.toast('❌ Erreur : ' + err.message);
       console.error(err);
     }
   }
@@ -158,62 +150,6 @@
     if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
     window.TDCA.toast('Candidature refusée.');
     await loadCandidatures();
-  }
-
-  // ── Email de bienvenue ────────────────────────────────
-  async function sendEmailBienvenue(c, tempPassword, numeroStr, codeParrain) {
-    var emailRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + window.TDCA.resendKey,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'The Dog Circle <hello@thedogcircle.fr>',
-        to:   [c.email],
-        subject: '🐾 Bienvenue dans The Dog Circle, ' + c.prenom + ' !',
-        html: emailTemplate(c, tempPassword, numeroStr, codeParrain)
-      })
-    });
-    if (!emailRes.ok) {
-      var err = await emailRes.json();
-      console.error('Resend:', err);
-    }
-  }
-
-  function emailTemplate(c, tempPassword, numeroStr, codeParrain) {
-    return '<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;background:#F6F0E4;border-radius:16px;overflow:hidden;">'
-      + '<div style="background:#3B5E3F;padding:32px;text-align:center;">'
-        + '<div style="font-size:40px;margin-bottom:8px;">🐾</div>'
-        + '<h1 style="color:#F6F0E4;font-size:28px;font-weight:400;margin:0;">The Dog Circle</h1>'
-        + '<div style="color:#B8882A;font-size:12px;letter-spacing:0.15em;margin-top:6px;">CLUB PRIVÉ CANIN · MEMBRE #' + numeroStr + '</div>'
-      + '</div>'
-      + '<div style="padding:36px 40px;">'
-        + '<h2 style="color:#2A1C0C;font-size:22px;font-weight:400;margin-bottom:16px;">Félicitations ' + c.prenom + ' ! 🎉</h2>'
-        + '<p style="color:#6B5240;font-size:15px;line-height:1.7;margin-bottom:20px;">Ta candidature a été <strong style="color:#3B5E3F;">acceptée</strong>. Tu fais désormais partie du cercle. Bienvenue à toi et à <strong>' + (c.chien||'ton chien') + '</strong> !</p>'
-
-        + '<div style="background:#3B5E3F;border-radius:12px;padding:20px 24px;margin-bottom:20px;">'
-          + '<div style="color:#B8882A;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">Tes accès membres</div>'
-          + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:6px;">🔗 <strong>thedogcircle.fr/membres.html</strong></div>'
-          + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:6px;">📧 Login : <strong>' + c.email + '</strong></div>'
-          + '<div style="color:#F6F0E4;font-size:14px;">🔑 Mot de passe : <strong>' + tempPassword + '</strong></div>'
-        + '</div>'
-
-        + '<div style="background:#F5E8C4;border-radius:12px;padding:16px 20px;margin-bottom:20px;">'
-          + '<div style="color:#B8882A;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Ton passeport membre</div>'
-          + '<div style="font-size:14px;color:#2A1C0C;margin-bottom:4px;">🏷️ Numéro de membre : <strong>#' + numeroStr + '</strong></div>'
-          + '<div style="font-size:14px;color:#2A1C0C;">🎁 Ton code parrain : <strong>' + codeParrain + '</strong></div>'
-          + '<div style="font-size:12px;color:#9C8472;margin-top:8px;">Partage ce code avec tes amis pour les inviter dans le cercle.</div>'
-        + '</div>'
-
-        + '<a href="https://thedogcircle.fr/membres.html" style="display:block;background:#B8882A;color:#F6F0E4;text-align:center;padding:14px;border-radius:100px;font-size:15px;text-decoration:none;font-weight:500;margin-bottom:20px;">Accéder à mon espace membre →</a>'
-
-        + '<p style="color:#9C8472;font-size:12px;line-height:1.7;">💡 Tu pourras changer ton mot de passe depuis ton espace membre → Mon espace → Paramètres.<br>Formule choisie : <strong>' + (c.formule||'—') + '</strong></p>'
-      + '</div>'
-      + '<div style="background:#2A1C0C;padding:20px;text-align:center;">'
-        + '<div style="color:rgba(246,240,228,0.4);font-size:11px;letter-spacing:0.1em;">thedogcircle.fr · Club Privé Canin · France</div>'
-      + '</div>'
-    + '</div>';
   }
 
   // ── API publique ──────────────────────────────────────
