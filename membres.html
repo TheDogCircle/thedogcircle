@@ -141,6 +141,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     <div class="fg"><label>Email</label><input type="email" id="loginEmail" placeholder="membre@thedogcircle.fr"></div>
     <div class="fg"><label>Mot de passe</label><input type="password" id="loginPwd" placeholder="••••••••"></div>
     <button class="btn btn-p" id="loginBtn" style="width:100%;padding:13px;font-size:14px;">Accéder au club 🐾</button>
+    <p class="login-hint">Mot de passe oublié ? <a id="forgotPwd" href="#">Réinitialiser</a></p>
     <p class="login-hint">Pas encore membre ? <a href="https://thedogcircle.fr" target="_blank">Candidater ici</a></p>
   </div>
 </div>
@@ -273,6 +274,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
   window.addEventListener('load', function () {
     window.TDC.db = window.supabase.createClient(SB_URL, SB_KEY);
     document.dispatchEvent(new Event('TDC:ready'));
+
+    // Gérer le retour depuis un lien de réinitialisation de mot de passe
+    var hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      showResetPasswordModal();
+    }
   });
 
   document.getElementById('tabsRow').addEventListener('click', function (e) {
@@ -286,7 +293,49 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     document.dispatchEvent(new CustomEvent('TDC:tab', { detail: { tab: name } }));
   });
 
-  document.getElementById('ddProfil').addEventListener('click', function () {
+  // Modal changement de mot de passe (reset depuis email ou depuis profil)
+  function showResetPasswordModal() {
+    var modal = document.getElementById('modal-reset-pwd');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id    = 'modal-reset-pwd';
+      modal.style = 'display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;';
+      modal.innerHTML =
+        '<div style="background:var(--w);border-radius:20px;padding:32px;width:100%;max-width:420px;">'
+          + '<div style="font-family:\'Playfair Display\',serif;font-size:22px;margin-bottom:8px;">🔑 Nouveau mot de passe</div>'
+          + '<div style="font-size:13px;color:var(--t3);margin-bottom:20px;">Choisis un mot de passe sécurisé pour ton compte.</div>'
+          + '<div class="fg"><label>Nouveau mot de passe</label><input type="password" id="new-pwd" placeholder="••••••••" style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);color:var(--t);outline:none;"></div>'
+          + '<div class="fg"><label>Confirmer le mot de passe</label><input type="password" id="new-pwd-confirm" placeholder="••••••••" style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);color:var(--t);outline:none;"></div>'
+          + '<div id="pwd-err" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;"></div>'
+          + '<button id="pwd-submit" class="btn btn-p" style="width:100%;padding:12px;font-size:14px;">Enregistrer mon mot de passe</button>'
+          + '<div id="pwd-ok" style="display:none;background:#d1fae5;color:#065f46;border-radius:10px;padding:12px;text-align:center;font-size:13px;margin-top:12px;">✓ Mot de passe mis à jour ! 🐾</div>'
+        + '</div>';
+      document.body.appendChild(modal);
+
+      document.getElementById('pwd-submit').addEventListener('click', async function () {
+        var pwd     = document.getElementById('new-pwd').value;
+        var confirm = document.getElementById('new-pwd-confirm').value;
+        var err     = document.getElementById('pwd-err');
+        err.style.display = 'none';
+
+        if (pwd.length < 8) { err.textContent = 'Minimum 8 caractères.'; err.style.display = 'block'; return; }
+        if (pwd !== confirm) { err.textContent = 'Les mots de passe ne correspondent pas.'; err.style.display = 'block'; return; }
+
+        var res = await window.TDC.db.auth.updateUser({ password: pwd });
+        if (res.error) { err.textContent = 'Erreur : ' + res.error.message; err.style.display = 'block'; return; }
+
+        document.getElementById('pwd-ok').style.display = 'block';
+        setTimeout(function () { modal.style.display = 'none'; }, 2500);
+        window.history.replaceState(null, '', window.location.pathname);
+      });
+    }
+    modal.style.display = 'flex';
+  }
+
+  // Exposer pour le module profil
+  window.TDC_showResetPassword = showResetPasswordModal;
+
+
     document.getElementById('profileDd').style.display = 'none';
     document.querySelector('[data-tab="profil"]').click();
   });

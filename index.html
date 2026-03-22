@@ -281,7 +281,8 @@ footer p{font-size:12px;line-height:1.8;}
           <div class="fg"><label>Race</label><input type="text" name="race" placeholder="Cocker spaniel" required></div>
           <div class="fg"><label>Ville</label><input type="text" name="ville" placeholder="Paris" required></div>
         </div>
-        <div class="fg"><label>Parrain dans le club ? (optionnel)</label><input type="text" name="parrain" placeholder="Prénom du membre qui te parraine"></div>
+        <div class="fg"><label>Code de ton parrain <span style="color:#C0392B;">*</span></label><input type="text" name="parrain1" placeholder="Ex: TDC-X7K2 — obligatoire" required style="text-transform:uppercase;"><div style="font-size:11px;color:var(--t3);margin-top:5px;">Demande ce code à ton parrain, membre The Dog Circle 🐾</div></div>
+        <div class="fg"><label>Code d'un 2ème parrain <span style="color:var(--t3);font-size:11px;">(optionnel)</span></label><input type="text" name="parrain2" placeholder="Ex: TDC-A3B9" style="text-transform:uppercase;"></div>
         <div class="fg"><label>Pourquoi veux-tu rejoindre The Dog Circle ?</label><textarea name="motivation" placeholder="Raconte-nous ce qui t'attire dans ce projet..." required></textarea></div>
         <div class="fg"><label>Formule souhaitée</label>
           <select name="formule">
@@ -338,6 +339,8 @@ document.getElementById('candidatureForm').addEventListener('submit', async func
     race:    form.querySelector('[name="race"]').value,
     formule: form.querySelector('[name="formule"]').value,
     message: form.querySelector('[name="motivation"]').value,
+    parrain1: (form.querySelector('[name="parrain1"]').value || '').toUpperCase(),
+    parrain2: (form.querySelector('[name="parrain2"]').value || '').toUpperCase() || null,
     statut:  'en_attente'
   };
 

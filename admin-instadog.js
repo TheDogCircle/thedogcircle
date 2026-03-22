@@ -23,7 +23,7 @@
     if (!grid) return;
     grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--t3);">Chargement...</div>';
 
-    var res = await db.from('photos').select('*').order('created_at', { ascending: false });
+    var res = await db.from('Photos').select('*').order('created_at', { ascending: false });
     if (res.error) {
       grid.innerHTML = '<div style="grid-column:1/-1;color:var(--red);padding:20px;">Erreur : ' + res.error.message + '</div>';
       return;
@@ -66,7 +66,7 @@
   // ── Valider une photo ──────────────────────────────
   async function validatePhoto(id) {
     var db  = window.TDCA.db;
-    var res = await db.from('photos').update({ statut: 'valide' }).eq('id', id);
+    var res = await db.from('Photos').update({ statut: 'valide' }).eq('id', id);
     if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
     window.TDCA.toast('Photo validée et publiée ✓');
     await loadPhotos();
@@ -76,7 +76,7 @@
   async function removePhoto(id) {
     if (!confirm('Supprimer cette photo ?')) return;
     var db  = window.TDCA.db;
-    var res = await db.from('photos').delete().eq('id', id);
+    var res = await db.from('Photos').delete().eq('id', id);
     if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
     window.TDCA.toast('Photo supprimée.');
     await loadPhotos();
