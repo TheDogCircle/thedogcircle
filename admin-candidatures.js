@@ -116,6 +116,7 @@
       // 4. Créer le membre dans la table
       var memRes = await db.from('membres').insert([{
         prenom:        c.prenom,
+        nom:           c.nom || null,
         email:         c.email,
         ville:         c.ville,
         chien:         c.chien,
