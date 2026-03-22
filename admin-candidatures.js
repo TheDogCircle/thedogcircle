@@ -94,7 +94,9 @@
 
       // 2. Générer mot de passe temporaire et code parrain
       var tempPassword = 'TDC-' + Math.random().toString(36).slice(2,8).toUpperCase() + '!';
-      var codeParrain  = 'TDC-' + Math.random().toString(36).slice(2,6).toUpperCase();
+      // Code parrain basé sur le prénom du chien
+      var nomChien     = (c.chien || 'CERCLE').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+      var codeParrain  = 'TDC_' + nomChien;
 
       // 3. Appeler la Netlify Function (crée Auth + envoie email)
       var fnRes = await fetch('/.netlify/functions/accept-candidature', {
