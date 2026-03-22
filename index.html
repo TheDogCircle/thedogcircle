@@ -264,8 +264,9 @@ footer p{font-size:12px;line-height:1.8;}
       <form id="candidatureForm">
         <div class="frow">
           <div class="fg"><label>Ton prénom</label><input type="text" name="prenom" placeholder="Sophie" required></div>
-          <div class="fg"><label>Prénom de ton chien</label><input type="text" name="prenom_chien" placeholder="Noisette" required></div>
+          <div class="fg"><label>Ton nom</label><input type="text" name="nom" placeholder="Dupont" required></div>
         </div>
+        <div class="fg"><label>Prénom de ton chien</label><input type="text" name="prenom_chien" placeholder="Noisette" required></div>
         <div class="fg"><label>Email</label><input type="email" name="email" placeholder="sophie@email.com" required></div>
         <div class="frow">
           <div class="fg"><label>Race</label><input type="text" name="race" placeholder="Cocker spaniel" required></div>
@@ -333,6 +334,7 @@ footer p{font-size:12px;line-height:1.8;}
 
     var res = await db.from('candidatures').insert([{
       prenom:   get('prenom'),
+      nom:      get('nom') || null,
       email:    get('email'),
       ville:    get('ville'),
       chien:    get('prenom_chien'),
