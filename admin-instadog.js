@@ -2,7 +2,7 @@
  * =====================================================
  *  THE DOG CIRCLE — Admin Instadog
  *  Fichier : admin-instadog.js
- *  Table   : photos
+ *  Table   : photos (minuscules)
  *  Écoute  : TDCA:login · TDCA:section(instadog)
  * =====================================================
  */
@@ -23,7 +23,7 @@
     if (!grid) return;
     grid.innerHTML = '<div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--t3);">Chargement...</div>';
 
-    var res = await db.from('Photos').select('*').order('created_at', { ascending: false });
+    var res = await db.from('photos').select('*').order('created_at', { ascending: false });
     if (res.error) {
       grid.innerHTML = '<div style="grid-column:1/-1;color:var(--red);padding:20px;">Erreur : ' + res.error.message + '</div>';
       return;
@@ -34,49 +34,30 @@
       return;
     }
 
-    // En attente en premier
-    var sorted = res.data.slice().sort(function (a, b) {
-      return a.statut === 'en_attente' ? -1 : 1;
-    });
+    grid.innerHTML = res.data.map(function (p) {
+      var media = p.photo_url
+        ? '<div class="photo-img" style="padding:0;overflow:hidden;"><img src="' + p.photo_url + '" style="width:100%;height:90px;object-fit:cover;" alt=""></div>'
+        : '<div class="photo-img" style="background:' + (p.bg_color || '#C8DEB8') + ';">' + (p.emoji || '🐾') + '</div>';
 
-    grid.innerHTML = sorted.map(function (p) {
-      var bg    = p.bg_color || '#C8DEB8';
-      var emoji = p.emoji    || '🐾';
-      var badge = p.statut === 'en_attente'
-        ? '<span class="pill pill-amber">En attente</span>'
-        : '<span class="pill pill-green">Validé</span>';
       return '<div class="photo-card" id="photo-' + p.id + '">'
-        + '<div class="photo-img" style="background:' + bg + ';">' + emoji + '</div>'
+        + media
         + '<div class="photo-info">'
           + '<div class="photo-name">' + (p.chien || '—') + '</div>'
           + '<div class="photo-meta">' + (p.membre_prenom || '') + (p.ville ? ' · ' + p.ville : '') + '</div>'
           + '<div class="photo-meta">"' + (p.caption || '') + '"</div>'
-          + '<div style="margin:4px 0;">' + badge + '</div>'
-          + '<div class="photo-actions">'
-            + (p.statut === 'en_attente'
-              ? '<button class="btn-xs btn-xs-g" onclick="window.TDCA.instadog.validate(\'' + p.id + '\')">✓ Valider</button>'
-              : '<span style="font-size:11px;color:var(--t3);">✓ Publié</span>')
-            + '<button class="btn-xs btn-xs-r" onclick="window.TDCA.instadog.remove(\'' + p.id + '\')">✗ Suppr.</button>'
+          + '<div class="photo-actions" style="margin-top:6px;">'
+            + '<button class="btn-xs btn-xs-r" onclick="window.TDCA.instadog.remove(\'' + p.id + '\')">✗ Supprimer</button>'
           + '</div>'
         + '</div>'
       + '</div>';
     }).join('');
   }
 
-  // ── Valider une photo ──────────────────────────────
-  async function validatePhoto(id) {
-    var db  = window.TDCA.db;
-    var res = await db.from('Photos').update({ statut: 'valide' }).eq('id', id);
-    if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
-    window.TDCA.toast('Photo validée et publiée ✓');
-    await loadPhotos();
-  }
-
   // ── Supprimer une photo ────────────────────────────
   async function removePhoto(id) {
     if (!confirm('Supprimer cette photo ?')) return;
     var db  = window.TDCA.db;
-    var res = await db.from('Photos').delete().eq('id', id);
+    var res = await db.from('photos').delete().eq('id', id);
     if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
     window.TDCA.toast('Photo supprimée.');
     await loadPhotos();
@@ -84,8 +65,7 @@
 
   window.TDCA = window.TDCA || {};
   window.TDCA.instadog = {
-    validate: validatePhoto,
-    remove:   removePhoto
+    remove: removePhoto
   };
 
 })();
