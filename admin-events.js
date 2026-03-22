@@ -2,7 +2,7 @@
  * =====================================================
  *  THE DOG CIRCLE — Admin Events
  *  Fichier : admin-events.js
- *  Table   : events + photo upload
+ *  Table   : events — photo, heure_fin, ville_custom, description
  * =====================================================
  */
 (function () {
@@ -12,7 +12,7 @@
   document.addEventListener('TDCA:ready', function () {
     document.getElementById('modals-container').insertAdjacentHTML('beforeend',
       '<div class="modal-overlay" id="modal-event">'
-      + '<div class="modal" style="max-width:540px;">'
+      + '<div class="modal" style="max-width:560px;">'
         + '<div class="modal-title" id="ev-modal-title">Nouvel event</div>'
         + '<input type="hidden" id="ev-edit-id">'
 
@@ -20,24 +20,33 @@
 
         + '<div class="frow">'
           + '<div class="fg"><label>Date</label><input type="date" id="ev-date"></div>'
-          + '<div class="fg"><label>Heure</label><input type="time" id="ev-time" value="10:00"></div>'
+          + '<div class="fg"><label>Heure de début</label><input type="time" id="ev-time" value="10:00"></div>'
         + '</div>'
 
-        + '<div class="fg"><label>Lieu / Détails</label><input type="text" id="ev-lieu" placeholder="Ex: RDV parking principal"></div>'
-
         + '<div class="frow">'
-          + '<div class="fg"><label>Prix membres</label><input type="text" id="ev-prix" placeholder="Gratuit ou 39€"></div>'
+          + '<div class="fg"><label>Heure de fin (optionnel)</label><input type="time" id="ev-time-fin"></div>'
           + '<div class="fg"><label>Nombre de places</label><input type="number" id="ev-places" placeholder="12"></div>'
         + '</div>'
 
+        + '<div class="fg"><label>Lieu / Point de RDV</label><input type="text" id="ev-lieu" placeholder="Ex: RDV parking principal, entrée nord"></div>'
+
         + '<div class="frow">'
+          + '<div class="fg"><label>Prix membres</label><input type="text" id="ev-prix" placeholder="Gratuit ou 39€"></div>'
           + '<div class="fg"><label>Type</label>'
             + '<select id="ev-type"><option>Balade</option><option>Évasion</option><option>Apéro canin</option><option>Atelier éducation</option><option>Shooting photo</option><option>Dîner dog-friendly</option><option>Autre</option></select>'
           + '</div>'
-          + '<div class="fg"><label>Ville</label>'
-            + '<select id="ev-ville"><option>Paris</option><option>Lyon</option><option>Bordeaux</option><option>Nantes</option><option>Marseille</option><option>Lille</option><option>National</option></select>'
-          + '</div>'
         + '</div>'
+
+        + '<div class="frow">'
+          + '<div class="fg"><label>Ville</label>'
+            + '<select id="ev-ville" onchange="document.getElementById(\'ev-ville-custom-wrap\').style.display=this.value===\'Autre\'?\'block\':\'none\'">'
+              + '<option>Paris</option><option>Lyon</option><option>Bordeaux</option><option>Nantes</option><option>Marseille</option><option>Lille</option><option>Toulouse</option><option>Nice</option><option>Strasbourg</option><option>National</option><option>Autre</option>'
+            + '</select>'
+          + '</div>'
+          + '<div class="fg" id="ev-ville-custom-wrap" style="display:none;"><label>Nom de la ville</label><input type="text" id="ev-ville-custom" placeholder="Ex: Rennes, Montpellier..."></div>'
+        + '</div>'
+
+        + '<div class="fg"><label>Description de l\'event</label><textarea id="ev-desc" placeholder="Décris l\'event : programme, ce qu\'il faut apporter, consignes pour les chiens..."></textarea></div>'
 
         + '<div class="fg"><label>Photo de l\'event (optionnel)</label>'
           + '<input type="file" id="ev-photo" accept="image/*" style="font-size:13px;width:100%;">'
@@ -52,8 +61,7 @@
       + '</div></div>'
 
       // Modal inscrits
-      + '<div class="modal-overlay" id="modal-inscrits">'
-      + '<div class="modal">'
+      + '<div class="modal-overlay" id="modal-inscrits"><div class="modal">'
         + '<div class="modal-title" id="inscrits-title">Inscrits</div>'
         + '<div id="inscrits-body"></div>'
         + '<div class="modal-footer"><button class="btn btn-o" onclick="closeModal(\'modal-inscrits\')">Fermer</button></div>'
@@ -65,8 +73,7 @@
     });
 
     document.getElementById('ev-photo').addEventListener('change', function () {
-      var file = this.files[0];
-      if (!file) return;
+      var file = this.files[0]; if (!file) return;
       var reader = new FileReader();
       reader.onload = function (e) {
         var img = document.getElementById('ev-preview');
@@ -94,24 +101,25 @@
   function renderEvents() {
     var tbl = document.getElementById('tbl-events');
     if (!tbl) return;
-    if (events.length === 0) {
-      tbl.innerHTML = '<tr><td colspan="9"><div class="empty">Aucun event</div></td></tr>';
-      return;
-    }
+    if (events.length === 0) { tbl.innerHTML = '<tr><td colspan="9"><div class="empty">Aucun event</div></td></tr>'; return; }
     tbl.innerHTML =
-      '<tr><th>Photo</th><th>Event</th><th>Date</th><th>Ville</th><th>Prix</th><th>Inscrits</th><th>Places restantes</th><th>Statut</th><th>Actions</th></tr>'
+      '<tr><th>Photo</th><th>Event</th><th>Date & Heure</th><th>Ville</th><th>Prix</th><th>Inscrits</th><th>Restantes</th><th>Statut</th><th>Actions</th></tr>'
       + events.map(function (e) {
           var restantes  = e.places - (e.inscrits || 0);
           var complet    = restantes <= 0;
-          var spotsStyle = complet ? 'color:#dc2626;font-weight:600;' : restantes <= 3 ? 'color:#d97706;font-weight:600;' : 'color:#059669;';
+          var spotsStyle = complet ? 'color:#dc2626;font-weight:600;' : restantes<=3 ? 'color:#d97706;font-weight:600;' : 'color:#059669;';
           var thumb      = e.photo_url
-            ? '<img src="' + e.photo_url + '" style="width:48px;height:48px;object-fit:cover;border-radius:8px;" alt="">'
+            ? '<img src="' + e.photo_url + '" style="width:48px;height:48px;object-fit:cover;border-radius:8px;">'
             : '<div style="width:48px;height:48px;background:var(--greenp);border-radius:8px;display:flex;align-items:center;justify-content:center;">🎉</div>';
+          var ville = e.ville_custom || e.ville || '—';
+          var heures = e.heure || '—';
+          if (e.heure && e.heure_fin) heures = e.heure + ' → ' + e.heure_fin;
           return '<tr>'
             + '<td>' + thumb + '</td>'
-            + '<td class="tbl-name">' + e.titre + '</td>'
-            + '<td>' + (e.date||'—') + '</td>'
-            + '<td><span class="pill pill-gray">' + (e.ville||'—') + '</span></td>'
+            + '<td><div class="tbl-name">' + e.titre + '</div>'
+              + (e.description ? '<div style="font-size:11px;color:var(--t3);">' + e.description.substring(0,50) + (e.description.length>50?'…':'') + '</div>' : '') + '</td>'
+            + '<td>' + (e.date||'—') + '<div style="font-size:11px;color:var(--t3);">' + heures + '</div></td>'
+            + '<td><span class="pill pill-gray">' + ville + '</span></td>'
             + '<td>' + (e.prix||'Gratuit') + '</td>'
             + '<td><strong>' + (e.inscrits||0) + '</strong> / ' + e.places + '</td>'
             + '<td style="' + spotsStyle + '">' + (complet ? 'COMPLET' : restantes + ' restante' + (restantes>1?'s':'')) + '</td>'
@@ -129,14 +137,14 @@
     var db  = window.TDCA.db;
     var res = await db.from('inscriptions').select('*').eq('event_id', eventId).order('created_at', { ascending: true });
     if (res.error) { alert('Erreur : ' + res.error.message); return; }
-    var data      = res.data || [];
+    var data = res.data || [];
     var confirmes = data.filter(function (i) { return i.statut === 'confirme'; });
     var attente   = data.filter(function (i) { return i.statut === 'liste_attente'; });
     document.getElementById('inscrits-title').textContent = 'Inscrits — ' + eventTitre;
     document.getElementById('inscrits-body').innerHTML =
       '<div style="margin-bottom:16px;">'
         + '<div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:8px;">✅ Confirmés (' + confirmes.length + ')</div>'
-        + (confirmes.length === 0 ? '<div style="color:var(--t3);font-size:12px;">Aucun</div>'
+        + (confirmes.length === 0 ? '<div style="color:var(--t3);font-size:12px;">Aucun inscrit</div>'
           : confirmes.map(function (i,n) { return '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--b);"><strong>' + (n+1) + '.</strong> ' + i.membre_prenom + ' — ' + i.membre_email + '</div>'; }).join(''))
       + '</div>'
       + (attente.length > 0
@@ -151,18 +159,30 @@
     if (!e) return;
     document.getElementById('ev-modal-title').textContent = 'Modifier l\'event';
     document.getElementById('ev-edit-id').value  = e.id;
-    document.getElementById('ev-title').value    = e.titre || '';
+    document.getElementById('ev-title').value    = e.titre    || '';
     document.getElementById('ev-date').value     = e.date_raw || '';
-    document.getElementById('ev-prix').value     = e.prix || '';
-    document.getElementById('ev-places').value   = e.places || '';
-    document.getElementById('ev-ville').value    = e.ville || 'Paris';
-    var photoInfo = document.getElementById('ev-photo-actuelle');
-    if (e.photo_url) {
-      photoInfo.innerHTML = 'Photo actuelle : <a href="' + e.photo_url + '" target="_blank" style="color:var(--green);">voir</a>';
-      var img = document.getElementById('ev-preview');
-      img.src = e.photo_url; img.style.display = 'block';
+    document.getElementById('ev-time').value     = e.heure    || '10:00';
+    document.getElementById('ev-time-fin').value = e.heure_fin|| '';
+    document.getElementById('ev-prix').value     = e.prix     || '';
+    document.getElementById('ev-places').value   = e.places   || '';
+    document.getElementById('ev-lieu').value     = e.lieu     || '';
+    document.getElementById('ev-desc').value     = e.description || '';
+
+    // Ville custom
+    var villeSelect = document.getElementById('ev-ville');
+    var villeCustomWrap = document.getElementById('ev-ville-custom-wrap');
+    if (e.ville_custom) {
+      villeSelect.value = 'Autre';
+      villeCustomWrap.style.display = 'block';
+      document.getElementById('ev-ville-custom').value = e.ville_custom;
     } else {
-      photoInfo.textContent = '';
+      villeSelect.value = e.ville || 'Paris';
+      villeCustomWrap.style.display = 'none';
+    }
+
+    if (e.photo_url) {
+      document.getElementById('ev-photo-actuelle').innerHTML = 'Photo actuelle : <a href="' + e.photo_url + '" target="_blank" style="color:var(--green);">voir</a>';
+      var img = document.getElementById('ev-preview'); img.src = e.photo_url; img.style.display = 'block';
     }
     openModal('modal-event');
   }
@@ -180,26 +200,31 @@
     var dateStr = d.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
     var editId  = document.getElementById('ev-edit-id').value;
 
+    var villeSelect = document.getElementById('ev-ville').value;
+    var villeCustom = document.getElementById('ev-ville-custom').value.trim();
+    var villeFinale = villeSelect === 'Autre' ? null : villeSelect;
+    var villeCustomFinale = villeSelect === 'Autre' ? villeCustom : null;
+
     var payload = {
-      titre:    titre,
-      date:     dateStr,
-      date_raw: date,
-      prix:     document.getElementById('ev-prix').value  || 'Gratuit',
-      places:   parseInt(document.getElementById('ev-places').value) || 10,
-      ville:    document.getElementById('ev-ville').value,
-      statut:   'Ouvert'
+      titre:        titre,
+      date:         dateStr,
+      date_raw:     date,
+      heure:        document.getElementById('ev-time').value    || null,
+      heure_fin:    document.getElementById('ev-time-fin').value || null,
+      lieu:         document.getElementById('ev-lieu').value,
+      prix:         document.getElementById('ev-prix').value     || 'Gratuit',
+      places:       parseInt(document.getElementById('ev-places').value) || 10,
+      ville:        villeFinale,
+      ville_custom: villeCustomFinale,
+      description:  document.getElementById('ev-desc').value,
+      statut:       'Ouvert'
     };
 
     // Upload photo
     var file = document.getElementById('ev-photo').files[0];
     if (file) {
-      try {
-        payload.photo_url = await window.TDCUpload.upload(db, file, 'events');
-      } catch (e) {
-        window.TDCA.toast('Erreur photo : ' + e.message);
-        btn.textContent = 'Enregistrer'; btn.disabled = false;
-        return;
-      }
+      try { payload.photo_url = await window.TDCUpload.upload(db, file, 'events'); }
+      catch (e) { window.TDCA.toast('Erreur photo : ' + e.message); btn.textContent = 'Enregistrer'; btn.disabled = false; return; }
     }
 
     if (!editId) payload.inscrits = 0;
@@ -209,7 +234,6 @@
 
     if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); }
     else { closeModal('modal-event'); resetForm(); window.TDCA.toast(editId ? 'Event modifié ! 🎉' : 'Event créé ! 🎉'); await loadEvents(); }
-
     btn.textContent = 'Enregistrer'; btn.disabled = false;
   }
 
@@ -224,10 +248,14 @@
   function resetForm() {
     document.getElementById('ev-modal-title').textContent = 'Nouvel event';
     document.getElementById('ev-edit-id').value = '';
-    ['ev-title','ev-date','ev-lieu','ev-prix','ev-places'].forEach(function (id) { document.getElementById(id).value = ''; });
+    ['ev-title','ev-date','ev-lieu','ev-prix','ev-places','ev-desc','ev-time-fin','ev-ville-custom'].forEach(function (id) {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('ev-time').value = '10:00';
     document.getElementById('ev-photo').value = '';
     document.getElementById('ev-preview').style.display = 'none';
     document.getElementById('ev-photo-actuelle').textContent = '';
+    document.getElementById('ev-ville-custom-wrap').style.display = 'none';
   }
 
   window.TDCA = window.TDCA || {};
