@@ -159,8 +159,8 @@
         }
         g.innerHTML = res.data.map(function (p) {
           var media = p.photo_url
-            ? '<img src="' + p.photo_url + '" style="width:100%;height:160px;object-fit:cover;" alt="' + (p.chien || '') + '" loading="lazy">'
-            : '<div class="feed-photo" style="background:' + (p.bg_color || '#C8DEB8') + '">' + (p.emoji || '🐾') + '</div>';
+            ? '<div style="width:100%;aspect-ratio:4/5;overflow:hidden;"><img src="' + p.photo_url + '" style="width:100%;height:100%;object-fit:cover;" alt="' + (p.chien || '') + '" loading="lazy"></div>'
+            : '<div class="feed-photo" style="aspect-ratio:4/5;background:' + (p.bg_color || '#C8DEB8') + '">' + (p.emoji || '🐾') + '</div>';
           return '<div class="feed-card">'
             + media
             + '<div class="feed-info">'
