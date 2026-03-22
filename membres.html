@@ -293,7 +293,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     document.dispatchEvent(new CustomEvent('TDC:tab', { detail: { tab: name } }));
   });
 
-  // Modal changement de mot de passe (reset depuis email ou depuis profil)
+  // Modal changement de mot de passe
   function showResetPasswordModal() {
     var modal = document.getElementById('modal-reset-pwd');
     if (!modal) {
@@ -317,13 +317,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
         var confirm = document.getElementById('new-pwd-confirm').value;
         var err     = document.getElementById('pwd-err');
         err.style.display = 'none';
-
         if (pwd.length < 8) { err.textContent = 'Minimum 8 caractères.'; err.style.display = 'block'; return; }
         if (pwd !== confirm) { err.textContent = 'Les mots de passe ne correspondent pas.'; err.style.display = 'block'; return; }
-
         var res = await window.TDC.db.auth.updateUser({ password: pwd });
         if (res.error) { err.textContent = 'Erreur : ' + res.error.message; err.style.display = 'block'; return; }
-
         document.getElementById('pwd-ok').style.display = 'block';
         setTimeout(function () { modal.style.display = 'none'; }, 2500);
         window.history.replaceState(null, '', window.location.pathname);
@@ -332,17 +329,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     modal.style.display = 'flex';
   }
 
-  // Exposer pour le module profil
   window.TDC_showResetPassword = showResetPasswordModal;
 
-
+  // Dropdown avatar — navigation vers onglets
+  document.getElementById('ddProfil').addEventListener('click', function () {
     document.getElementById('profileDd').style.display = 'none';
     document.querySelector('[data-tab="profil"]').click();
   });
+
   document.getElementById('ddMap').addEventListener('click', function () {
     document.getElementById('profileDd').style.display = 'none';
     document.querySelector('[data-tab="map"]').click();
   });
+
 })();
 </script>
 </body>
