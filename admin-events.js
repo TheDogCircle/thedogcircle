@@ -2,8 +2,7 @@
  * =====================================================
  *  THE DOG CIRCLE — Admin Events
  *  Fichier : admin-events.js
- *  Écoute  : TDCA:login · TDCA:section(events)
- *  Expose  : window.TDCA.events.load()
+ *  Table   : events + photo upload
  * =====================================================
  */
 (function () {
@@ -11,22 +10,26 @@
   var events = [];
 
   document.addEventListener('TDCA:ready', function () {
-    // Injecter la modal
     document.getElementById('modals-container').insertAdjacentHTML('beforeend',
       '<div class="modal-overlay" id="modal-event">'
-      + '<div class="modal">'
+      + '<div class="modal" style="max-width:540px;">'
         + '<div class="modal-title" id="ev-modal-title">Nouvel event</div>'
         + '<input type="hidden" id="ev-edit-id">'
+
         + '<div class="fg"><label>Titre</label><input type="text" id="ev-title" placeholder="Ex: Balade Forêt de Fontainebleau"></div>'
+
         + '<div class="frow">'
           + '<div class="fg"><label>Date</label><input type="date" id="ev-date"></div>'
           + '<div class="fg"><label>Heure</label><input type="time" id="ev-time" value="10:00"></div>'
         + '</div>'
+
         + '<div class="fg"><label>Lieu / Détails</label><input type="text" id="ev-lieu" placeholder="Ex: RDV parking principal"></div>'
+
         + '<div class="frow">'
           + '<div class="fg"><label>Prix membres</label><input type="text" id="ev-prix" placeholder="Gratuit ou 39€"></div>'
           + '<div class="fg"><label>Nombre de places</label><input type="number" id="ev-places" placeholder="12"></div>'
         + '</div>'
+
         + '<div class="frow">'
           + '<div class="fg"><label>Type</label>'
             + '<select id="ev-type"><option>Balade</option><option>Évasion</option><option>Apéro canin</option><option>Atelier éducation</option><option>Shooting photo</option><option>Dîner dog-friendly</option><option>Autre</option></select>'
@@ -35,9 +38,16 @@
             + '<select id="ev-ville"><option>Paris</option><option>Lyon</option><option>Bordeaux</option><option>Nantes</option><option>Marseille</option><option>Lille</option><option>National</option></select>'
           + '</div>'
         + '</div>'
+
+        + '<div class="fg"><label>Photo de l\'event (optionnel)</label>'
+          + '<input type="file" id="ev-photo" accept="image/*" style="font-size:13px;width:100%;">'
+          + '<img id="ev-preview" style="display:none;width:100%;height:140px;object-fit:cover;border-radius:10px;margin-top:8px;" src="" alt="">'
+          + '<div id="ev-photo-actuelle" style="font-size:11px;color:var(--t3);margin-top:4px;"></div>'
+        + '</div>'
+
         + '<div class="modal-footer">'
           + '<button class="btn btn-o" onclick="closeModal(\'modal-event\')">Annuler</button>'
-          + '<button class="btn btn-p" onclick="window.TDCA.events.save()">Enregistrer</button>'
+          + '<button class="btn btn-p" id="ev-save-btn" onclick="window.TDCA.events.save()">Enregistrer</button>'
         + '</div>'
       + '</div></div>'
 
@@ -51,18 +61,24 @@
     );
 
     document.getElementById('btn-add-event').addEventListener('click', function () {
-      resetForm();
-      openModal('modal-event');
+      resetForm(); openModal('modal-event');
+    });
+
+    document.getElementById('ev-photo').addEventListener('change', function () {
+      var file = this.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var img = document.getElementById('ev-preview');
+        img.src = e.target.result; img.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
     });
   });
 
   document.addEventListener('TDCA:login', loadEvents);
+  document.addEventListener('TDCA:section', function (e) { if (e.detail.sec === 'events') loadEvents(); });
 
-  document.addEventListener('TDCA:section', function (e) {
-    if (e.detail.sec === 'events') loadEvents();
-  });
-
-  // ── Charger ────────────────────────────────────────
   async function loadEvents() {
     var db  = window.TDCA.db;
     var res = await db.from('events').select('*').order('date_raw', { ascending: true });
@@ -75,36 +91,33 @@
     if (window.TDCA.dashboard) window.TDCA.dashboard.refresh();
   }
 
-  // ── Rendu ──────────────────────────────────────────
   function renderEvents() {
     var tbl = document.getElementById('tbl-events');
     if (!tbl) return;
-
     if (events.length === 0) {
-      tbl.innerHTML = '<tr><td colspan="8"><div class="empty">Aucun event pour le moment</div></td></tr>';
+      tbl.innerHTML = '<tr><td colspan="9"><div class="empty">Aucun event</div></td></tr>';
       return;
     }
-
     tbl.innerHTML =
-      '<tr><th>Event</th><th>Date</th><th>Ville</th><th>Prix</th><th>Inscrits</th><th>Places restantes</th><th>Statut</th><th>Actions</th></tr>'
+      '<tr><th>Photo</th><th>Event</th><th>Date</th><th>Ville</th><th>Prix</th><th>Inscrits</th><th>Places restantes</th><th>Statut</th><th>Actions</th></tr>'
       + events.map(function (e) {
-          var restantes    = e.places - (e.inscrits || 0);
-          var complet      = restantes <= 0;
-          var spotsStyle   = complet
-            ? 'color:#dc2626;font-weight:600;'
-            : restantes <= 3
-              ? 'color:#d97706;font-weight:600;'
-              : 'color:#059669;';
+          var restantes  = e.places - (e.inscrits || 0);
+          var complet    = restantes <= 0;
+          var spotsStyle = complet ? 'color:#dc2626;font-weight:600;' : restantes <= 3 ? 'color:#d97706;font-weight:600;' : 'color:#059669;';
+          var thumb      = e.photo_url
+            ? '<img src="' + e.photo_url + '" style="width:48px;height:48px;object-fit:cover;border-radius:8px;" alt="">'
+            : '<div style="width:48px;height:48px;background:var(--greenp);border-radius:8px;display:flex;align-items:center;justify-content:center;">🎉</div>';
           return '<tr>'
+            + '<td>' + thumb + '</td>'
             + '<td class="tbl-name">' + e.titre + '</td>'
-            + '<td>' + (e.date || '—') + '</td>'
-            + '<td><span class="pill pill-gray">' + (e.ville || '—') + '</span></td>'
-            + '<td>' + (e.prix || 'Gratuit') + '</td>'
-            + '<td><strong>' + (e.inscrits || 0) + '</strong> / ' + e.places + '</td>'
-            + '<td style="' + spotsStyle + '">' + (complet ? 'COMPLET' : restantes + ' restante' + (restantes > 1 ? 's' : '')) + '</td>'
+            + '<td>' + (e.date||'—') + '</td>'
+            + '<td><span class="pill pill-gray">' + (e.ville||'—') + '</span></td>'
+            + '<td>' + (e.prix||'Gratuit') + '</td>'
+            + '<td><strong>' + (e.inscrits||0) + '</strong> / ' + e.places + '</td>'
+            + '<td style="' + spotsStyle + '">' + (complet ? 'COMPLET' : restantes + ' restante' + (restantes>1?'s':'')) + '</td>'
             + '<td>' + window.pillStatut(e.statut) + '</td>'
             + '<td><div class="actions">'
-              + '<button class="btn-xs btn-xs-e" onclick="window.TDCA.events.inscrits(\'' + e.id + '\',\'' + e.titre.replace(/'/g, '') + '\')">Inscrits</button>'
+              + '<button class="btn-xs btn-xs-e" onclick="window.TDCA.events.inscrits(\'' + e.id + '\',\'' + e.titre.replace(/'/g,'') + '\')">Inscrits</button>'
               + '<button class="btn-xs" onclick="window.TDCA.events.edit(\'' + e.id + '\')">✏️</button>'
               + '<button class="btn-xs btn-xs-r" onclick="window.TDCA.events.delete(\'' + e.id + '\')">Suppr.</button>'
             + '</div></td>'
@@ -112,65 +125,59 @@
         }).join('');
   }
 
-  // ── Voir inscrits ───────────────────────────────────
   async function voirInscrits(eventId, eventTitre) {
     var db  = window.TDCA.db;
     var res = await db.from('inscriptions').select('*').eq('event_id', eventId).order('created_at', { ascending: true });
     if (res.error) { alert('Erreur : ' + res.error.message); return; }
-
     var data      = res.data || [];
     var confirmes = data.filter(function (i) { return i.statut === 'confirme'; });
     var attente   = data.filter(function (i) { return i.statut === 'liste_attente'; });
-
     document.getElementById('inscrits-title').textContent = 'Inscrits — ' + eventTitre;
     document.getElementById('inscrits-body').innerHTML =
       '<div style="margin-bottom:16px;">'
         + '<div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:8px;">✅ Confirmés (' + confirmes.length + ')</div>'
-        + (confirmes.length === 0
-          ? '<div style="color:var(--t3);font-size:12px;">Aucun inscrit confirmé</div>'
-          : confirmes.map(function (i, n) {
-              return '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--b);">'
-                + '<strong>' + (n + 1) + '.</strong> ' + i.membre_prenom + ' — ' + i.membre_email
-              + '</div>';
-            }).join(''))
+        + (confirmes.length === 0 ? '<div style="color:var(--t3);font-size:12px;">Aucun</div>'
+          : confirmes.map(function (i,n) { return '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--b);"><strong>' + (n+1) + '.</strong> ' + i.membre_prenom + ' — ' + i.membre_email + '</div>'; }).join(''))
       + '</div>'
       + (attente.length > 0
-        ? '<div>'
-            + '<div style="font-size:12px;font-weight:500;color:var(--gold);margin-bottom:8px;">⏳ Liste d\'attente (' + attente.length + ')</div>'
-            + attente.map(function (i, n) {
-                return '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--b);">'
-                  + '<strong>' + (n + 1) + '.</strong> ' + i.membre_prenom + ' — ' + i.membre_email
-                + '</div>';
-              }).join('')
-          + '</div>'
+        ? '<div><div style="font-size:12px;font-weight:500;color:var(--gold);margin-bottom:8px;">⏳ Liste d\'attente (' + attente.length + ')</div>'
+          + attente.map(function (i,n) { return '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--b);"><strong>' + (n+1) + '.</strong> ' + i.membre_prenom + ' — ' + i.membre_email + '</div>'; }).join('') + '</div>'
         : '');
-
     openModal('modal-inscrits');
   }
 
-  // ── Éditer ─────────────────────────────────────────
   function editEvent(id) {
-    var e = events.find(function (x) { return x.id === id; });
+    var e = events.find(function (x) { return String(x.id) === String(id); });
     if (!e) return;
     document.getElementById('ev-modal-title').textContent = 'Modifier l\'event';
     document.getElementById('ev-edit-id').value  = e.id;
-    document.getElementById('ev-title').value    = e.titre;
+    document.getElementById('ev-title').value    = e.titre || '';
     document.getElementById('ev-date').value     = e.date_raw || '';
     document.getElementById('ev-prix').value     = e.prix || '';
     document.getElementById('ev-places').value   = e.places || '';
     document.getElementById('ev-ville').value    = e.ville || 'Paris';
+    var photoInfo = document.getElementById('ev-photo-actuelle');
+    if (e.photo_url) {
+      photoInfo.innerHTML = 'Photo actuelle : <a href="' + e.photo_url + '" target="_blank" style="color:var(--green);">voir</a>';
+      var img = document.getElementById('ev-preview');
+      img.src = e.photo_url; img.style.display = 'block';
+    } else {
+      photoInfo.textContent = '';
+    }
     openModal('modal-event');
   }
 
-  // ── Sauvegarder ────────────────────────────────────
   async function saveEvent() {
     var db    = window.TDCA.db;
     var titre = document.getElementById('ev-title').value.trim();
     var date  = document.getElementById('ev-date').value;
+    var btn   = document.getElementById('ev-save-btn');
     if (!titre || !date) { window.TDCA.toast('Titre et date obligatoires.'); return; }
 
+    btn.textContent = 'Enregistrement...'; btn.disabled = true;
+
     var d       = new Date(date);
-    var dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    var dateStr = d.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
     var editId  = document.getElementById('ev-edit-id').value;
 
     var payload = {
@@ -183,27 +190,32 @@
       statut:   'Ouvert'
     };
 
-    var res;
-    if (editId) {
-      res = await db.from('events').update(payload).eq('id', editId);
-    } else {
-      payload.inscrits = 0;
-      res = await db.from('events').insert([payload]);
+    // Upload photo
+    var file = document.getElementById('ev-photo').files[0];
+    if (file) {
+      try {
+        payload.photo_url = await window.TDCUpload.upload(db, file, 'events');
+      } catch (e) {
+        window.TDCA.toast('Erreur photo : ' + e.message);
+        btn.textContent = 'Enregistrer'; btn.disabled = false;
+        return;
+      }
     }
 
-    if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
+    if (!editId) payload.inscrits = 0;
+    var res = editId
+      ? await db.from('events').update(payload).eq('id', editId)
+      : await db.from('events').insert([payload]);
 
-    closeModal('modal-event');
-    resetForm();
-    window.TDCA.toast(editId ? 'Event modifié ! 🎉' : 'Event créé ! 🎉');
-    await loadEvents();
+    if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); }
+    else { closeModal('modal-event'); resetForm(); window.TDCA.toast(editId ? 'Event modifié ! 🎉' : 'Event créé ! 🎉'); await loadEvents(); }
+
+    btn.textContent = 'Enregistrer'; btn.disabled = false;
   }
 
-  // ── Supprimer ──────────────────────────────────────
   async function deleteEvent(id) {
     if (!confirm('Supprimer cet event ?')) return;
-    var db  = window.TDCA.db;
-    var res = await db.from('events').delete().eq('id', id);
+    var res = await window.TDCA.db.from('events').delete().eq('id', id);
     if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
     window.TDCA.toast('Event supprimé.');
     await loadEvents();
@@ -211,20 +223,14 @@
 
   function resetForm() {
     document.getElementById('ev-modal-title').textContent = 'Nouvel event';
-    document.getElementById('ev-edit-id').value  = '';
-    ['ev-title','ev-date','ev-lieu','ev-prix','ev-places'].forEach(function (id) {
-      document.getElementById(id).value = '';
-    });
+    document.getElementById('ev-edit-id').value = '';
+    ['ev-title','ev-date','ev-lieu','ev-prix','ev-places'].forEach(function (id) { document.getElementById(id).value = ''; });
+    document.getElementById('ev-photo').value = '';
+    document.getElementById('ev-preview').style.display = 'none';
+    document.getElementById('ev-photo-actuelle').textContent = '';
   }
 
-  // ── API publique ────────────────────────────────────
   window.TDCA = window.TDCA || {};
-  window.TDCA.events = {
-    load:     loadEvents,
-    save:     saveEvent,
-    edit:     editEvent,
-    delete:   deleteEvent,
-    inscrits: voirInscrits
-  };
+  window.TDCA.events = { load: loadEvents, save: saveEvent, edit: editEvent, delete: deleteEvent, inscrits: voirInscrits };
 
 })();
