@@ -17,7 +17,6 @@
 html{scroll-behavior:smooth;}
 body{font-family:'DM Sans',system-ui,sans-serif;background:var(--w);color:var(--t);font-size:15px;line-height:1.65;}
 h1,h2,h3{font-family:'Playfair Display',Georgia,serif;}
-
 /* NAV */
 nav{position:sticky;top:0;z-index:100;background:var(--w);border-bottom:1px solid var(--b);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:60px;}
 .logo{display:flex;align-items:center;gap:10px;}
@@ -30,7 +29,6 @@ nav{position:sticky;top:0;z-index:100;background:var(--w);border-bottom:1px soli
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 22px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all 0.2s;text-decoration:none;}
 .btn-p{background:var(--green);color:#ffffff!important;}.btn-p:hover,.btn-p:active,.btn-p:focus{background:var(--greenm);color:#ffffff!important;outline:none;}
 .btn-o{background:transparent;color:var(--green);border:1.5px solid var(--green);}.btn-o:hover{background:var(--greenp);}
-
 /* HERO */
 .hero{background:var(--cream);padding:80px 5% 70px;text-align:center;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;top:-80px;right:-80px;width:350px;height:350px;border-radius:50%;background:var(--cream2);opacity:0.5;}
@@ -44,7 +42,6 @@ nav{position:sticky;top:0;z-index:100;background:var(--w);border-bottom:1px soli
 .hstats{display:flex;gap:36px;justify-content:center;padding-top:30px;border-top:1px solid var(--b);}
 .hsv{font-family:'Playfair Display',Georgia,serif;font-size:30px;font-weight:600;color:var(--green);line-height:1;margin-bottom:4px;}
 .hsl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:0.05em;}
-
 /* SECTIONS */
 section{padding:64px 5%;}
 .cnt{max-width:1000px;margin:0 auto;}
@@ -52,7 +49,6 @@ section{padding:64px 5%;}
 .stitle{font-size:clamp(26px,3.5vw,42px);font-weight:400;line-height:1.2;color:var(--t);margin-bottom:14px;}
 .stitle em{color:var(--green);font-style:italic;}
 .ssub{font-size:15px;color:var(--t2);max-width:520px;line-height:1.7;margin-bottom:38px;}
-
 /* CONCEPT */
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
 .cvis{background:var(--cream);border-radius:20px;padding:32px;position:relative;overflow:hidden;min-height:280px;display:flex;flex-direction:column;justify-content:center;gap:10px;}
@@ -61,14 +57,12 @@ section{padding:64px 5%;}
 .cbicon{width:38px;height:38px;border-radius:10px;background:var(--greenp);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
 .cbt{font-size:13px;font-weight:500;color:var(--t);}
 .cbs{font-size:11px;color:var(--t3);}
-
 /* FEATURES */
 .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 .fcard{background:var(--w);border-radius:16px;padding:26px;border:1px solid var(--b);transition:transform 0.2s;}.fcard:hover{transform:translateY(-3px);}
 .ficon{width:46px;height:46px;border-radius:12px;background:var(--greenp);display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:14px;}
 .ftitle{font-size:14px;font-weight:500;color:var(--t);margin-bottom:6px;}
 .fdesc{font-size:12px;color:var(--t2);line-height:1.65;}
-
 /* PRICING */
 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 .pcard{border-radius:22px;padding:30px;border:1.5px solid var(--b);background:var(--w);position:relative;}
@@ -85,13 +79,11 @@ section{padding:64px 5%;}
 .pcard.feat .pi{color:rgba(255,255,255,0.75);border-bottom-color:rgba(255,255,255,0.15);}
 .piico{color:var(--green);}
 .pcard.feat .piico{color:rgba(255,255,255,0.9);}
-
 /* STEPS */
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
 .snum{font-family:'Playfair Display',Georgia,serif;font-size:52px;font-weight:600;color:var(--cream2);line-height:1;margin-bottom:8px;}
 .stit{font-size:15px;font-weight:500;color:var(--t);margin-bottom:6px;}
 .sdesc{font-size:13px;color:var(--t2);line-height:1.65;}
-
 /* FORM */
 .fmcard{max-width:540px;margin:0 auto;background:var(--cream);border-radius:24px;padding:40px;}
 .fg{margin-bottom:16px;}
@@ -101,7 +93,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--green);}
 textarea{resize:vertical;min-height:80px;}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .smsg{background:var(--greenp);border:1px solid var(--greenm);border-radius:10px;padding:16px;color:var(--green);font-size:13px;display:none;margin-top:12px;text-align:center;line-height:1.6;}
-
 /* FOOTER */
 footer{background:var(--t);color:rgba(255,255,255,0.5);padding:44px 5%;text-align:center;}
 .flogo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;}
@@ -111,7 +102,6 @@ footer{background:var(--t);color:rgba(255,255,255,0.5);padding:44px 5%;text-alig
 footer p{font-size:12px;line-height:1.8;}
 .flinks{display:flex;gap:20px;justify-content:center;margin-top:16px;}
 .flinks a{font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;}
-
 @media(max-width:768px){
   .cgrid,.pgrid,.sgrid,.fgrid{grid-template-columns:1fr!important;}
   .frow{grid-template-columns:1fr;}
@@ -271,7 +261,7 @@ footer p{font-size:12px;line-height:1.8;}
     <h2 class="stitle" style="text-align:center;margin-bottom:8px;">Rejoins <em>The Dog Circle</em></h2>
     <p style="text-align:center;color:var(--t2);font-size:14px;margin-bottom:32px;">Places limitées · Réponse sous 48h</p>
     <div class="fmcard">
-      <form  id="candidatureForm">
+      <form id="candidatureForm">
         <div class="frow">
           <div class="fg"><label>Ton prénom</label><input type="text" name="prenom" placeholder="Sophie" required></div>
           <div class="fg"><label>Prénom de ton chien</label><input type="text" name="prenom_chien" placeholder="Noisette" required></div>
@@ -281,8 +271,15 @@ footer p{font-size:12px;line-height:1.8;}
           <div class="fg"><label>Race</label><input type="text" name="race" placeholder="Cocker spaniel" required></div>
           <div class="fg"><label>Ville</label><input type="text" name="ville" placeholder="Paris" required></div>
         </div>
-        <div class="fg"><label>Code de ton parrain <span style="color:#C0392B;">*</span></label><input type="text" name="parrain1" placeholder="Ex: TDC-X7K2 — obligatoire" required style="text-transform:uppercase;"><div style="font-size:11px;color:var(--t3);margin-top:5px;">Demande ce code à ton parrain, membre The Dog Circle 🐾</div></div>
-        <div class="fg"><label>Code d'un 2ème parrain <span style="color:var(--t3);font-size:11px;">(optionnel)</span></label><input type="text" name="parrain2" placeholder="Ex: TDC-A3B9" style="text-transform:uppercase;"></div>
+        <div class="fg">
+          <label>Code de ton parrain <span style="color:#C0392B;">*</span></label>
+          <input type="text" name="parrain1" placeholder="Ex: TDC-X7K2 — obligatoire" required style="text-transform:uppercase;">
+          <div style="font-size:11px;color:var(--t3);margin-top:5px;">Demande ce code à ton parrain, membre The Dog Circle 🐾</div>
+        </div>
+        <div class="fg">
+          <label>Code d'un 2ème parrain <span style="color:var(--t3);font-size:11px;">(optionnel)</span></label>
+          <input type="text" name="parrain2" placeholder="Ex: TDC-A3B9" style="text-transform:uppercase;">
+        </div>
         <div class="fg"><label>Pourquoi veux-tu rejoindre The Dog Circle ?</label><textarea name="motivation" placeholder="Raconte-nous ce qui t'attire dans ce projet..." required></textarea></div>
         <div class="fg"><label>Formule souhaitée</label>
           <select name="formule">
@@ -313,92 +310,53 @@ footer p{font-size:12px;line-height:1.8;}
   <p style="margin-top:16px;font-size:11px;opacity:0.4;">© 2026 The Dog Circle · Tous droits réservés</p>
 </footer>
 
-<script>
-
-
-<script>
-const _supa = window.supabase.createClient(
-  'https://bmqyysilivmxndwhmovw.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcXl5c2lsaXZteG5kd2htb3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDc2MDYsImV4cCI6MjA4OTUyMzYwNn0.95uvAOXwBEes1lbYti872OErXb6OOwEBt9dQ-mR4MFE'
-);
-
-document.getElementById('candidatureForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const form = e.target;
-  const btn = document.getElementById('submitBtn');
-  const msg = document.getElementById('smsg');
-
-  btn.textContent = 'Envoi en cours...';
-  btn.disabled = true;
-
-  const data = {
-    prenom:  form.querySelector('[name="prenom"]').value,
-    email:   form.querySelector('[name="email"]').value,
-    ville:   form.querySelector('[name="ville"]').value,
-    chien:   form.querySelector('[name="prenom_chien"]').value,
-    race:    form.querySelector('[name="race"]').value,
-    formule: form.querySelector('[name="formule"]').value,
-    message: form.querySelector('[name="motivation"]').value,
-    parrain1: (form.querySelector('[name="parrain1"]').value || '').toUpperCase(),
-    parrain2: (form.querySelector('[name="parrain2"]').value || '').toUpperCase() || null,
-    statut:  'en_attente'
-  };
-
-  const { error } = await _supa.from('candidatures').insert([data]);
-
-  if (error) {
-    console.error(error);
-    btn.textContent = 'Erreur — réessaie';
-    btn.disabled = false;
-  } else {
-    msg.style.display = 'block';
-    form.reset();
-    btn.textContent = 'Candidature envoyée ✓';
-  }
-});
-</script>
-
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-const _db = window.supabase.createClient(
-  'https://bmqyysilivmxndwhmovw.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcXl5c2lsaXZteG5kd2htb3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDc2MDYsImV4cCI6MjA4OTUyMzYwNn0.95uvAOXwBEes1lbYti872OErXb6OOwEBt9dQ-mR4MFE'
-);
+(function () {
+  var db = window.supabase.createClient(
+    'https://bmqyysilivmxndwhmovw.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcXl5c2lsaXZteG5kd2htb3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDc2MDYsImV4cCI6MjA4OTUyMzYwNn0.95uvAOXwBEes1lbYti872OErXb6OOwEBt9dQ-mR4MFE'
+  );
 
-document.getElementById('candidatureForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const form = e.target;
-  const btn  = document.getElementById('submitBtn');
-  const msg  = document.getElementById('smsg');
-  const get  = n => { const el = form.querySelector('[name="'+n+'"]'); return el ? el.value.trim() : ''; };
+  document.getElementById('candidatureForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var form = e.target;
+    var btn  = document.getElementById('submitBtn');
+    var msg  = document.getElementById('smsg');
+    var get  = function (n) { var el = form.querySelector('[name="' + n + '"]'); return el ? el.value.trim() : ''; };
 
-  btn.textContent = 'Envoi en cours...';
-  btn.disabled = true;
+    btn.textContent = 'Envoi en cours...';
+    btn.disabled    = true;
+    msg.style.display = 'none';
 
-  const { error } = await _db.from('candidatures').insert([{
-    prenom:  get('prenom'),
-    email:   get('email'),
-    ville:   get('ville'),
-    chien:   get('prenom_chien'),
-    race:    get('race'),
-    formule: get('formule'),
-    message: get('motivation'),
-    statut:  'en_attente'
-  }]);
+    var parrain2 = get('parrain2').toUpperCase();
 
-  if (error) {
-    console.error(error);
-    btn.textContent = 'Erreur — réessaie';
-    btn.style.background = '#dc2626';
-    btn.disabled = false;
-  } else {
-    msg.style.cssText = 'display:block!important;background:#EBF0E8;border:1px solid #587A5C;border-radius:10px;padding:16px;color:#3B5E3F;font-size:13px;margin-top:12px;text-align:center;';
-    msg.textContent = '🐾 Candidature reçue ! On revient vers toi sous 48h.';
-    form.reset();
-    btn.textContent = '✓ Candidature envoyée';
-  }
-});
+    var res = await db.from('candidatures').insert([{
+      prenom:   get('prenom'),
+      email:    get('email'),
+      ville:    get('ville'),
+      chien:    get('prenom_chien'),
+      race:     get('race'),
+      formule:  get('formule'),
+      message:  get('motivation'),
+      parrain1: get('parrain1').toUpperCase(),
+      parrain2: parrain2 || null,
+      statut:   'en_attente'
+    }]);
+
+    if (res.error) {
+      console.error(res.error);
+      btn.textContent       = 'Erreur — réessaie';
+      btn.style.background  = '#dc2626';
+      btn.disabled          = false;
+    } else {
+      msg.style.cssText = 'display:block!important;background:#EBF0E8;border:1px solid #587A5C;border-radius:10px;padding:16px;color:#3B5E3F;font-size:13px;margin-top:12px;text-align:center;';
+      msg.textContent   = '🐾 Candidature reçue ! On revient vers toi sous 48h.';
+      form.reset();
+      btn.textContent = '✓ Candidature envoyée';
+    }
+  });
+})();
 </script>
 
 </body>
