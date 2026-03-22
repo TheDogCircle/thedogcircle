@@ -97,32 +97,54 @@ exports.handler = async function (event) {
 };
 
 function emailTemplate(c, tempPassword, numeroStr, codeParrain) {
-  return '<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;background:#F6F0E4;border-radius:16px;overflow:hidden;">'
-    + '<div style="background:#3B5E3F;padding:32px;text-align:center;">'
-      + '<div style="font-size:40px;margin-bottom:8px;">🐾</div>'
-      + '<h1 style="color:#F6F0E4;font-size:28px;font-weight:400;margin:0;">The Dog Circle</h1>'
-      + '<div style="color:#B8882A;font-size:12px;letter-spacing:0.15em;margin-top:6px;">CLUB PRIVÉ CANIN · MEMBRE #' + numeroStr + '</div>'
+  return '<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;background:#F6F0E4;">'
+
+    // Header
+    + '<div style="background:#3B5E3F;padding:40px 32px;text-align:center;">'
+      + '<div style="font-size:44px;margin-bottom:12px;">🐾</div>'
+      + '<h1 style="color:#F6F0E4;font-size:30px;font-weight:400;margin:0 0 8px 0;">The Dog Circle</h1>'
+      + '<div style="color:#B8882A;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;">Club Privé Canin · Membre #' + numeroStr + '</div>'
     + '</div>'
-    + '<div style="padding:36px 40px;">'
-      + '<h2 style="color:#2A1C0C;font-size:22px;font-weight:400;margin-bottom:16px;">Félicitations ' + c.prenom + ' ! 🎉</h2>'
-      + '<p style="color:#6B5240;font-size:15px;line-height:1.7;margin-bottom:20px;">Ta candidature a été <strong style="color:#3B5E3F;">acceptée</strong>. Tu fais désormais partie du cercle. Bienvenue à toi et à <strong>' + (c.chien || 'ton chien') + '</strong> !</p>'
-      + '<div style="background:#3B5E3F;border-radius:12px;padding:20px 24px;margin-bottom:20px;">'
-        + '<div style="color:#B8882A;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">Tes accès membres</div>'
-        + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:6px;">🔗 <strong>thedogcircle.fr/membres</strong></div>'
-        + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:6px;">📧 Login : <strong>' + c.email + '</strong></div>'
-        + '<div style="color:#F6F0E4;font-size:14px;">🔑 Mot de passe : <strong>' + tempPassword + '</strong></div>'
+
+    // Corps
+    + '<div style="padding:40px 40px 32px;">'
+
+      + '<h2 style="color:#2A1C0C;font-size:24px;font-weight:400;margin:0 0 16px 0;">Félicitations ' + c.prenom + ' ! 🎉</h2>'
+      + '<p style="color:#6B5240;font-size:15px;line-height:1.8;margin:0 0 28px 0;">'
+        + 'Ta candidature a été <strong style="color:#3B5E3F;">acceptée</strong>. Tu fais désormais partie du cercle. '
+        + 'Bienvenue à toi et à <strong>' + (c.chien || 'ton chien') + '</strong> ! 🐶'
+      + '</p>'
+
+      // Accès membres
+      + '<div style="background:#3B5E3F;border-radius:14px;padding:22px 26px;margin-bottom:20px;">'
+        + '<div style="color:#B8882A;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;font-family:Arial,sans-serif;">Tes accès membres</div>'
+        + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:8px;font-family:Arial,sans-serif;">🔗 <strong>thedogcircle.fr/membres</strong></div>'
+        + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:8px;font-family:Arial,sans-serif;">📧 Login : <strong>' + c.email + '</strong></div>'
+        + '<div style="color:#F6F0E4;font-size:14px;font-family:Arial,sans-serif;">🔑 Mot de passe temporaire : <strong>' + tempPassword + '</strong></div>'
       + '</div>'
-      + '<div style="background:#F5E8C4;border-radius:12px;padding:16px 20px;margin-bottom:20px;">'
-        + '<div style="color:#B8882A;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Ton passeport membre</div>'
-        + '<div style="font-size:14px;color:#2A1C0C;margin-bottom:4px;">🏷️ Numéro de membre : <strong>#' + numeroStr + '</strong></div>'
-        + '<div style="font-size:14px;color:#2A1C0C;">🎁 Ton code parrain : <strong>' + codeParrain + '</strong></div>'
-        + '<div style="font-size:12px;color:#9C8472;margin-top:8px;">Partage ce code avec tes amis pour les inviter dans le cercle.</div>'
+
+      // Passeport
+      + '<div style="background:#F5E8C4;border-radius:14px;padding:20px 26px;margin-bottom:28px;">'
+        + '<div style="color:#B8882A;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px;font-family:Arial,sans-serif;">Ton passeport membre</div>'
+        + '<div style="font-size:14px;color:#2A1C0C;margin-bottom:6px;font-family:Arial,sans-serif;">🏷️ Numéro de membre : <strong>#' + numeroStr + '</strong></div>'
+        + '<div style="font-size:14px;color:#2A1C0C;margin-bottom:8px;font-family:Arial,sans-serif;">🎁 Ton code parrain : <strong style="font-size:16px;letter-spacing:0.05em;">' + codeParrain + '</strong></div>'
+        + '<div style="font-size:12px;color:#9C8472;font-family:Arial,sans-serif;">Partage ce code avec tes amis pour les inviter dans The Dog Circle 🐾</div>'
       + '</div>'
-      + '<a href="https://thedogcircle.fr/membres" style="display:block;background:#B8882A;color:#F6F0E4;text-align:center;padding:14px;border-radius:100px;font-size:15px;text-decoration:none;font-weight:500;margin-bottom:20px;">Accéder à mon espace membre →</a>'
-      + '<p style="color:#9C8472;font-size:12px;line-height:1.7;">💡 Tu pourras changer ton mot de passe depuis ton espace membre → Mon espace → Paramètres.<br>Formule choisie : <strong>' + (c.formule || '—') + '</strong></p>'
+
+      // CTA
+      + '<a href="https://thedogcircle.fr/membres" style="display:block;background:#B8882A;color:#FFFFFF;text-align:center;padding:16px;border-radius:100px;font-size:15px;text-decoration:none;font-weight:500;margin-bottom:24px;font-family:Arial,sans-serif;">Accéder à mon espace membre →</a>'
+
+      + '<p style="color:#9C8472;font-size:12px;line-height:1.8;margin:0;font-family:Arial,sans-serif;">'
+        + '💡 Change ton mot de passe dès ta première connexion : Mon espace → Paramètres.<br>'
+        + 'Formule choisie : <strong>' + (c.formule || '—') + '</strong>'
+      + '</p>'
+
     + '</div>'
+
+    // Footer
     + '<div style="background:#2A1C0C;padding:20px;text-align:center;">'
-      + '<div style="color:rgba(246,240,228,0.4);font-size:11px;letter-spacing:0.1em;">thedogcircle.fr · Club Privé Canin · France</div>'
+      + '<div style="color:rgba(246,240,228,0.5);font-size:11px;letter-spacing:0.1em;font-family:Arial,sans-serif;">thedogcircle.fr · Club Privé Canin · France · 2026</div>'
     + '</div>'
+
   + '</div>';
 }
