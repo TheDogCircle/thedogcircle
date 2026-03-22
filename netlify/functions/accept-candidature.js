@@ -109,7 +109,7 @@ function emailTemplate(c, tempPassword, numeroStr, codeParrain) {
     // Corps
     + '<div style="padding:40px 40px 32px;">'
 
-      + '<h2 style="color:#2A1C0C;font-size:24px;font-weight:400;margin:0 0 16px 0;">Félicitations ' + c.prenom + ' ! 🎉</h2>'
+      + '<h2 style="color:#2A1C0C;font-size:24px;font-weight:400;margin:0 0 16px 0;">Félicitations ' + c.prenom + ' ' + (c.nom || '') + ' ! 🎉</h2>'
       + '<p style="color:#6B5240;font-size:15px;line-height:1.8;margin:0 0 28px 0;">'
         + 'Ta candidature a été <strong style="color:#3B5E3F;">acceptée</strong>. Tu fais désormais partie du cercle. '
         + 'Bienvenue à toi et à <strong>' + (c.chien || 'ton chien') + '</strong> ! 🐶'
@@ -118,8 +118,8 @@ function emailTemplate(c, tempPassword, numeroStr, codeParrain) {
       // Accès membres
       + '<div style="background:#3B5E3F;border-radius:14px;padding:22px 26px;margin-bottom:20px;">'
         + '<div style="color:#B8882A;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;font-family:Arial,sans-serif;">Tes accès membres</div>'
-        + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:8px;font-family:Arial,sans-serif;">🔗 <strong>thedogcircle.fr/membres</strong></div>'
-        + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:8px;font-family:Arial,sans-serif;">📧 Login : <strong>' + c.email + '</strong></div>'
+        + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:8px;font-family:Arial,sans-serif;">🔗 <a href="https://thedogcircle.fr/membres" style="color:#F6F0E4 !important;text-decoration:none;"><strong>thedogcircle.fr/membres</strong></a></div>'
+        + '<div style="color:#F6F0E4;font-size:14px;margin-bottom:8px;font-family:Arial,sans-serif;">📧 Login : <span style="color:#F6F0E4;"><strong>' + c.email + '</strong></span></div>'
         + '<div style="color:#F6F0E4;font-size:14px;font-family:Arial,sans-serif;">🔑 Mot de passe temporaire : <strong>' + tempPassword + '</strong></div>'
       + '</div>'
 
