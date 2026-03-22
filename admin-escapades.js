@@ -9,13 +9,21 @@
 (function () {
 
   document.addEventListener('TDCA:ready', function () {
-    // Ajouter dans la sidebar
-    var sbNav = document.querySelector('.sb-nav');
-    if (!sbNav || document.querySelector('[data-sec="escapades"]')) return;
+    // Injecter sous "Club" après Suggestions
+    var suggestionsItem = document.querySelector('.sb-item[data-sec="suggestions"]');
+    var partenairesItem = document.querySelector('.sb-item[data-sec="partenaires"]');
+    var ref = suggestionsItem || partenairesItem;
 
     var item = document.createElement('div');
-    item.innerHTML = '<div class="sb-item" data-sec="escapades"><span class="sb-icon">✨</span> Escapades luxury</div>';
-    sbNav.appendChild(item);
+    item.className = 'sb-item';
+    item.setAttribute('data-sec', 'escapades');
+    item.innerHTML = '<span class="sb-icon">✨</span> Escapades luxury';
+
+    if (ref && ref.nextSibling) {
+      ref.parentNode.insertBefore(item, ref.nextSibling);
+    } else {
+      document.querySelector('.sb-nav').appendChild(item);
+    }
 
     // Ajouter la section
     var main = document.querySelector('.main-content');

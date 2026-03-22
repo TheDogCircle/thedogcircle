@@ -9,15 +9,20 @@
 (function () {
 
   document.addEventListener('TDCA:ready', function () {
-    // Ajouter l'entrée dans la sidebar
-    var sbNav = document.querySelector('.sb-nav');
-    if (!sbNav || document.querySelector('[data-sec="suggestions"]')) return;
+    // Injecter sous la section "Club" (après le item Partenaires)
+    var partenairesItem = document.querySelector('.sb-item[data-sec="partenaires"]');
+    var insertAfter = partenairesItem || document.querySelector('.sb-nav');
 
-    var secDiv = document.createElement('div');
-    secDiv.innerHTML =
-      '<div class="sb-sec">Membres</div>'
-      + '<div class="sb-item" data-sec="suggestions"><span class="sb-icon">💡</span> Suggestions & Demandes <span class="sb-badge" id="nb-suggestions">0</span></div>';
-    sbNav.appendChild(secDiv);
+    var item = document.createElement('div');
+    item.className = 'sb-item';
+    item.setAttribute('data-sec', 'suggestions');
+    item.innerHTML = '<span class="sb-icon">💡</span> Suggestions & Demandes <span class="sb-badge" id="nb-suggestions">0</span>';
+
+    if (partenairesItem && partenairesItem.nextSibling) {
+      partenairesItem.parentNode.insertBefore(item, partenairesItem.nextSibling);
+    } else {
+      document.querySelector('.sb-nav').appendChild(item);
+    }
 
     // Ajouter la section dans le contenu
     var main = document.querySelector('.main-content');
