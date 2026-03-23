@@ -52,6 +52,7 @@
           + '<input type="file" id="ev-photo" accept="image/*" style="font-size:13px;width:100%;">'
           + '<img id="ev-preview" style="display:none;width:100%;height:140px;object-fit:cover;border-radius:10px;margin-top:8px;" src="" alt="">'
           + '<div id="ev-photo-actuelle" style="font-size:11px;color:var(--t3);margin-top:4px;"></div>'
+        + '<div id="ev-photo-suppr" style="display:none;margin-top:6px;"><button type="button" class="btn-xs btn-xs-r" onclick="window.TDCA.events.removePhoto()">🗑️ Supprimer la photo actuelle</button></div>'
         + '</div>'
 
         + '<div class="modal-footer">'
@@ -135,7 +136,7 @@
 
   async function voirInscrits(eventId, eventTitre) {
     var db  = window.TDCA.db;
-    var res = await db.from('inscriptions').select('*').eq('event_id', eventId).order('created_at', { ascending: true });
+    var res = await db.from('inscriptions').select('*,created_at').eq('event_id', eventId).order('created_at', { ascending: true });
     if (res.error) { alert('Erreur : ' + res.error.message); return; }
     var data = res.data || [];
     var confirmes = data.filter(function (i) { return i.statut === 'confirme'; });
@@ -145,11 +146,23 @@
       '<div style="margin-bottom:16px;">'
         + '<div style="font-size:12px;font-weight:500;color:var(--green);margin-bottom:8px;">✅ Confirmés (' + confirmes.length + ')</div>'
         + (confirmes.length === 0 ? '<div style="color:var(--t3);font-size:12px;">Aucun inscrit</div>'
-          : confirmes.map(function (i,n) { return '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--b);"><strong>' + (n+1) + '.</strong> ' + i.membre_prenom + ' — ' + i.membre_email + '</div>'; }).join(''))
+          : confirmes.map(function (i,n) {
+              var d = i.created_at ? new Date(i.created_at).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+              return '<div style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;">'
+                + '<span><strong>' + (n+1) + '.</strong> ' + i.membre_prenom + ' · ' + i.membre_email + '</span>'
+                + '<span style="font-size:11px;color:var(--t3);">' + d + '</span>'
+              + '</div>';
+            }).join(''))
       + '</div>'
       + (attente.length > 0
         ? '<div><div style="font-size:12px;font-weight:500;color:var(--gold);margin-bottom:8px;">⏳ Liste d\'attente (' + attente.length + ')</div>'
-          + attente.map(function (i,n) { return '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--b);"><strong>' + (n+1) + '.</strong> ' + i.membre_prenom + ' — ' + i.membre_email + '</div>'; }).join('') + '</div>'
+          + attente.map(function (i,n) {
+              var d = i.created_at ? new Date(i.created_at).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+              return '<div style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;">'
+                + '<span><strong>' + (n+1) + '.</strong> ' + i.membre_prenom + ' · ' + i.membre_email + '</span>'
+                + '<span style="font-size:11px;color:var(--t3);">' + d + '</span>'
+              + '</div>';
+            }).join('') + '</div>'
         : '');
     openModal('modal-inscrits');
   }
@@ -183,6 +196,10 @@
     if (e.photo_url) {
       document.getElementById('ev-photo-actuelle').innerHTML = 'Photo actuelle : <a href="' + e.photo_url + '" target="_blank" style="color:var(--green);">voir</a>';
       var img = document.getElementById('ev-preview'); img.src = e.photo_url; img.style.display = 'block';
+      document.getElementById('ev-photo-suppr').style.display = 'block';
+      document.getElementById('ev-photo-suppr').dataset.photoUrl = e.photo_url;
+    } else {
+      document.getElementById('ev-photo-suppr').style.display = 'none';
     }
     openModal('modal-event');
   }
@@ -258,7 +275,22 @@
     document.getElementById('ev-ville-custom-wrap').style.display = 'none';
   }
 
+  // ── Supprimer photo d'un event ──────────────────────
+  async function removeEventPhoto() {
+    var editId = document.getElementById('ev-edit-id').value;
+    if (!editId) return;
+    if (!confirm('Supprimer la photo de cet event ?')) return;
+    var db  = window.TDCA.db;
+    var res = await db.from('events').update({ photo_url: null }).eq('id', editId);
+    if (res.error) { window.TDCA.toast('Erreur : ' + res.error.message); return; }
+    document.getElementById('ev-preview').style.display = 'none';
+    document.getElementById('ev-photo-actuelle').textContent = '';
+    document.getElementById('ev-photo-suppr').style.display = 'none';
+    window.TDCA.toast('Photo supprimée ✓');
+    await loadEvents();
+  }
+
   window.TDCA = window.TDCA || {};
-  window.TDCA.events = { load: loadEvents, save: saveEvent, edit: editEvent, delete: deleteEvent, inscrits: voirInscrits };
+  window.TDCA.events = { load: loadEvents, save: saveEvent, edit: editEvent, delete: deleteEvent, inscrits: voirInscrits, removePhoto: removeEventPhoto };
 
 })();
