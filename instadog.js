@@ -161,25 +161,128 @@
           var media = p.photo_url
             ? '<div style="width:100%;aspect-ratio:4/5;overflow:hidden;"><img src="' + p.photo_url + '" style="width:100%;height:100%;object-fit:cover;" alt="' + (p.chien || '') + '" loading="lazy"></div>'
             : '<div class="feed-photo" style="aspect-ratio:4/5;background:' + (p.bg_color || '#C8DEB8') + '">' + (p.emoji || '🐾') + '</div>';
+          var isLiked   = likes[p.id];
+          var likeCount = (p.likes || 0) + (isLiked ? 1 : 0);
           return '<div class="feed-card">'
             + media
             + '<div class="feed-info">'
               + '<div class="feed-dog">' + (p.chien || 'Mon chien') + '</div>'
               + '<div class="feed-meta">' + (p.membre_prenom || '') + (p.ville ? ' · ' + p.ville : '') + '</div>'
               + '<div class="feed-cap">' + (p.caption || '') + '</div>'
-              + '<span class="feed-like" data-id="' + p.id + '" data-lk="' + (p.likes || 0) + '">♡ ' + (p.likes || 0) + '</span>'
+              + '<div style="display:flex;align-items:center;gap:12px;margin-top:6px;">'
+                + '<span class="feed-like" data-id="' + p.id + '" data-lk="' + (p.likes || 0) + '" style="cursor:pointer;font-size:16px;transition:transform .2s;display:flex;align-items:center;gap:4px;">'
+                  + '<span style="font-size:18px;">' + (isLiked ? '🦴' : '🩶') + '</span>'
+                  + '<span style="font-size:12px;color:var(--t3);">' + likeCount + '</span>'
+                + '</span>'
+                + '<span class="feed-comment-btn" data-id="' + p.id + '" data-chien="' + (p.chien||'') + '" style="cursor:pointer;font-size:13px;color:var(--t3);display:flex;align-items:center;gap:4px;">'
+                  + '💬 <span id="cmt-count-' + p.id + '" style="font-size:12px;">0</span>'
+                + '</span>'
+              + '</div>'
+              + '<div id="cmt-section-' + p.id + '" style="display:none;margin-top:10px;"></div>'
             + '</div></div>';
         }).join('');
 
+        // Charger les compteurs de commentaires
+        res.data.forEach(function(p) { loadCommentCount(p.id); });
+
         g.addEventListener('click', function (e) {
-          var el = e.target.closest('.feed-like');
-          if (!el) return;
-          var id = el.dataset.id; var base = parseInt(el.dataset.lk);
-          if (likes[id]) { el.textContent = '♡ ' + base; el.style.color = ''; delete likes[id]; }
-          else           { el.textContent = '♥ ' + (base + 1); el.style.color = '#dc2626'; likes[id] = 1; }
+          // Like avec os
+          var likeEl = e.target.closest('.feed-like');
+          if (likeEl) {
+            var id   = likeEl.dataset.id;
+            var base = parseInt(likeEl.dataset.lk);
+            var boneEl = likeEl.querySelector('span:first-child');
+            var countEl = likeEl.querySelector('span:last-child');
+            if (likes[id]) {
+              boneEl.textContent  = '🩶';
+              countEl.textContent = base;
+              delete likes[id];
+            } else {
+              boneEl.textContent  = '🦴';
+              countEl.textContent = base + 1;
+              likes[id] = 1;
+              likeEl.style.transform = 'scale(1.3)';
+              setTimeout(function() { likeEl.style.transform = 'scale(1)'; }, 200);
+            }
+            return;
+          }
+
+          // Commentaires
+          var cmtBtn = e.target.closest('.feed-comment-btn');
+          if (cmtBtn) {
+            var id    = cmtBtn.dataset.id;
+            var chien = cmtBtn.dataset.chien;
+            var sec   = document.getElementById('cmt-section-' + id);
+            if (sec.style.display === 'none') {
+              sec.style.display = 'block';
+              loadComments(id, chien);
+            } else {
+              sec.style.display = 'none';
+            }
+          }
         });
       });
   }
+
+  // ── Commentaires ─────────────────────────────────────
+  function loadCommentCount(photoId) {
+    window.TDC.db.from('commentaires').select('id', { count: 'exact', head: true }).eq('photo_id', photoId)
+      .then(function(res) {
+        var el = document.getElementById('cmt-count-' + photoId);
+        if (el) el.textContent = res.count || 0;
+      });
+  }
+
+  function loadComments(photoId, chien) {
+    var sec = document.getElementById('cmt-section-' + photoId);
+    if (!sec) return;
+    sec.innerHTML = '<div style="font-size:12px;color:var(--t3);">Chargement...</div>';
+
+    window.TDC.db.from('commentaires').select('*').eq('photo_id', photoId).order('created_at', { ascending: true })
+      .then(function(res) {
+        var comments = res.data || [];
+        var inp = 'flex:1;padding:8px 10px;border-radius:20px;border:1.5px solid var(--b);font-family:inherit;font-size:12px;background:var(--cream);color:var(--t);outline:none;';
+
+        sec.innerHTML =
+          '<div style="margin-bottom:8px;">'
+            + (comments.length === 0
+              ? '<div style="font-size:12px;color:var(--t3);margin-bottom:8px;">Sois le premier à commenter 🐾</div>'
+              : comments.map(function(c) {
+                  return '<div style="margin-bottom:6px;">'
+                    + '<span style="font-size:12px;font-weight:500;color:var(--t);">' + (c.membre_prenom||'Membre') + '</span> '
+                    + '<span style="font-size:12px;color:var(--t2);">' + c.contenu + '</span>'
+                  + '</div>';
+                }).join(''))
+          + '</div>'
+          + '<div style="display:flex;gap:6px;align-items:center;">'
+            + '<input type="text" id="cmt-input-' + photoId + '" placeholder="Commenter..." style="' + inp + '" maxlength="200">'
+            + '<button onclick="window._TDC_sendComment('' + photoId + '')" style="padding:8px 12px;border-radius:20px;background:var(--green);color:#fff;border:none;font-family:inherit;font-size:12px;cursor:pointer;">→</button>'
+          + '</div>';
+
+        document.getElementById('cmt-count-' + photoId).textContent = comments.length;
+      });
+  }
+
+  window._TDC_sendComment = async function(photoId) {
+    var input = document.getElementById('cmt-input-' + photoId);
+    if (!input) return;
+    var contenu = input.value.trim();
+    if (!contenu) return;
+
+    var res = await window.TDC.db.from('commentaires').insert([{
+      photo_id:      photoId,
+      membre_email:  window.TDC.userEmail,
+      membre_prenom: window.TDC.userPrenom,
+      contenu:       contenu
+    }]);
+
+    if (res.error) { alert('Erreur : ' + res.error.message); return; }
+    input.value = '';
+    // Reload la section commentaires
+    var photo = document.querySelector('.feed-comment-btn[data-id="' + photoId + '"]');
+    var chien = photo ? photo.dataset.chien : '';
+    loadComments(photoId, chien);
+  };
 
   function toast(msg) {
     var t = document.createElement('div');
