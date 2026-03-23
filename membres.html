@@ -338,7 +338,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
   // Exposer pour le module profil
   window.TDC_showResetPassword = showResetPasswordModal;
 
-
+  document.getElementById('ddProfil').addEventListener('click', function () {
     document.getElementById('profileDd').style.display = 'none';
     document.querySelector('[data-tab="profil"]').click();
   });
