@@ -14,11 +14,10 @@
 
     document.addEventListener('click', function (e) {
 
-      // Ouvrir le modal détail
+      // Ouvrir le modal détail — seulement sur "Voir les détails"
       var card = e.target.closest('.ev-card-wrap');
-      if (card && !e.target.closest('[data-action]') && !e.target.closest('.ev-actions')) {
-        var id = card.dataset.evid;
-        if (id) openEventModal(id);
+      if (card && !e.target.closest('[data-action]') && !e.target.closest('.ev-actions') && !e.target.closest('[data-open-ev]')) {
+        // Ne rien faire si clic sur la card — laisser les boutons gérer
         return;
       }
 
