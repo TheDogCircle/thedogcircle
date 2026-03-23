@@ -256,7 +256,7 @@
           + '</div>'
           + '<div style="display:flex;gap:6px;align-items:center;">'
             + '<input type="text" id="cmt-input-' + photoId + '" placeholder="Commenter..." style="' + inp + '" maxlength="200">'
-            + '<button onclick="window._TDC_sendComment('' + photoId + '')" style="padding:8px 12px;border-radius:20px;background:var(--green);color:#fff;border:none;font-family:inherit;font-size:12px;cursor:pointer;">→</button>'
+            + '<button onclick="window._TDC_sendComment(\'' + photoId + '\')" style="padding:8px 12px;border-radius:20px;background:var(--green);color:#fff;border:none;font-family:inherit;font-size:12px;cursor:pointer;">→</button>'
           + '</div>';
 
         document.getElementById('cmt-count-' + photoId).textContent = comments.length;
