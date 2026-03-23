@@ -135,7 +135,7 @@ textarea{resize:vertical;min-height:72px;}
     <div class="fg"><label>Email admin</label><input type="email" id="adminEmail" placeholder="admin@thedogcircle.fr"></div>
     <div class="fg"><label>Mot de passe</label><input type="password" id="adminPwd" placeholder="••••••••"></div>
     <button class="btn btn-p" id="loginBtn" style="width:100%;padding:11px;justify-content:center;">Accéder au back office</button>
-    <p class="hint">admin@thedogcircle.fr / admin2026</p>
+    <p class="hint"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d4b5b0b9bdba94a0bcb1b0bbb3b7bda6b7b8b1fab2a6">[email&#160;protected]</a> / admin2026</p>
   </div>
 </div>
 
@@ -248,7 +248,7 @@ textarea{resize:vertical;min-height:72px;}
 <div id="modals-container"></div>
 
 <!-- LIBS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="upload-helper.js"></script>
 
 <!-- MODULES ADMIN -->
@@ -262,6 +262,7 @@ textarea{resize:vertical;min-height:72px;}
 <script src="admin-map.js"></script>
 <script src="admin-suggestions.js"></script>
 <script src="admin-escapades.js"></script>
+<script src="admin-education.js"></script>
 
 <!-- SHELL : init TDCA + navigation -->
 <script>
@@ -325,12 +326,4 @@ textarea{resize:vertical;min-height:72px;}
   };
   window.pillFormule = function (f) {
     if (!f) return '<span class="pill pill-gray">—</span>';
-    if (f.includes('Fondateur')) return '<span class="pill pill-amber">' + f + '</span>';
-    if (f.includes('Annuel') || f === 'Annuel') return '<span class="pill pill-blue">' + f + '</span>';
-    return '<span class="pill pill-gray">' + f + '</span>';
-  };
-
-})();
-</script>
-</body>
-</html>
+    if (f.includes('Fondateur')) return '<span class="pill p
