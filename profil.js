@@ -72,7 +72,9 @@
     var formule     = m.formule     || '—';
     var numero      = m.numero_membre ? String(m.numero_membre).padStart(3,'0') : '—';
     var codeParrain = m.code_parrain || '—';
-    var photoProfil = m.photo_profil || null;
+    var photoProfil     = m.photo_profil || null;
+    var dateNaissanceMaitre = m.date_naissance || null;
+    var ageMaitre = dateNaissanceMaitre ? calculerAge(dateNaissanceMaitre) : null;
     var photoChien  = m.photo_chien  || null;
 
     // Infos chien
@@ -118,7 +120,7 @@
             + '</div>'
             + '<div>'
               + '<div style="font-family:\'Playfair Display\',serif;font-size:22px;color:var(--cream);font-weight:400;">' + prenom + (nom ? ' ' + nom.toUpperCase() : '') + '</div>'
-              + '<div style="font-size:12px;color:rgba(246,240,228,0.6);margin-top:2px;">📍 ' + ville + '</div>'
+              + '<div style="font-size:12px;color:rgba(246,240,228,0.6);margin-top:2px;">📍 ' + ville + (ageMaitre ? ' · ' + ageMaitre : '') + '</div>'
               + '<div style="display:inline-flex;align-items:center;gap:5px;background:var(--gold);color:#fff;font-size:10px;padding:3px 10px;border-radius:100px;margin-top:6px;font-weight:500;">⭐ Membre Fondateur</div>'
             + '</div>'
           + '</div>'
@@ -253,7 +255,8 @@
             + '<div><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px;">Prénom</label><input type="text" id="edit-prenom" value="' + (m.prenom||'') + '" style="' + inp + '"></div>'
             + '<div><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px;">Nom</label><input type="text" id="edit-nom" value="' + (m.nom||'') + '" style="' + inp + '"></div>'
           + '</div>'
-          + '<div style="margin-bottom:20px;"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px;">Ville</label><input type="text" id="edit-ville" value="' + (m.ville||'') + '" style="' + inp + '"></div>'
+          + '<div style="margin-bottom:12px;"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px;">Ville</label><input type="text" id="edit-ville" value="' + (m.ville||'') + '" style="' + inp + '"></div>'
+          + '<div style="margin-bottom:20px;"><label style="display:block;font-size:11px;color:var(--t3);text-transform:uppercase;margin-bottom:5px;">Ta date de naissance (JJ/MM/AAAA)</label><input type="text" id="edit-naissance-maitre" value="' + (m.date_naissance||'') + '" placeholder="Ex: 15/06/1990" style="' + inp + '"></div>'
 
           // Section chien
           + '<div style="font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">🐾 Passeport canin</div>'
@@ -304,6 +307,7 @@
       ville:                 get('edit-ville'),
       chien:                 get('edit-chien'),
       race:                  get('edit-race'),
+      date_naissance:        get('edit-naissance-maitre') || null,
       date_naissance_chien:  get('edit-naissance') || null,
       couleur_yeux:          get('edit-yeux')      || null,
       couleur_robe:          get('edit-robe')      || null,
