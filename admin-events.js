@@ -194,12 +194,12 @@
     }
 
     if (e.photo_url) {
-      document.getElementById('ev-photo-actuelle').innerHTML = 'Photo actuelle : <a href="' + e.photo_url + '" target="_blank" style="color:var(--green);">voir</a>';
+      document.getElementById('ev-photo-actuelle').innerHTML =
+        'Photo actuelle : <a href="' + e.photo_url + '" target="_blank" style="color:var(--green);">voir</a>'
+        + ' · <button type="button" class="btn-xs btn-xs-r" style="margin-left:8px;" onclick="window.TDCA.events.removePhoto()">🗑️ Supprimer</button>';
       var img = document.getElementById('ev-preview'); img.src = e.photo_url; img.style.display = 'block';
-      document.getElementById('ev-photo-suppr').style.display = 'block';
-      document.getElementById('ev-photo-suppr').dataset.photoUrl = e.photo_url;
     } else {
-      document.getElementById('ev-photo-suppr').style.display = 'none';
+      document.getElementById('ev-photo-actuelle').textContent = '';
     }
     openModal('modal-event');
   }
