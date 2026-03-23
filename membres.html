@@ -41,9 +41,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 .profile-dd div{padding:10px 16px;font-size:13px;cursor:pointer;color:var(--t2);}
 .profile-dd div:hover{background:var(--cream);}
 .profile-dd .logout{color:var(--red);border-top:1px solid var(--b);}
-.tabs{display:flex;border-bottom:1px solid var(--b);overflow-x:auto;padding:0 24px;background:var(--w);}
+.tabs{display:flex;border-bottom:1px solid var(--b);overflow-x:auto;padding:0;background:var(--w);}
 .tabs::-webkit-scrollbar{display:none;}
-.tab{padding:14px 16px;font-size:13px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;}
+.tab{padding:14px 0;font-size:13px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;flex:1;text-align:center;}
 .tab.active{color:var(--green);border-bottom-color:var(--green);}
 .content{padding:24px;max-width:900px;margin:0 auto;}
 .tc{display:none;}
@@ -172,18 +172,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     <div class="tab" data-tab="partners">🤝 Partenaires</div>
     <div class="tab" data-tab="garde">🐕 Dog Sitting</div>
     <div class="tab" data-tab="map">🗺️ Map</div>
-    <div class="tab" data-tab="profil" style="margin-left:auto;border-left:1px solid var(--b);">🪪 Mon espace</div>
+    <div class="tab" data-tab="education">📚 Éducation</div>
+    <div class="tab" data-tab="profil">🪪 Mon espace</div>
   </div>
 
   <div class="content">
 
-    <div class="banner">
-      <div>
-        <div class="banner-title" id="welcomeMsg">Bienvenue dans le cercle 🐾</div>
-        <div class="banner-sub">Club privé canin · Membres sélectionnés</div>
-      </div>
-      <div class="banner-badge">⭐ Membre Fondateur</div>
-    </div>
+
 
     <!-- Instadog -->
     <div id="tc-feed" class="tc active">
@@ -221,7 +216,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 
     <!-- Profil -->
     <div id="tc-profil" class="tc">
-      <div class="sec-title">Mon profil 🪪</div>
+      <div class="sec-title">Mon profil</div>
       <div class="sec-sub">Passeport, agenda et paramètres</div>
       <div class="subtab-row">
         <button class="subtab active" id="profTabPasseport">🐾 Passeport</button>
@@ -231,6 +226,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
       <div id="profPasseport"></div>
       <div id="profAgenda" style="display:none;"></div>
       <div id="profParams" style="display:none;"></div>
+    </div>
+
+    <!-- Education -->
+    <div id="tc-education" class="tc">
+      <div class="sec-title">Conseils & Éducation 📚</div>
+      <div class="sec-sub">Guides, conseils et ressources pour toi et ton chien</div>
+      <div id="educationGrid"></div>
     </div>
 
     <!-- Map -->
@@ -262,6 +264,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 <script src="garde.js"></script>
 <script src="profil.js"></script>
 <script src="map.js"></script>
+<script src="education.js"></script>
 
 <!-- SHELL : init TDC + navigation -->
 <script>
@@ -293,7 +296,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     document.dispatchEvent(new CustomEvent('TDC:tab', { detail: { tab: name } }));
   });
 
-  // Modal changement de mot de passe
+  // Modal changement de mot de passe (reset depuis email ou depuis profil)
   function showResetPasswordModal() {
     var modal = document.getElementById('modal-reset-pwd');
     if (!modal) {
@@ -317,10 +320,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
         var confirm = document.getElementById('new-pwd-confirm').value;
         var err     = document.getElementById('pwd-err');
         err.style.display = 'none';
+
         if (pwd.length < 8) { err.textContent = 'Minimum 8 caractères.'; err.style.display = 'block'; return; }
         if (pwd !== confirm) { err.textContent = 'Les mots de passe ne correspondent pas.'; err.style.display = 'block'; return; }
+
         var res = await window.TDC.db.auth.updateUser({ password: pwd });
         if (res.error) { err.textContent = 'Erreur : ' + res.error.message; err.style.display = 'block'; return; }
+
         document.getElementById('pwd-ok').style.display = 'block';
         setTimeout(function () { modal.style.display = 'none'; }, 2500);
         window.history.replaceState(null, '', window.location.pathname);
@@ -329,19 +335,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     modal.style.display = 'flex';
   }
 
+  // Exposer pour le module profil
   window.TDC_showResetPassword = showResetPasswordModal;
 
-  // Dropdown avatar — navigation vers onglets
-  document.getElementById('ddProfil').addEventListener('click', function () {
+
     document.getElementById('profileDd').style.display = 'none';
     document.querySelector('[data-tab="profil"]').click();
   });
-
   document.getElementById('ddMap').addEventListener('click', function () {
     document.getElementById('profileDd').style.display = 'none';
     document.querySelector('[data-tab="map"]').click();
   });
-
 })();
 </script>
 </body>
