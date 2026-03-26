@@ -168,12 +168,10 @@
     if (!msg) return;
     input.value = '';
 
-    var m = window.TDC.userMembre || {};
     await window.TDC.db.from('chat_collectif').insert([{
       membre_email:  window.TDC.userEmail,
       membre_prenom: window.TDC.userPrenom,
-      message:       msg,
-      photo_profil:  m.photo_profil || null
+      message:       msg
     }]);
   }
 
