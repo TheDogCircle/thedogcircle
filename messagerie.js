@@ -52,7 +52,8 @@
   }
 
   // ── Inject UI ─────────────────────────────────────────
-  document.addEventListener('TDC:ready', function () {
+  document.addEventListener('TDC:login', function () {
+    setTimeout(function() {
     var sec = document.getElementById('tc-messagerie');
     if (!sec) return;
 
@@ -110,6 +111,7 @@
     document.getElementById('priv-input').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') sendPrivate();
     });
+    }, 100);
   });
 
   // ── CHAT COLLECTIF ────────────────────────────────────
