@@ -95,9 +95,9 @@
     document.getElementById('pg-app').style.display   = 'block';
 
     // Mettre à jour l'avatar et le bandeau
-    var initiale = window.TDC.userPrenom[0].toUpperCase();
-    var avatarBtn = document.getElementById('avatarBtn');
-    if (avatarBtn) avatarBtn.childNodes[0].textContent = initiale;
+    var initiale    = window.TDC.userPrenom[0].toUpperCase();
+    var photoProfil = membre && membre.photo_profil ? membre.photo_profil : null;
+    updateAvatar(photoProfil, initiale);
     var welcomeMsg = document.getElementById('welcomeMsg');
     if (welcomeMsg) welcomeMsg.textContent = 'Bienvenue ' + window.TDC.userPrenom + ' 🐾';
 
@@ -135,6 +135,32 @@
     if (res.error) { alert('Erreur : ' + res.error.message); return; }
     alert('📧 Un email de réinitialisation a été envoyé à ' + email + ' !');
   }
+
+  // ── Mettre à jour l'avatar ──────────────────────────
+  function updateAvatar(photoUrl, initiale) {
+    var btn = document.getElementById('avatarBtn');
+    if (!btn) return;
+    // Supprimer l'ancienne image si présente
+    var oldImg = btn.querySelector('img.avatar-photo');
+    if (oldImg) oldImg.remove();
+    // Mettre à jour l'initiale ou photo
+    var textNode = btn.childNodes[0];
+    if (photoUrl) {
+      var img = document.createElement('img');
+      img.src = photoUrl;
+      img.className = 'avatar-photo';
+      img.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:50%;';
+      btn.style.position = 'relative';
+      btn.style.overflow = 'hidden';
+      if (textNode && textNode.nodeType === 3) textNode.textContent = '';
+      btn.insertBefore(img, btn.firstChild);
+    } else {
+      if (textNode && textNode.nodeType === 3) textNode.textContent = initiale;
+    }
+  }
+
+  // Exposer pour profil.js
+  window.TDC_updateAvatar = updateAvatar;
 
   // ── Avatar dropdown ──────────────────────────────────
   function bindAvatar() {
