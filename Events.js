@@ -8,6 +8,7 @@
 
   var mesInscriptions = [];
   window._TDC_EVENTS  = {};
+  var filtreVille = 'Toutes';
 
   document.addEventListener('TDC:ready', function () {
     injectModal();
@@ -184,7 +185,43 @@
       window._TDC_EVENTS = {};
       evRes.data.forEach(function (ev) { window._TDC_EVENTS[String(ev.id)] = ev; });
 
-      c.innerHTML = evRes.data.map(function (ev) { return renderEvent(ev); }).join('');
+      // Extraire les villes uniques
+      var villes = ['Toutes'];
+      evRes.data.forEach(function(ev) {
+        var v = ev.ville_custom || ev.ville || 'National';
+        if (v && villes.indexOf(v) === -1) villes.push(v);
+      });
+
+      // Filtrer les events
+      var evsFiltres = filtreVille === 'Toutes'
+        ? evRes.data
+        : evRes.data.filter(function(ev) {
+            var v = ev.ville_custom || ev.ville || 'National';
+            return v === filtreVille;
+          });
+
+      // Vider le conteneur
+      c.innerHTML = evsFiltres.length === 0
+        ? '<div class="loading">Aucun event dans cette ville pour le moment 🐾</div>'
+        : evsFiltres.map(function (ev) { return renderEvent(ev); }).join('');
+
+      // Injecter le filtre AVANT les events directement dans le DOM
+      var filtreDiv = document.createElement('div');
+      filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;';
+      villes.forEach(function(v) {
+        var btn = document.createElement('button');
+        btn.textContent = v;
+        btn.style.cssText = 'padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;'
+          + (filtreVille === v
+            ? 'background:var(--green);color:#fff;border:1.5px solid var(--green);'
+            : 'background:transparent;color:var(--t2);border:1.5px solid var(--b);');
+        btn.addEventListener('click', function() {
+          filtreVille = v;
+          loadEvents();
+        });
+        filtreDiv.appendChild(btn);
+      });
+      c.insertBefore(filtreDiv, c.firstChild);
 
     }).catch(function (err) {
       c.innerHTML = '<div class="error">Erreur : ' + err.message + '</div>';
