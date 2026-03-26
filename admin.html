@@ -135,7 +135,7 @@ textarea{resize:vertical;min-height:72px;}
     <div class="fg"><label>Email admin</label><input type="email" id="adminEmail" placeholder="admin@thedogcircle.fr"></div>
     <div class="fg"><label>Mot de passe</label><input type="password" id="adminPwd" placeholder="••••••••"></div>
     <button class="btn btn-p" id="loginBtn" style="width:100%;padding:11px;justify-content:center;">Accéder au back office</button>
-    <p class="hint"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d4b5b0b9bdba94a0bcb1b0bbb3b7bda6b7b8b1fab2a6">[email&#160;protected]</a> / admin2026</p>
+    <p class="hint"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2b4a4f4642456b5f434e4f444c48425948474e054d59">[email&#160;protected]</a> / admin2026</p>
   </div>
 </div>
 
@@ -326,4 +326,12 @@ textarea{resize:vertical;min-height:72px;}
   };
   window.pillFormule = function (f) {
     if (!f) return '<span class="pill pill-gray">—</span>';
-    if (f.includes('Fondateur')) return '<span class="pill p
+    if (f.includes('Fondateur')) return '<span class="pill pill-amber">' + f + '</span>';
+    if (f.includes('Annuel') || f === 'Annuel') return '<span class="pill pill-blue">' + f + '</span>';
+    return '<span class="pill pill-gray">' + f + '</span>';
+  };
+
+})();
+</script>
+</body>
+</html>
