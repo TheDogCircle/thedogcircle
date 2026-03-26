@@ -350,6 +350,7 @@
       if (res.error) throw res.error;
       if (membreData) membreData.photo_profil = url;
       buildPasseport();
+      if (window.TDC_updateAvatar) window.TDC_updateAvatar(url, window.TDC.userPrenom[0].toUpperCase());
       toast('Photo de profil mise à jour ! 🐾');
     } catch(e) { toast('Erreur : ' + e.message); }
   }
