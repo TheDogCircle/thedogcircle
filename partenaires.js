@@ -8,6 +8,7 @@
 (function () {
 
   var bgColors = ['#C8DEB8','#D4C5A9','#B8C9D4','#D4B8B8','#C5C8D4','#D4CEB8'];
+  var filtreVilleP = 'Toutes';
   var icons    = { 'Toilettage':'✂️','Promenades canines':'🦮','Boutique':'🛍️','Vétérinaire':'🩺','Éducation canine':'🎓','Hôtel pet-friendly':'🏨','Restaurant':'🍽️','Autre':'🤝' };
 
   document.addEventListener('TDC:login', function () { loadPartners(); });
@@ -30,7 +31,43 @@
           return;
         }
 
-        g.innerHTML = res.data.map(function (p, i) {
+        // Extraire villes uniques
+        var villes = ['Toutes'];
+        res.data.forEach(function(p) {
+          var v = p.ville || 'National';
+          if (v && villes.indexOf(v) === -1) villes.push(v);
+        });
+
+        // HTML filtre villes
+        var filtreHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;grid-column:1/-1;">'
+          + villes.map(function(v) {
+              return '<button onclick="window._TDC_ptFiltre(\'' + v + '\')" style="padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;'
+                + (filtreVilleP === v
+                  ? 'background:var(--green);color:#fff;border:1.5px solid var(--green);'
+                  : 'background:transparent;color:var(--t2);border:1.5px solid var(--b);')
+                + '">' + v + '</button>';
+            }).join('')
+          + '</div>';
+
+        // Filtrer
+        var pFiltres = filtreVilleP === 'Toutes'
+          ? res.data
+          : res.data.filter(function(p) {
+              var v = p.ville || 'National';
+              return v === filtreVilleP;
+            });
+
+        window._TDC_ptFiltre = function(ville) {
+          filtreVilleP = ville;
+          loadPartners();
+        };
+
+        if (pFiltres.length === 0) {
+          g.innerHTML = filtreHtml + '<div class="loading" style="grid-column:1/-1;">Aucun partenaire dans cette ville 🐾</div>';
+          return;
+        }
+
+        g.innerHTML = filtreHtml + pFiltres.map(function (p, i) {
           var bg   = bgColors[i % bgColors.length];
           var icon = icons[p.type] || '🤝';
 
