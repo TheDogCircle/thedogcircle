@@ -87,18 +87,20 @@
         }
 
         // Injecter filtre villes en haut
+        // Injecter filtre villes — select dropdown
         var filtreDiv = document.createElement('div');
-        filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;';
+        filtreDiv.style.cssText = 'margin-bottom:16px;';
+        var select = document.createElement('select');
+        select.style.cssText = 'padding:8px 14px;border-radius:10px;border:1.5px solid var(--b);font-family:inherit;font-size:13px;background:var(--w);color:var(--t);outline:none;cursor:pointer;';
         villes.forEach(function(v) {
-          var btn = document.createElement('button');
-          btn.textContent = v;
-          btn.style.cssText = 'padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;'
-            + (filtreVilleP === v
-              ? 'background:var(--green);color:#fff;border:1.5px solid var(--green);'
-              : 'background:transparent;color:var(--t2);border:1.5px solid var(--b);');
-          btn.addEventListener('click', function() { filtreVilleP = v; loadPartners(); });
-          filtreDiv.appendChild(btn);
+          var opt = document.createElement('option');
+          opt.value = v;
+          opt.textContent = v === 'Toutes' ? '📍 Toutes les villes' : '📍 ' + v;
+          if (filtreVilleP === v) opt.selected = true;
+          select.appendChild(opt);
         });
+        select.addEventListener('change', function() { filtreVilleP = this.value; loadPartners(); });
+        filtreDiv.appendChild(select);
         g.insertBefore(filtreDiv, g.firstChild);
 
         // Copier code
