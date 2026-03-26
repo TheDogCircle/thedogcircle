@@ -38,27 +38,6 @@
           if (v && villes.indexOf(v) === -1) villes.push(v);
         });
 
-        // HTML filtre villes
-        var filtreDiv = document.createElement('div');
-        filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;grid-column:1/-1;';
-        villes.forEach(function(v) {
-          var btn = document.createElement('button');
-          btn.textContent = v;
-          btn.dataset.ville = v;
-          btn.style.cssText = 'padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;border:1.5px solid var(--b);background:transparent;color:var(--t2);';
-          if (filtreVilleP === v) {
-            btn.style.background = 'var(--green)';
-            btn.style.color = '#fff';
-            btn.style.borderColor = 'var(--green)';
-          }
-          btn.addEventListener('click', function() {
-            filtreVilleP = v;
-            loadPartners();
-          });
-          filtreDiv.appendChild(btn);
-        });
-        var filtreHtml = filtreDiv.outerHTML;
-
         // Filtrer
         var pFiltres = filtreVilleP === 'Toutes'
           ? res.data
@@ -67,17 +46,10 @@
               return v === filtreVilleP;
             });
 
-        window._TDC_ptFiltre = function(ville) {
-          filtreVilleP = ville;
-          loadPartners();
-        };
-
         if (pFiltres.length === 0) {
-          g.innerHTML = filtreHtml + '<div class="loading" style="grid-column:1/-1;">Aucun partenaire dans cette ville 🐾</div>';
-          return;
-        }
-
-        g.innerHTML = filtreHtml + pFiltres.map(function (p, i) {
+          g.innerHTML = '<div class="loading" style="grid-column:1/-1;">Aucun partenaire dans cette ville 🐾</div>';
+        } else {
+          g.innerHTML = pFiltres.map(function (p, i) {
           var bg   = bgColors[i % bgColors.length];
           var icon = icons[p.type] || '🤝';
 
@@ -112,6 +84,22 @@
                 : '')
             + '</div></div>';
         }).join('');
+        }
+
+        // Injecter filtre villes en haut
+        var filtreDiv = document.createElement('div');
+        filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;';
+        villes.forEach(function(v) {
+          var btn = document.createElement('button');
+          btn.textContent = v;
+          btn.style.cssText = 'padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;'
+            + (filtreVilleP === v
+              ? 'background:var(--green);color:#fff;border:1.5px solid var(--green);'
+              : 'background:transparent;color:var(--t2);border:1.5px solid var(--b);');
+          btn.addEventListener('click', function() { filtreVilleP = v; loadPartners(); });
+          filtreDiv.appendChild(btn);
+        });
+        g.insertBefore(filtreDiv, g.firstChild);
 
         // Copier code
         g.addEventListener('click', function (e) {
