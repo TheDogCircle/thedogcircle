@@ -192,16 +192,28 @@
         if (v && villes.indexOf(v) === -1) villes.push(v);
       });
 
-      // Filtre villes
-      var filtreHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">'
-        + villes.map(function(v) {
-            return '<button onclick="window._TDC_evFiltre(\'' + v + '\')" style="padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;'
-              + (filtreVille === v
-                ? 'background:var(--green);color:#fff;border:1.5px solid var(--green);'
-                : 'background:transparent;color:var(--t2);border:1.5px solid var(--b);')
-              + '">' + v + '</button>';
-          }).join('')
-        + '</div>';
+      // Filtre villes — boutons avec data-attribute pour éviter les pb de guillemets
+      var filtreDiv = document.createElement('div');
+      filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;';
+      filtreDiv.id = 'ev-filtres-villes';
+      villes.forEach(function(v) {
+        var btn = document.createElement('button');
+        btn.textContent = v;
+        btn.dataset.ville = v;
+        btn.style.cssText = 'padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;border:1.5px solid var(--b);background:transparent;color:var(--t2);';
+        if (filtreVille === v) {
+          btn.style.background = 'var(--green)';
+          btn.style.color = '#fff';
+          btn.style.borderColor = 'var(--green)';
+        }
+        btn.addEventListener('click', function() {
+          filtreVille = v;
+          loadEvents();
+        });
+        filtreDiv.appendChild(btn);
+      });
+
+      var filtreHtml = filtreDiv.outerHTML;
 
       // Filtrer les events
       var evsFiltres = filtreVille === 'Toutes'

@@ -39,15 +39,25 @@
         });
 
         // HTML filtre villes
-        var filtreHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;grid-column:1/-1;">'
-          + villes.map(function(v) {
-              return '<button onclick="window._TDC_ptFiltre(\'' + v + '\')" style="padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;'
-                + (filtreVilleP === v
-                  ? 'background:var(--green);color:#fff;border:1.5px solid var(--green);'
-                  : 'background:transparent;color:var(--t2);border:1.5px solid var(--b);')
-                + '">' + v + '</button>';
-            }).join('')
-          + '</div>';
+        var filtreDiv = document.createElement('div');
+        filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;grid-column:1/-1;';
+        villes.forEach(function(v) {
+          var btn = document.createElement('button');
+          btn.textContent = v;
+          btn.dataset.ville = v;
+          btn.style.cssText = 'padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;border:1.5px solid var(--b);background:transparent;color:var(--t2);';
+          if (filtreVilleP === v) {
+            btn.style.background = 'var(--green)';
+            btn.style.color = '#fff';
+            btn.style.borderColor = 'var(--green)';
+          }
+          btn.addEventListener('click', function() {
+            filtreVilleP = v;
+            loadPartners();
+          });
+          filtreDiv.appendChild(btn);
+        });
+        var filtreHtml = filtreDiv.outerHTML;
 
         // Filtrer
         var pFiltres = filtreVilleP === 'Toutes'
