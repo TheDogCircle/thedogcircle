@@ -8,83 +8,10 @@
 
   var mesInscriptions = [];
   window._TDC_EVENTS  = {};
-  var filtreVille = 'Toutes';
+  var filtreVille     = 'Toutes';
 
-  // ── Fonctions globales appelées par onclick inline ───
-  // Exposées sur window = impossible à intercepter par un parent
-
-  window._TDC_inscrire = function(eventId, attente, btn) {
-    btn.disabled    = true;
-    btn.textContent = '...';
-    inscrire(String(eventId), attente)
-      .then(function () { loadEvents(); closeModal(); })
-      .catch(function (err) {
-        btn.disabled    = false;
-        btn.textContent = attente ? 'Liste attente' : "S'inscrire";
-        alert('Erreur : ' + err.message);
-      });
-  };
-
-  window._TDC_desinscrire = function(eventId, btn) {
-    if (!confirm('Tu veux vraiment te désinscrire ?')) return;
-    btn.disabled    = true;
-    btn.textContent = '...';
-    desinscrire(String(eventId))
-      .then(function () { loadEvents(); closeModal(); })
-      .catch(function (err) {
-        btn.disabled = false;
-        alert('Erreur : ' + err.message);
-      });
-  };
-
-  window._TDC_annulerPayant = function(titre) {
-    if (confirm('Cet événement est payant et a lieu dans moins de 24h.\nPour annuler, contacte thedogcircleclub@gmail.com\n\nVeux-tu ouvrir ton client email ?')) {
-      window.location.href = 'mailto:thedogcircleclub@gmail.com'
-        + '?subject=' + encodeURIComponent('Annulation - ' + titre);
-    }
-  };
-
-  window._TDC_openEvent = function(id) {
-    openEventModal(String(id));
-  };
-
-  // ────────────────────────────────────────────────────
-
-  document.addEventListener('TDC:ready', function () {
-    injectModal();
-
-    // Délégation pour les boutons du modal uniquement
-    document.addEventListener('click', function (e) {
-      var btn = e.target.closest('#ev-det-act [data-action]');
-      if (!btn) return;
-      var action = btn.dataset.action;
-      if (action === 'inscrire') {
-        var attente = btn.dataset.attente === '1';
-        btn.disabled    = true;
-        btn.textContent = '...';
-        inscrire(btn.dataset.id, attente)
-          .then(function () { loadEvents(); closeModal(); })
-          .catch(function (err) {
-            btn.disabled    = false;
-            btn.textContent = attente ? 'Liste attente' : "S'inscrire";
-            alert('Erreur : ' + err.message);
-          });
-      } else if (action === 'desinscrire') {
-        if (!confirm('Tu veux vraiment te désinscrire ?')) return;
-        btn.disabled = true;
-        desinscrire(btn.dataset.id)
-          .then(function () { loadEvents(); closeModal(); })
-          .catch(function (err) {
-            btn.disabled = false;
-            alert('Erreur : ' + err.message);
-          });
-      } else if (action === 'annuler-payant') {
-        window._TDC_annulerPayant(btn.dataset.titre);
-      }
-    });
-  });
-
-  document.addEventListener('TDC:tab',  function (e) { if (e.detail.tab === 'events') loadEvents(); });
+  document.addEventListener('TDC:ready', function () { injectModal(); });
+  document.addEventListener('TDC:tab',   function (e) { if (e.detail.tab === 'events') loadEvents(); });
   document.addEventListener('TDC:login', function () { loadEvents(); });
 
   // ── Injecter le modal ────────────────────────────────
@@ -108,6 +35,13 @@
     document.body.appendChild(m);
     m.addEventListener('click', function (e) { if (e.target === m) closeModal(); });
     document.getElementById('ev-det-close').addEventListener('click', closeModal);
+
+    // Délégation sur le modal uniquement
+    document.getElementById('ev-det-act').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      handleAction(btn);
+    });
   }
 
   function closeModal() {
@@ -115,17 +49,52 @@
     if (m) m.style.display = 'none';
   }
 
+  // ── Action (inscrire / désinscrire) ─────────────────
+  function handleAction(btn) {
+    var action  = btn.dataset.action;
+    var eventId = btn.dataset.id;
+
+    if (action === 'inscrire') {
+      var attente = btn.dataset.attente === '1';
+      btn.disabled    = true;
+      btn.textContent = '...';
+      inscrire(eventId, attente)
+        .then(function () { loadEvents(); closeModal(); })
+        .catch(function (err) {
+          btn.disabled    = false;
+          btn.textContent = attente ? 'Liste attente' : "S'inscrire";
+          alert('Erreur : ' + err.message);
+        });
+
+    } else if (action === 'desinscrire') {
+      if (!confirm('Tu veux vraiment te désinscrire ?')) return;
+      btn.disabled    = true;
+      btn.textContent = '...';
+      desinscrire(eventId)
+        .then(function () { loadEvents(); closeModal(); })
+        .catch(function (err) {
+          btn.disabled = false;
+          alert('Erreur : ' + err.message);
+        });
+
+    } else if (action === 'annuler-payant') {
+      var titre = btn.dataset.titre;
+      if (confirm('Cet événement est payant et a lieu dans moins de 24h.\nPour annuler, contacte thedogcircleclub@gmail.com\n\nVeux-tu ouvrir ton client email ?')) {
+        window.location.href = 'mailto:thedogcircleclub@gmail.com?subject=' + encodeURIComponent('Annulation - ' + titre);
+      }
+    }
+  }
+
   // ── Ouvrir le modal ──────────────────────────────────
   function openEventModal(id) {
     var ev = window._TDC_EVENTS[String(id)];
     if (!ev) return;
-
     var m = document.getElementById('modal-ev-detail');
     if (!m) { injectModal(); m = document.getElementById('modal-ev-detail'); }
 
     var photoEl = document.getElementById('ev-det-photo');
     if (ev.photo_url) {
-      photoEl.innerHTML      = '<img src="' + ev.photo_url + '" style="width:100%;height:220px;object-fit:cover;" alt="">';
+      photoEl.innerHTML = '<img src="' + ev.photo_url + '" style="width:100%;height:220px;object-fit:cover;" alt="">';
     } else {
       photoEl.innerHTML      = '🎉';
       photoEl.style.fontSize = '64px';
@@ -161,7 +130,7 @@
     if (estInscrit) {
       actEl.innerHTML = '<span class="ev-tag tag-green" style="padding:8px 16px;font-size:13px;">✓ Tu es inscrit(e)</span>'
         + ((payant && moins24h)
-          ? '<button class="btn btn-danger" data-action="annuler-payant" data-titre="' + ev.titre.replace(/"/g,'&quot;') + '">Annuler</button>'
+          ? '<button class="btn btn-danger" data-action="annuler-payant" data-titre="' + ev.titre + '">Annuler</button>'
           : '<button class="btn btn-danger" data-action="desinscrire" data-id="' + ev.id + '">Se désinscrire</button>');
     } else if (enAttente) {
       actEl.innerHTML = '<span class="ev-tag tag-yellow" style="padding:8px 16px;">⏳ Liste d\'attente</span>'
@@ -212,11 +181,57 @@
             return v === filtreVille;
           });
 
+      // Rendu HTML
       c.innerHTML = evsFiltres.length === 0
-        ? '<div class="loading">Aucun event dans cette ville pour le moment 🐾</div>'
+        ? '<div class="loading">Aucun event dans cette ville 🐾</div>'
         : evsFiltres.map(function (ev) { return renderEvent(ev); }).join('');
 
-      // Filtre villes — inséré en premier
+      // ✅ Listeners directs sur chaque bouton immédiatement après rendu
+      c.querySelectorAll('button[data-ev-id]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          var action  = btn.dataset.evAction;
+          var eventId = btn.dataset.evId;
+          if (action === 'inscrire') {
+            var attente = btn.dataset.evAttente === '1';
+            btn.disabled    = true;
+            btn.textContent = '...';
+            inscrire(eventId, attente)
+              .then(function () { loadEvents(); })
+              .catch(function (err) {
+                btn.disabled    = false;
+                btn.textContent = attente ? 'Liste attente' : "S'inscrire";
+                alert('Erreur : ' + err.message);
+              });
+          } else if (action === 'desinscrire') {
+            if (!confirm('Tu veux vraiment te désinscrire ?')) return;
+            btn.disabled    = true;
+            btn.textContent = '...';
+            desinscrire(eventId)
+              .then(function () { loadEvents(); })
+              .catch(function (err) {
+                btn.disabled = false;
+                alert('Erreur : ' + err.message);
+              });
+          } else if (action === 'annuler-payant') {
+            var titre = btn.dataset.evTitre;
+            if (confirm('Cet événement est payant et a lieu dans moins de 24h.\nPour annuler, contacte thedogcircleclub@gmail.com\n\nVeux-tu ouvrir ton client email ?')) {
+              window.location.href = 'mailto:thedogcircleclub@gmail.com?subject=' + encodeURIComponent('Annulation - ' + titre);
+            }
+          }
+        });
+      });
+
+      // ✅ Listeners sur "Voir les détails"
+      c.querySelectorAll('button[data-ev-open]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          openEventModal(btn.dataset.evOpen);
+        });
+      });
+
+      // Filtre villes
       var filtreDiv = document.createElement('div');
       filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;';
       villes.forEach(function(v) {
@@ -226,7 +241,7 @@
           + (filtreVille === v
             ? 'background:var(--green);color:#fff;border:1.5px solid var(--green);'
             : 'background:transparent;color:var(--t2);border:1.5px solid var(--b);');
-        btn.addEventListener('click', function() { filtreVille = v; loadEvents(); });
+        btn.addEventListener('click', function () { filtreVille = v; loadEvents(); });
         filtreDiv.appendChild(btn);
       });
       c.insertBefore(filtreDiv, c.firstChild);
@@ -237,6 +252,7 @@
   }
 
   // ── Rendu d'une card event ───────────────────────────
+  // ⚠️ Utilise data-ev-* (pas data-action) pour éviter tout conflit avec d'autres listeners
   function renderEvent(ev) {
     var restantes  = ev.places - (ev.inscrits || 0);
     var complet    = restantes <= 0;
@@ -247,28 +263,25 @@
     var payant     = ev.prix && ev.prix !== 'Gratuit' && ev.prix !== 'Gratuit membres';
     var heuresRest = (new Date(ev.date_raw || '') - Date.now()) / 3600000;
     var moins24h   = heuresRest < 24 && heuresRest > 0;
-    var id         = ev.id;
-    var titreEsc   = (ev.titre || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
     var spotsTag = complet
       ? '<span class="ev-tag tag-red">Complet</span>'
       : '<span class="ev-tag ' + (restantes <= 3 ? 'tag-red' : 'tag-green') + '">'
           + restantes + ' place' + (restantes > 1 ? 's' : '') + ' restante' + (restantes > 1 ? 's' : '') + '</span>';
 
-    // ✅ onclick inline directement sur les boutons — priorité absolue
     var actions = '';
     if (estInscrit) {
       actions = '<span class="ev-tag tag-green" style="padding:5px 12px;">✓ Inscrit</span>'
         + ((payant && moins24h)
-          ? '<button class="btn btn-danger" onclick="event.stopPropagation();window._TDC_annulerPayant(\'' + titreEsc + '\')">Annuler</button>'
-          : '<button class="btn btn-danger" onclick="event.stopPropagation();window._TDC_desinscrire(\'' + id + '\',this)">Se désinscrire</button>');
+          ? '<button class="btn btn-danger" data-ev-id="' + ev.id + '" data-ev-action="annuler-payant" data-ev-titre="' + ev.titre.replace(/"/g, '&quot;') + '">Annuler</button>'
+          : '<button class="btn btn-danger" data-ev-id="' + ev.id + '" data-ev-action="desinscrire">Se désinscrire</button>');
     } else if (enAttente) {
       actions = '<span class="ev-tag tag-yellow" style="padding:5px 12px;">⏳ Attente</span>'
-        + '<button class="btn btn-danger" onclick="event.stopPropagation();window._TDC_desinscrire(\'' + id + '\',this)">Annuler</button>';
+        + '<button class="btn btn-danger" data-ev-id="' + ev.id + '" data-ev-action="desinscrire">Annuler</button>';
     } else if (complet) {
-      actions = '<button class="btn btn-o" style="font-size:12px;padding:6px 14px;" onclick="event.stopPropagation();window._TDC_inscrire(\'' + id + '\',true,this)">Liste attente</button>';
+      actions = '<button class="btn btn-o" style="font-size:12px;padding:6px 14px;" data-ev-id="' + ev.id + '" data-ev-action="inscrire" data-ev-attente="1">Liste attente</button>';
     } else {
-      actions = '<button class="btn btn-p" style="font-size:12px;padding:6px 14px;" onclick="event.stopPropagation();window._TDC_inscrire(\'' + id + '\',false,this)">S\'inscrire</button>';
+      actions = '<button class="btn btn-p" style="font-size:12px;padding:6px 14px;" data-ev-id="' + ev.id + '" data-ev-action="inscrire" data-ev-attente="0">S\'inscrire</button>';
     }
 
     var photoHtml = ev.photo_url
@@ -277,7 +290,6 @@
         + '</div>'
       : '';
 
-    // Pas de onclick sur la card entière — seul "Voir les détails" ouvre le modal
     return '<div class="ev-card" style="margin-bottom:12px;padding:20px;position:relative;">'
       + photoHtml
       + '<div style="display:flex;gap:16px;align-items:flex-start;">'
@@ -290,7 +302,7 @@
         + '</div>'
       + '</div>'
       + '<div style="text-align:right;margin-top:10px;">'
-        + '<span onclick="window._TDC_openEvent(\'' + id + '\')" style="font-size:12px;color:var(--green);cursor:pointer;font-weight:500;">Voir les détails →</span>'
+        + '<button data-ev-open="' + ev.id + '" style="background:none;border:none;font-size:12px;color:var(--green);cursor:pointer;font-weight:500;font-family:inherit;padding:0;">Voir les détails →</button>'
       + '</div>'
     + '</div>';
   }
