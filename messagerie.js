@@ -73,22 +73,23 @@
         + '</div>'
       + '</div>'
 
-      // Messages privés
-      + '<div id="msg-prives" style="display:none;flex-direction:row;height:520px;border:1px solid var(--b);border-radius:0 16px 16px 16px;overflow:hidden;">'
+      // Messages privés - responsive mobile
+      + '<div id="msg-prives" style="display:none;flex-direction:column;height:520px;border:1px solid var(--b);border-radius:0 16px 16px 16px;overflow:hidden;">'
 
-        // Liste conversations
-        + '<div id="conv-list" style="width:200px;flex-shrink:0;border-right:1px solid var(--b);background:var(--cream);overflow-y:auto;">'
-          + '<div style="padding:12px 14px;font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--b);">Membres</div>'
-          + '<div id="conv-membres"></div>'
+        // Vue liste membres (mobile: plein écran, desktop: sidebar)
+        + '<div id="conv-list-view" style="display:flex;flex-direction:column;height:100%;">'
+          + '<div style="padding:12px 14px;font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--b);background:var(--cream);">Membres du cercle</div>'
+          + '<div id="conv-membres" style="flex:1;overflow-y:auto;background:var(--cream);"></div>'
         + '</div>'
 
-        // Zone conversation
-        + '<div style="flex:1;display:flex;flex-direction:column;">'
+        // Vue conversation (mobile: plein écran, caché par défaut)
+        + '<div id="conv-chat-view" style="display:none;flex-direction:column;height:100%;">'
           + '<div id="conv-header" style="padding:12px 16px;border-bottom:1px solid var(--b);font-size:14px;font-weight:500;color:var(--t);background:var(--w);display:flex;align-items:center;gap:10px;">'
+            + '<button id="conv-back" style="background:none;border:none;font-size:20px;cursor:pointer;padding:0;color:var(--green);">←</button>'
             + '<span style="color:var(--t3);">Sélectionne un membre</span>'
           + '</div>'
           + '<div id="priv-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--w);"></div>'
-          + '<div id="priv-input-zone" style="padding:12px 16px;border-top:1px solid var(--b);display:none;align-items:center;gap:8px;background:var(--w);">'
+          + '<div id="priv-input-zone" style="padding:12px 16px;border-top:1px solid var(--b);display:flex;align-items:center;gap:8px;background:var(--w);">'
             + '<input type="text" id="priv-input" placeholder="Ton message..." maxlength="500" style="flex:1;padding:10px 14px;border-radius:100px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);color:var(--t);outline:none;">'
             + '<button id="priv-send" style="width:40px;height:40px;border-radius:50%;background:var(--green);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">→</button>'
           + '</div>'
@@ -210,10 +211,18 @@
     var avatar = membre.photo_profil
       ? '<img src="' + membre.photo_profil + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="">'
       : '<div style="width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;">' + (membre.prenom||'?')[0].toUpperCase() + '</div>';
-    header.innerHTML = avatar + '<span>' + membre.prenom + '</span>';
+    header.innerHTML = '<button id="conv-back" style="background:none;border:none;font-size:20px;cursor:pointer;padding:0;color:var(--green);">←</button>'
+      + avatar + '<span>' + membre.prenom + '</span>';
 
-    // Afficher zone saisie
-    document.getElementById('priv-input-zone').style.display = 'flex';
+    // Bouton retour
+    document.getElementById('conv-back').addEventListener('click', function() {
+      document.getElementById('conv-list-view').style.display = 'flex';
+      document.getElementById('conv-chat-view').style.display = 'none';
+    });
+
+    // Sur mobile: masquer liste, afficher chat
+    document.getElementById('conv-list-view').style.display = 'none';
+    document.getElementById('conv-chat-view').style.display = 'flex';
 
     // Charger messages
     loadPrivateMessages();
