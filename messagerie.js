@@ -12,6 +12,7 @@
   var realtimePrivate = null;
   var currentConv     = null; // email du destinataire actif
   var membres         = [];
+  var searchQuery     = '';   // filtre recherche membres
 
   document.addEventListener('TDC:login',  function () { loadMembres(); });
   document.addEventListener('TDC:tab',    function (e) {
@@ -48,70 +49,101 @@
     secP.style.display = tab === 'prives'    ? 'flex' : 'none';
 
     if (tab === 'collectif') loadChat();
-    if (tab === 'prives')    loadConversations();
+    if (tab === 'prives')    { searchQuery = ''; loadConversations(); }
   }
 
   // ── Inject UI ─────────────────────────────────────────
   document.addEventListener('TDC:login', function () {
     setTimeout(function() {
-    var sec = document.getElementById('tc-messagerie');
-    if (!sec) return;
+      var sec = document.getElementById('tc-messagerie');
+      if (!sec) return;
 
-    sec.innerHTML =
-      // Sous-onglets
-      '<div class="subtab-row" style="margin-bottom:0;">'
-        + '<button class="subtab active" id="msgTabCollectif">🌍 Chat du cercle</button>'
-        + '<button class="subtab" id="msgTabPrives">💌 Messages privés</button>'
-      + '</div>'
-
-      // Chat collectif
-      + '<div id="msg-collectif" style="display:flex;flex-direction:column;height:520px;border:1px solid var(--b);border-radius:0 16px 16px 16px;overflow:hidden;background:var(--w);">'
-        + '<div id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;"></div>'
-        + '<div style="padding:12px 16px;border-top:1px solid var(--b);display:flex;gap:8px;align-items:center;background:var(--w);">'
-          + '<input type="text" id="chat-input" placeholder="Envoie un message à la meute 🐾" maxlength="500" style="flex:1;padding:10px 14px;border-radius:100px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);color:var(--t);outline:none;">'
-          + '<button id="chat-send" style="width:40px;height:40px;border-radius:50%;background:var(--green);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">→</button>'
-        + '</div>'
-      + '</div>'
-
-      // Messages privés - responsive mobile
-      + '<div id="msg-prives" style="display:none;flex-direction:column;height:520px;border:1px solid var(--b);border-radius:0 16px 16px 16px;overflow:hidden;">'
-
-        // Vue liste membres (mobile: plein écran, desktop: sidebar)
-        + '<div id="conv-list-view" style="display:flex;flex-direction:column;height:100%;">'
-          + '<div style="padding:12px 14px;font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--b);background:var(--cream);">Membres du cercle</div>'
-          + '<div id="conv-membres" style="flex:1;overflow-y:auto;background:var(--cream);"></div>'
+      sec.innerHTML =
+        // Sous-onglets
+        '<div class="subtab-row" style="margin-bottom:0;">'
+          + '<button class="subtab active" id="msgTabCollectif">🌍 Chat du cercle</button>'
+          + '<button class="subtab" id="msgTabPrives">💌 Messages privés</button>'
         + '</div>'
 
-        // Vue conversation (mobile: plein écran, caché par défaut)
-        + '<div id="conv-chat-view" style="display:none;flex-direction:column;height:100%;">'
-          + '<div id="conv-header" style="padding:12px 16px;border-bottom:1px solid var(--b);font-size:14px;font-weight:500;color:var(--t);background:var(--w);display:flex;align-items:center;gap:10px;">'
-            + '<button id="conv-back" style="background:none;border:none;font-size:20px;cursor:pointer;padding:0;color:var(--green);">←</button>'
-            + '<span style="color:var(--t3);">Sélectionne un membre</span>'
-          + '</div>'
-          + '<div id="priv-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--w);"></div>'
-          + '<div id="priv-input-zone" style="padding:12px 16px;border-top:1px solid var(--b);display:flex;align-items:center;gap:8px;background:var(--w);">'
-            + '<input type="text" id="priv-input" placeholder="Ton message..." maxlength="500" style="flex:1;padding:10px 14px;border-radius:100px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);color:var(--t);outline:none;">'
-            + '<button id="priv-send" style="width:40px;height:40px;border-radius:50%;background:var(--green);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">→</button>'
+        // Chat collectif
+        + '<div id="msg-collectif" style="display:flex;flex-direction:column;height:520px;border:1px solid var(--b);border-radius:0 16px 16px 16px;overflow:hidden;background:var(--w);">'
+          + '<div id="chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;"></div>'
+          + '<div style="padding:12px 16px;border-top:1px solid var(--b);display:flex;gap:8px;align-items:center;background:var(--w);">'
+            + '<input type="text" id="chat-input" placeholder="Envoie un message à la meute 🐾" maxlength="500" style="flex:1;padding:10px 14px;border-radius:100px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);color:var(--t);outline:none;">'
+            + '<button id="chat-send" style="width:40px;height:40px;border-radius:50%;background:var(--green);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">→</button>'
           + '</div>'
         + '</div>'
 
-      + '</div>';
+        // Messages privés
+        + '<div id="msg-prives" style="display:none;flex-direction:column;height:520px;border:1px solid var(--b);border-radius:0 16px 16px 16px;overflow:hidden;">'
 
-    // Bind sous-onglets
-    document.getElementById('msgTabCollectif').addEventListener('click', function() { showSubTab('collectif'); });
-    document.getElementById('msgTabPrives').addEventListener('click', function() { showSubTab('prives'); });
+          // Vue liste membres
+          + '<div id="conv-list-view" style="display:flex;flex-direction:column;height:100%;">'
 
-    // Bind envoi chat collectif
-    document.getElementById('chat-send').addEventListener('click', sendChat);
-    document.getElementById('chat-input').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') sendChat();
-    });
+            // Header + barre de recherche
+            + '<div style="border-bottom:1px solid var(--b);background:var(--cream);">'
+              + '<div style="padding:10px 14px 6px;font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;">Membres du cercle</div>'
+              + '<div style="padding:0 10px 10px;">'
+                + '<div style="display:flex;align-items:center;gap:8px;background:var(--w);border:1.5px solid var(--b);border-radius:100px;padding:7px 12px;">'
+                  + '<span style="font-size:13px;color:var(--t3);">🔍</span>'
+                  + '<input type="text" id="membres-search" placeholder="Rechercher un membre..." style="border:none;background:transparent;font-family:inherit;font-size:13px;color:var(--t);outline:none;width:100%;" autocomplete="off">'
+                  + '<button id="membres-search-clear" style="display:none;background:none;border:none;font-size:14px;color:var(--t3);cursor:pointer;padding:0;line-height:1;">✕</button>'
+                + '</div>'
+              + '</div>'
+            + '</div>'
 
-    // Bind envoi message privé
-    document.getElementById('priv-send').addEventListener('click', sendPrivate);
-    document.getElementById('priv-input').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') sendPrivate();
-    });
+            + '<div id="conv-membres" style="flex:1;overflow-y:auto;background:var(--cream);"></div>'
+          + '</div>'
+
+          // Vue conversation
+          + '<div id="conv-chat-view" style="display:none;flex-direction:column;height:100%;">'
+            + '<div id="conv-header" style="padding:12px 16px;border-bottom:1px solid var(--b);font-size:14px;font-weight:500;color:var(--t);background:var(--w);display:flex;align-items:center;gap:10px;">'
+              + '<button id="conv-back" style="background:none;border:none;font-size:20px;cursor:pointer;padding:0;color:var(--green);">←</button>'
+              + '<span style="color:var(--t3);">Sélectionne un membre</span>'
+            + '</div>'
+            + '<div id="priv-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--w);"></div>'
+            + '<div id="priv-input-zone" style="padding:12px 16px;border-top:1px solid var(--b);display:flex;align-items:center;gap:8px;background:var(--w);">'
+              + '<input type="text" id="priv-input" placeholder="Ton message..." maxlength="500" style="flex:1;padding:10px 14px;border-radius:100px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);color:var(--t);outline:none;">'
+              + '<button id="priv-send" style="width:40px;height:40px;border-radius:50%;background:var(--green);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">→</button>'
+            + '</div>'
+          + '</div>'
+
+        + '</div>';
+
+      // Bind sous-onglets
+      document.getElementById('msgTabCollectif').addEventListener('click', function() { showSubTab('collectif'); });
+      document.getElementById('msgTabPrives').addEventListener('click', function() { showSubTab('prives'); });
+
+      // Bind barre de recherche membres
+      var searchInput = document.getElementById('membres-search');
+      var clearBtn    = document.getElementById('membres-search-clear');
+
+      searchInput.addEventListener('input', function() {
+        searchQuery = searchInput.value.trim().toLowerCase();
+        clearBtn.style.display = searchQuery ? 'block' : 'none';
+        renderMembresList();
+      });
+
+      clearBtn.addEventListener('click', function() {
+        searchInput.value  = '';
+        searchQuery        = '';
+        clearBtn.style.display = 'none';
+        searchInput.focus();
+        renderMembresList();
+      });
+
+      // Bind envoi chat collectif
+      document.getElementById('chat-send').addEventListener('click', sendChat);
+      document.getElementById('chat-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') sendChat();
+      });
+
+      // Bind envoi message privé
+      document.getElementById('priv-send').addEventListener('click', sendPrivate);
+      document.getElementById('priv-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') sendPrivate();
+      });
+
     }, 100);
   });
 
@@ -178,29 +210,72 @@
 
   // ── MESSAGES PRIVÉS ───────────────────────────────────
   function loadConversations() {
+    searchQuery = '';
+    var searchInput = document.getElementById('membres-search');
+    var clearBtn    = document.getElementById('membres-search-clear');
+    if (searchInput) searchInput.value = '';
+    if (clearBtn)    clearBtn.style.display = 'none';
+    renderMembresList();
+  }
+
+  // Rendu filtré de la liste des membres
+  function renderMembresList() {
     var listEl = document.getElementById('conv-membres');
     if (!listEl) return;
 
+    var filtered = membres.filter(function(m) {
+      if (!searchQuery) return true;
+      return (m.prenom || '').toLowerCase().includes(searchQuery);
+    });
+
     if (membres.length === 0) {
-      listEl.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--t3);">Aucun membre</div>';
+      listEl.innerHTML = '<div style="padding:16px;font-size:13px;color:var(--t3);text-align:center;">Aucun membre</div>';
+      return;
+    }
+
+    if (filtered.length === 0) {
+      listEl.innerHTML =
+        '<div style="padding:24px 16px;text-align:center;">'
+          + '<div style="font-size:28px;margin-bottom:8px;">🔍</div>'
+          + '<div style="font-size:13px;color:var(--t3);">Aucun membre trouvé pour<br><strong style="color:var(--t);">"' + escapeHtml(searchQuery) + '"</strong></div>'
+        + '</div>';
       return;
     }
 
     listEl.innerHTML = '';
-    membres.forEach(function(m) {
+    filtered.forEach(function(m) {
       var div = document.createElement('div');
-      div.style.cssText = 'padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--b);transition:background .15s;';
-      div.addEventListener('mouseover', function() { div.style.background = 'var(--cream2)'; });
-      div.addEventListener('mouseout',  function() { div.style.background = currentConv === m.email ? 'var(--greenp)' : ''; });
+      div.style.cssText = 'padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--b);transition:background .15s;background:' + (currentConv === m.email ? 'var(--greenp)' : 'transparent') + ';';
+      div.addEventListener('mouseover', function() { if (currentConv !== m.email) div.style.background = 'var(--cream2)'; });
+      div.addEventListener('mouseout',  function() { div.style.background = currentConv === m.email ? 'var(--greenp)' : 'transparent'; });
 
       var avatar = m.photo_profil
-        ? '<img src="' + m.photo_profil + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" alt="">'
-        : '<div style="width:28px;height:28px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;">' + (m.prenom||'?')[0].toUpperCase() + '</div>';
+        ? '<img src="' + m.photo_profil + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="">'
+        : '<div style="width:36px;height:36px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;flex-shrink:0;">' + (m.prenom||'?')[0].toUpperCase() + '</div>';
 
-      div.innerHTML = avatar + '<span style="font-size:13px;color:var(--t);font-weight:' + (currentConv === m.email ? '500' : '400') + ';">' + m.prenom + '</span>';
+      // Highlight du terme recherché dans le prénom
+      var prenomDisplay = highlightMatch(m.prenom || '', searchQuery);
+
+      div.innerHTML = avatar
+        + '<div>'
+          + '<div style="font-size:13px;color:var(--t);font-weight:' + (currentConv === m.email ? '600' : '400') + ';">' + prenomDisplay + '</div>'
+          + (currentConv === m.email ? '<div style="font-size:11px;color:var(--green);">Conversation active</div>' : '')
+        + '</div>';
+
       div.addEventListener('click', function() { openConversation(m); });
       listEl.appendChild(div);
     });
+  }
+
+  // Met en surbrillance le terme recherché dans le texte
+  function highlightMatch(text, query) {
+    if (!query) return escapeHtml(text);
+    var escaped = escapeHtml(text);
+    var escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return escaped.replace(
+      new RegExp('(' + escapedQuery + ')', 'gi'),
+      '<mark style="background:var(--goldp);color:var(--gold);border-radius:3px;padding:0 2px;">$1</mark>'
+    );
   }
 
   function openConversation(membre) {
@@ -212,23 +287,25 @@
       ? '<img src="' + membre.photo_profil + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="">'
       : '<div style="width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;">' + (membre.prenom||'?')[0].toUpperCase() + '</div>';
     header.innerHTML = '<button id="conv-back" style="background:none;border:none;font-size:20px;cursor:pointer;padding:0;color:var(--green);">←</button>'
-      + avatar + '<span>' + membre.prenom + '</span>';
+      + avatar + '<span style="font-size:14px;font-weight:500;">' + escapeHtml(membre.prenom) + '</span>';
 
     // Bouton retour
     document.getElementById('conv-back').addEventListener('click', function() {
       document.getElementById('conv-list-view').style.display = 'flex';
       document.getElementById('conv-chat-view').style.display = 'none';
+      currentConv = null;
+      renderMembresList();
     });
 
-    // Sur mobile: masquer liste, afficher chat
+    // Mobile: masquer liste, afficher chat
     document.getElementById('conv-list-view').style.display = 'none';
     document.getElementById('conv-chat-view').style.display = 'flex';
 
     // Charger messages
     loadPrivateMessages();
 
-    // Re-render liste pour highlight
-    loadConversations();
+    // Re-render liste pour highlight de la conv active
+    renderMembresList();
 
     // Subscribe realtime messages privés
     if (realtimePrivate) realtimePrivate.unsubscribe();
@@ -294,11 +371,11 @@
     input.value = '';
 
     await window.TDC.db.from('messages_prives').insert([{
-      expediteur_email:  window.TDC.userEmail,
-      expediteur_prenom: window.TDC.userPrenom,
+      expediteur_email:   window.TDC.userEmail,
+      expediteur_prenom:  window.TDC.userPrenom,
       destinataire_email: currentConv,
-      message:           msg,
-      lu:                false
+      message:            msg,
+      lu:                 false
     }]);
   }
 
@@ -314,7 +391,6 @@
       }, function(payload) {
         var box = document.getElementById('chat-messages');
         if (!box) return;
-        // Supprimer le message "sois le premier"
         var empty = box.querySelector('div[style*="Sois le premier"]');
         if (empty) empty.remove();
         appendChatMsg(payload.new);
