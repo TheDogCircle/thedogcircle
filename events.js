@@ -13,36 +13,28 @@
   document.addEventListener('TDC:ready', function () {
     injectModal();
 
-    // ✅ DÉLÉGATION GLOBALE — gère TOUS les clics (cards + modal)
+    // ✅ DÉLÉGATION GLOBALE — sélecteur simplifié au maximum
     document.addEventListener('click', function (e) {
 
-      // 1. Bouton action dans une card (hors modal)
-      var cardBtn = e.target.closest('.ev-actions [data-action]');
-      if (cardBtn && !e.target.closest('#modal-ev-detail')) {
+      // 1. N'importe quel bouton [data-action] (card ou modal) — priorité absolue
+      var actionBtn = e.target.closest('[data-action]');
+      if (actionBtn) {
         e.stopPropagation();
-        handleAction(cardBtn);
+        handleAction(actionBtn);
         return;
       }
 
-      // 2. Bouton action dans le modal
-      var modalBtn = e.target.closest('#ev-det-act [data-action]');
-      if (modalBtn) {
-        handleAction(modalBtn);
-        return;
-      }
-
-      // 3. "Voir les détails →"
+      // 2. "Voir les détails →"
       var openLink = e.target.closest('[data-open-ev]');
-      if (openLink && !e.target.closest('#modal-ev-detail')) {
+      if (openLink) {
+        e.stopPropagation();
         openEventModal(openLink.dataset.openEv);
         return;
       }
 
-      // 4. Clic sur la card (ouvre le modal) — seulement si pas sur un bouton ou lien
+      // 3. Clic sur la card → ouvre le modal (uniquement si hors modal)
       var card = e.target.closest('.ev-card-wrap');
-      if (card
-          && !e.target.closest('[data-action]')
-          && !e.target.closest('[data-open-ev]')) {
+      if (card && !e.target.closest('#modal-ev-detail')) {
         openEventModal(card.dataset.evid);
         return;
       }
