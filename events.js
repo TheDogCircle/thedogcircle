@@ -13,62 +13,54 @@
   document.addEventListener('TDC:ready', function () {
     injectModal();
 
+    // Gestionnaire global uniquement pour les boutons dans le MODAL
     document.addEventListener('click', function (e) {
 
-      // Ouvrir le modal détail — seulement sur "Voir les détails"
-      var card = e.target.closest('.ev-card-wrap');
-      if (card && !e.target.closest('[data-action]') && !e.target.closest('.ev-actions') && !e.target.closest('[data-open-ev]')) {
-        // Ne rien faire si clic sur la card — laisser les boutons gérer
-        return;
-      }
-
-      // Bouton "Voir les détails"
-      var btnDetail = e.target.closest('[data-open-ev]');
-      if (btnDetail) {
-        openEventModal(btnDetail.dataset.openEv);
-        return;
-      }
-
-      // Actions inscription
-      var btn = e.target.closest('[data-action]');
+      // Bouton dans le modal
+      var btn = e.target.closest('#ev-det-act [data-action]');
       if (!btn) return;
-      var action = btn.dataset.action;
-
-      if (action === 'inscrire') {
-        var id      = btn.dataset.id;
-        var attente = btn.dataset.attente === '1';
-        btn.disabled    = true;
-        btn.textContent = '...';
-        inscrire(id, attente)
-          .then(function () { loadEvents(); closeModal(); })
-          .catch(function (err) {
-            btn.disabled    = false;
-            btn.textContent = attente ? 'Liste attente' : "S'inscrire";
-            alert('Erreur : ' + err.message);
-          });
-
-      } else if (action === 'desinscrire') {
-        if (!confirm('Tu veux vraiment te désinscrire ?')) return;
-        btn.disabled = true;
-        desinscrire(btn.dataset.id)
-          .then(function () { loadEvents(); closeModal(); })
-          .catch(function (err) {
-            btn.disabled = false;
-            alert('Erreur : ' + err.message);
-          });
-
-      } else if (action === 'annuler-payant') {
-        var titre = btn.dataset.titre;
-        if (confirm('Cet événement est payant et a lieu dans moins de 24h.\nPour annuler, contacte thedogcircleclub@gmail.com\n\nVeux-tu ouvrir ton client email ?')) {
-          window.location.href = 'mailto:thedogcircleclub@gmail.com'
-            + '?subject=' + encodeURIComponent('Annulation - ' + titre);
-        }
-      }
+      handleAction(btn);
     });
   });
 
   document.addEventListener('TDC:tab',   function (e) { if (e.detail.tab === 'events') loadEvents(); });
   document.addEventListener('TDC:login',  function () { loadEvents(); });
+
+  // ── Gérer une action (inscrire / désinscrire) ────────
+  function handleAction(btn) {
+    var action = btn.dataset.action;
+
+    if (action === 'inscrire') {
+      var id      = btn.dataset.id;
+      var attente = btn.dataset.attente === '1';
+      btn.disabled    = true;
+      btn.textContent = '...';
+      inscrire(id, attente)
+        .then(function () { loadEvents(); closeModal(); })
+        .catch(function (err) {
+          btn.disabled    = false;
+          btn.textContent = attente ? 'Liste attente' : "S'inscrire";
+          alert('Erreur : ' + err.message);
+        });
+
+    } else if (action === 'desinscrire') {
+      if (!confirm('Tu veux vraiment te désinscrire ?')) return;
+      btn.disabled = true;
+      desinscrire(btn.dataset.id)
+        .then(function () { loadEvents(); closeModal(); })
+        .catch(function (err) {
+          btn.disabled = false;
+          alert('Erreur : ' + err.message);
+        });
+
+    } else if (action === 'annuler-payant') {
+      var titre = btn.dataset.titre;
+      if (confirm('Cet événement est payant et a lieu dans moins de 24h.\nPour annuler, contacte thedogcircleclub@gmail.com\n\nVeux-tu ouvrir ton client email ?')) {
+        window.location.href = 'mailto:thedogcircleclub@gmail.com'
+          + '?subject=' + encodeURIComponent('Annulation - ' + titre);
+      }
+    }
+  }
 
   // ── Injecter le modal ────────────────────────────────
   function injectModal() {
@@ -106,7 +98,6 @@
     var m = document.getElementById('modal-ev-detail');
     if (!m) { injectModal(); m = document.getElementById('modal-ev-detail'); }
 
-    // Photo
     var photoEl = document.getElementById('ev-det-photo');
     if (ev.photo_url) {
       photoEl.innerHTML = '<img src="' + ev.photo_url + '" style="width:100%;height:220px;object-fit:cover;" alt="">';
@@ -133,7 +124,6 @@
 
     document.getElementById('ev-det-desc').textContent = ev.description || '';
 
-    // Bouton action
     var complet    = restantes <= 0;
     var insc       = mesInscriptions.find(function (i) { return i.event_id === ev.id; });
     var estInscrit = insc && insc.statut === 'confirme';
@@ -181,18 +171,15 @@
       if (evRes.error) { c.innerHTML = '<div class="error">Erreur : ' + evRes.error.message + '</div>'; return; }
       if (!evRes.data || evRes.data.length === 0) { c.innerHTML = '<div class="loading">Aucun event pour le moment 🐾</div>'; return; }
 
-      // Stocker pour le modal
       window._TDC_EVENTS = {};
       evRes.data.forEach(function (ev) { window._TDC_EVENTS[String(ev.id)] = ev; });
 
-      // Extraire les villes uniques
       var villes = ['Toutes'];
       evRes.data.forEach(function(ev) {
         var v = ev.ville_custom || ev.ville || 'National';
         if (v && villes.indexOf(v) === -1) villes.push(v);
       });
 
-      // Filtrer les events
       var evsFiltres = filtreVille === 'Toutes'
         ? evRes.data
         : evRes.data.filter(function(ev) {
@@ -200,12 +187,27 @@
             return v === filtreVille;
           });
 
-      // Vider le conteneur
       c.innerHTML = evsFiltres.length === 0
         ? '<div class="loading">Aucun event dans cette ville pour le moment 🐾</div>'
         : evsFiltres.map(function (ev) { return renderEvent(ev); }).join('');
 
-      // Injecter le filtre AVANT les events directement dans le DOM
+      // ✅ FIX : Attacher les handlers directement sur chaque bouton des cards
+      c.querySelectorAll('[data-action]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation(); // empêche l'ouverture du modal
+          handleAction(btn);
+        });
+      });
+
+      // ✅ FIX : Attacher "Voir les détails" directement aussi
+      c.querySelectorAll('[data-open-ev]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openEventModal(link.dataset.openEv);
+        });
+      });
+
+      // Filtre villes
       var filtreDiv = document.createElement('div');
       filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;';
       villes.forEach(function(v) {
@@ -260,7 +262,6 @@
       actions = '<button class="btn btn-p" style="font-size:12px;padding:6px 14px;" data-action="inscrire" data-id="' + ev.id + '" data-attente="0">S\'inscrire</button>';
     }
 
-    // Photo si disponible
     var photoHtml = ev.photo_url
       ? '<div style="height:130px;overflow:hidden;margin:-20px -20px 16px -20px;border-radius:16px 16px 0 0;">'
           + '<img src="' + ev.photo_url + '" style="width:100%;height:130px;object-fit:cover;" loading="lazy" alt="">'
