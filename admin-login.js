@@ -7,7 +7,6 @@
  * =====================================================
  */
 (function () {
-
   document.addEventListener('TDCA:ready', function () {
     document.getElementById('loginBtn').addEventListener('click', doLogin);
     document.getElementById('logoutBtn').addEventListener('click', doLogout);
@@ -20,11 +19,10 @@
     var email = document.getElementById('adminEmail').value.trim();
     var pwd   = document.getElementById('adminPwd').value.trim();
     var err   = document.getElementById('loginErr');
-
     if (email === 'admin@thedogcircle.fr' && pwd === 'admin2026') {
       err.style.display = 'none';
       document.getElementById('pg-login').style.display = 'none';
-      document.getElementById('pg-app').style.display   = 'flex';
+      document.getElementById('pg-app').style.display   = 'flex';  // ✅ flex et non grid
       window.scrollTo(0, 0);
       document.dispatchEvent(new Event('TDCA:login'));
     } else {
@@ -40,5 +38,4 @@
     window.scrollTo(0, 0);
     document.dispatchEvent(new Event('TDCA:logout'));
   }
-
 })();
