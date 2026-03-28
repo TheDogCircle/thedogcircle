@@ -181,12 +181,11 @@
             return v === filtreVille;
           });
 
-      // Rendu HTML
       c.innerHTML = evsFiltres.length === 0
         ? '<div class="loading">Aucun event dans cette ville 🐾</div>'
         : evsFiltres.map(function (ev) { return renderEvent(ev); }).join('');
 
-      // ✅ Listeners directs sur chaque bouton immédiatement après rendu
+      // Listeners directs sur chaque bouton
       c.querySelectorAll('button[data-ev-id]').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
           e.stopPropagation();
@@ -223,7 +222,7 @@
         });
       });
 
-      // ✅ Listeners sur "Voir les détails"
+      // Listeners sur "Voir les détails"
       c.querySelectorAll('button[data-ev-open]').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
           e.stopPropagation();
@@ -252,7 +251,6 @@
   }
 
   // ── Rendu d'une card event ───────────────────────────
-  // ⚠️ Utilise data-ev-* (pas data-action) pour éviter tout conflit avec d'autres listeners
   function renderEvent(ev) {
     var restantes  = ev.places - (ev.inscrits || 0);
     var complet    = restantes <= 0;
@@ -290,7 +288,8 @@
         + '</div>'
       : '';
 
-    return '<div class="ev-card" style="margin-bottom:12px;padding:20px;position:relative;">'
+    // ✅ flex-direction:column pour que "Voir les détails" soit bien en bas
+    return '<div class="ev-card" style="margin-bottom:12px;padding:20px;position:relative;display:flex;flex-direction:column;">'
       + photoHtml
       + '<div style="display:flex;gap:16px;align-items:flex-start;">'
         + '<div class="ev-date" style="flex-shrink:0;"><div class="ev-day">' + (parts[0] || '--') + '</div><div class="ev-month">' + (parts[1] || '--') + '</div></div>'
