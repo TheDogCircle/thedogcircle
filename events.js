@@ -13,18 +13,44 @@
   document.addEventListener('TDC:ready', function () {
     injectModal();
 
-    // Gestionnaire global uniquement pour les boutons dans le MODAL
+    // ✅ DÉLÉGATION GLOBALE — gère TOUS les clics (cards + modal)
     document.addEventListener('click', function (e) {
 
-      // Bouton dans le modal
-      var btn = e.target.closest('#ev-det-act [data-action]');
-      if (!btn) return;
-      handleAction(btn);
+      // 1. Bouton action dans une card (hors modal)
+      var cardBtn = e.target.closest('.ev-actions [data-action]');
+      if (cardBtn && !e.target.closest('#modal-ev-detail')) {
+        e.stopPropagation();
+        handleAction(cardBtn);
+        return;
+      }
+
+      // 2. Bouton action dans le modal
+      var modalBtn = e.target.closest('#ev-det-act [data-action]');
+      if (modalBtn) {
+        handleAction(modalBtn);
+        return;
+      }
+
+      // 3. "Voir les détails →"
+      var openLink = e.target.closest('[data-open-ev]');
+      if (openLink && !e.target.closest('#modal-ev-detail')) {
+        openEventModal(openLink.dataset.openEv);
+        return;
+      }
+
+      // 4. Clic sur la card (ouvre le modal) — seulement si pas sur un bouton ou lien
+      var card = e.target.closest('.ev-card-wrap');
+      if (card
+          && !e.target.closest('[data-action]')
+          && !e.target.closest('[data-open-ev]')) {
+        openEventModal(card.dataset.evid);
+        return;
+      }
     });
   });
 
-  document.addEventListener('TDC:tab',   function (e) { if (e.detail.tab === 'events') loadEvents(); });
-  document.addEventListener('TDC:login',  function () { loadEvents(); });
+  document.addEventListener('TDC:tab',  function (e) { if (e.detail.tab === 'events') loadEvents(); });
+  document.addEventListener('TDC:login', function () { loadEvents(); });
 
   // ── Gérer une action (inscrire / désinscrire) ────────
   function handleAction(btn) {
@@ -187,25 +213,10 @@
             return v === filtreVille;
           });
 
+      // ✅ Plus de listeners directs sur les boutons — la délégation globale s'en charge
       c.innerHTML = evsFiltres.length === 0
         ? '<div class="loading">Aucun event dans cette ville pour le moment 🐾</div>'
         : evsFiltres.map(function (ev) { return renderEvent(ev); }).join('');
-
-      // ✅ FIX : Attacher les handlers directement sur chaque bouton des cards
-      c.querySelectorAll('[data-action]').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation(); // empêche l'ouverture du modal
-          handleAction(btn);
-        });
-      });
-
-      // ✅ FIX : Attacher "Voir les détails" directement aussi
-      c.querySelectorAll('[data-open-ev]').forEach(function(link) {
-        link.addEventListener('click', function(e) {
-          e.stopPropagation();
-          openEventModal(link.dataset.openEv);
-        });
-      });
 
       // Filtre villes
       var filtreDiv = document.createElement('div');
