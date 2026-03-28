@@ -247,8 +247,12 @@
 
     // Photo ou fond coloré
     var mediaSide = ev.photo_url
-      ? '<div style="width:140px;min-width:140px;flex-shrink:0;overflow:hidden;border-radius:12px;">'
+      ? '<div style="width:140px;min-width:140px;flex-shrink:0;overflow:hidden;border-radius:12px;position:relative;">'
           + '<img src="' + ev.photo_url + '" style="width:140px;height:100%;min-height:130px;object-fit:cover;display:block;" loading="lazy" alt="">'
+          + '<div style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);border-radius:8px;padding:5px 10px;text-align:center;">'
+            + '<div style="font-family:\'Playfair Display\',serif;font-size:22px;font-weight:600;color:#fff;line-height:1;">' + (parts[0] || '--') + '</div>'
+            + '<div style="font-size:10px;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:.08em;font-weight:500;">' + monthLabel(parts[1]) + '</div>'
+          + '</div>'
         + '</div>'
       : '<div style="width:140px;min-width:140px;flex-shrink:0;background:var(--greenp);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:16px;">'
           + '<div style="font-family:\'Playfair Display\',serif;font-size:36px;font-weight:600;color:var(--green);line-height:1;">' + (parts[0] || '--') + '</div>'
