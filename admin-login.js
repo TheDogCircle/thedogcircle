@@ -24,7 +24,7 @@
     if (email === 'admin@thedogcircle.fr' && pwd === 'admin2026') {
       err.style.display = 'none';
       document.getElementById('pg-login').style.display = 'none';
-      document.getElementById('pg-app').style.display   = 'grid';
+      document.getElementById('pg-app').style.display   = 'flex';
       window.scrollTo(0, 0);
       document.dispatchEvent(new Event('TDCA:login'));
     } else {
