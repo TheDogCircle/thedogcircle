@@ -192,29 +192,6 @@
         if (v && villes.indexOf(v) === -1) villes.push(v);
       });
 
-      // Filtre villes — boutons avec data-attribute pour éviter les pb de guillemets
-      var filtreDiv = document.createElement('div');
-      filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;';
-      filtreDiv.id = 'ev-filtres-villes';
-      villes.forEach(function(v) {
-        var btn = document.createElement('button');
-        btn.textContent = v;
-        btn.dataset.ville = v;
-        btn.style.cssText = 'padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;border:1.5px solid var(--b);background:transparent;color:var(--t2);';
-        if (filtreVille === v) {
-          btn.style.background = 'var(--green)';
-          btn.style.color = '#fff';
-          btn.style.borderColor = 'var(--green)';
-        }
-        btn.addEventListener('click', function() {
-          filtreVille = v;
-          loadEvents();
-        });
-        filtreDiv.appendChild(btn);
-      });
-
-      var filtreHtml = filtreDiv.outerHTML;
-
       // Filtrer les events
       var evsFiltres = filtreVille === 'Toutes'
         ? evRes.data
@@ -223,15 +200,28 @@
             return v === filtreVille;
           });
 
-      c.innerHTML = filtreHtml
-        + (evsFiltres.length === 0
-          ? '<div class="loading">Aucun event dans cette ville pour le moment 🐾</div>'
-          : evsFiltres.map(function (ev) { return renderEvent(ev); }).join(''));
+      // Vider le conteneur
+      c.innerHTML = evsFiltres.length === 0
+        ? '<div class="loading">Aucun event dans cette ville pour le moment 🐾</div>'
+        : evsFiltres.map(function (ev) { return renderEvent(ev); }).join('');
 
-      window._TDC_evFiltre = function(ville) {
-        filtreVille = ville;
-        loadEvents();
-      };
+      // Injecter le filtre AVANT les events directement dans le DOM
+      var filtreDiv = document.createElement('div');
+      filtreDiv.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;';
+      villes.forEach(function(v) {
+        var btn = document.createElement('button');
+        btn.textContent = v;
+        btn.style.cssText = 'padding:6px 14px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;'
+          + (filtreVille === v
+            ? 'background:var(--green);color:#fff;border:1.5px solid var(--green);'
+            : 'background:transparent;color:var(--t2);border:1.5px solid var(--b);');
+        btn.addEventListener('click', function() {
+          filtreVille = v;
+          loadEvents();
+        });
+        filtreDiv.appendChild(btn);
+      });
+      c.insertBefore(filtreDiv, c.firstChild);
 
     }).catch(function (err) {
       c.innerHTML = '<div class="error">Erreur : ' + err.message + '</div>';
@@ -277,7 +267,7 @@
         + '</div>'
       : '';
 
-    return '<div class="ev-card ev-card-wrap" data-evid="' + ev.id + '" style="cursor:pointer;display:block;padding:20px;position:relative;">'
+    return '<div class="ev-card ev-card-wrap" data-evid="' + ev.id + '" style="display:block;padding:20px;position:relative;">'
       + photoHtml
       + '<div style="display:flex;gap:16px;align-items:flex-start;">'
         + '<div class="ev-date" style="flex-shrink:0;"><div class="ev-day">' + (parts[0] || '--') + '</div><div class="ev-month">' + (parts[1] || '--') + '</div></div>'
@@ -285,7 +275,7 @@
           + '<div class="ev-title">' + ev.titre + '</div>'
           + '<div class="ev-detail">' + (ev.ville_custom || ev.ville || 'National') + ' · ' + (ev.prix || 'Gratuit') + '</div>'
           + '<div class="ev-tags"><span class="ev-tag tag-gold">' + (ev.prix || 'Gratuit') + '</span>' + spotsTag + '</div>'
-          + '<div class="ev-actions" onclick="event.stopPropagation();">' + actions + '</div>'
+          + '<div class="ev-actions">' + actions + '</div>'
         + '</div>'
       + '</div>'
       + '<div style="text-align:right;margin-top:10px;">'
