@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Dog Circle — Back Office</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   --cream:#F6F0E4;--green:#3B5E3F;--greenm:#587A5C;--greenp:#EBF0E8;
@@ -14,12 +14,11 @@
   --red:#C0392B;--redp:#FCEBEB;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',system-ui,sans-serif;background:#F5F5F3;color:var(--t);font-size:14px;line-height:1.5;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--w);color:var(--t);font-size:14px;line-height:1.5;}
 
 /* LOGIN */
 #pg-login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cream);}
-#pg-app{display:none;min-height:100vh;flex-direction:row;}
-.sidebar{width:220px;flex-shrink:0;}
+#pg-app{display:none;flex-direction:column;min-height:100vh;}
 .login-box{background:var(--w);border-radius:16px;padding:36px;width:100%;max-width:380px;border:1px solid var(--b);}
 .login-logo{text-align:center;margin-bottom:24px;}
 .login-brand{font-size:18px;font-weight:500;color:var(--t);}
@@ -45,35 +44,51 @@ textarea{resize:vertical;min-height:72px;}
 .btn-xs-r{background:var(--redp);color:var(--red);border-color:#F09595;}.btn-xs-r:hover{background:#F7C1C1;}
 .btn-xs-e{background:#E6F1FB;color:#185FA5;border-color:#85B7EB;}
 
-/* SIDEBAR */
-.sidebar{background:var(--w);border-right:1px solid var(--b);display:flex;flex-direction:column;}
-.sb-logo{padding:16px 18px;border-bottom:1px solid var(--b);}
-.sb-brand{font-size:15px;font-weight:500;color:var(--t);}
-.sb-brand span{color:var(--gold);}
-.sb-sub{font-size:11px;color:var(--t3);margin-top:2px;}
-.sb-nav{flex:1;padding:8px 0;}
-.sb-sec{font-size:10px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:0.08em;padding:12px 18px 4px;}
-.sb-item{display:flex;align-items:center;gap:8px;padding:9px 18px;font-size:13px;color:var(--t2);cursor:pointer;transition:all 0.15s;border-left:2.5px solid transparent;}
-.sb-item:hover{background:var(--cream);color:var(--t);}
-.sb-item.active{background:var(--greenp);color:var(--green);border-left-color:var(--green);font-weight:500;}
-.sb-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
-.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:500;padding:1px 6px;border-radius:10px;}
-.sb-footer{padding:14px 18px;border-top:1px solid var(--b);}
-.logout-btn{font-size:12px;color:var(--t3);cursor:pointer;display:flex;align-items:center;gap:6px;}
-.logout-btn:hover{color:var(--red);}
+/* TOP NAV */
+.app-nav{
+  position:sticky;top:0;z-index:100;
+  background:var(--w);border-bottom:1px solid var(--b);
+  height:56px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 24px;
+  flex-shrink:0;
+}
+.nav-logo{display:flex;align-items:center;gap:8px;}
+.nav-logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;}
+.nav-logo-text span{color:var(--gold);}
+.nav-tag{font-size:10px;color:var(--t3);background:var(--cream);padding:2px 8px;border-radius:100px;margin-left:6px;}
+.nav-logout{font-size:12px;color:var(--t3);cursor:pointer;display:flex;align-items:center;gap:5px;}
+.nav-logout:hover{color:var(--red);}
 
-/* MAIN */
-.main-content{padding:24px;overflow-y:auto;}
+/* TABS */
+.app-tabs{
+  display:flex;border-bottom:1px solid var(--b);
+  overflow-x:auto;padding:0 24px;background:var(--w);
+  flex-shrink:0;
+}
+.app-tabs::-webkit-scrollbar{display:none;}
+.app-tab{
+  padding:13px 16px;font-size:13px;font-weight:500;
+  color:var(--t3);cursor:pointer;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;transition:all .2s;
+  display:flex;align-items:center;gap:6px;
+}
+.app-tab:hover{color:var(--t);}
+.app-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.tab-badge{background:var(--red);color:#fff;font-size:9px;font-weight:600;padding:1px 6px;border-radius:10px;margin-left:2px;}
+
+/* CONTENU */
+.main-content{padding:24px;max-width:1100px;margin:0 auto;flex:1;}
 .sec{display:none;}.sec.active{display:block;}
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.page-title{font-size:20px;font-weight:500;color:var(--t);}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.page-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--t);}
 .page-sub{font-size:13px;color:var(--t3);margin-top:2px;}
 
 /* STATS */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
-.stat-card{background:var(--w);border-radius:12px;padding:14px 16px;border:1px solid var(--b);}
+.stat-card{background:var(--w);border-radius:12px;padding:16px;border:1px solid var(--b);}
 .stat-label{font-size:11px;color:var(--t3);margin-bottom:4px;}
-.stat-val{font-size:24px;font-weight:500;color:var(--t);}
+.stat-val{font-size:26px;font-weight:500;color:var(--t);}
 .stat-trend{font-size:11px;color:var(--green);margin-top:3px;}
 .stat-trend.neg{color:var(--red);}
 
@@ -120,82 +135,19 @@ textarea{resize:vertical;min-height:72px;}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:var(--cream);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;}
 .toast.show{transform:translateY(0);opacity:1;}
 
-/* ── ADMIN MOBILE ──────────────────────────────── */
-.hamburger { display: none; }
-
-@media (max-width: 768px) {
-  /* Layout principal */
-  .layout {
-    flex-direction: column !important;
-    width: 100vw !important;
-    overflow-x: hidden !important;
-  }
-
-  /* Sidebar cachée par défaut sur mobile */
-  .sidebar {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    bottom: 0 !important;
-    width: 280px !important;
-    height: 100vh !important;
-    z-index: 1000 !important;
-    transform: translateX(-100%) !important;
-    transition: transform .3s ease !important;
-    overflow-y: auto !important;
-  }
-  .sidebar.open {
-    transform: translateX(0) !important;
-  }
-
-  /* Contenu principal */
-  .main-content {
-    width: 100vw !important;
-    padding: 60px 14px 20px !important;
-    box-sizing: border-box !important;
-    overflow-x: hidden !important;
-  }
-
-  /* Hamburger visible */
-  .hamburger {
-    display: flex !important;
-    position: fixed !important;
-    top: 12px !important;
-    left: 12px !important;
-    z-index: 1001 !important;
-    background: var(--green) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 8px !important;
-    width: 42px !important;
-    height: 42px !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 20px !important;
-    cursor: pointer !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
-  }
-
-  /* Overlay */
-  .sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 999;
-  }
-  .sidebar-overlay.open { display: block; }
-
-  /* Tableaux */
-  .tbl { font-size: 12px; display: block; overflow-x: auto; }
-  .tbl th, .tbl td { padding: 8px 6px; white-space: nowrap; }
-  .card { padding: 14px; overflow-x: auto; }
-  .page-header { flex-direction: column; gap: 10px; align-items: flex-start; }
-  .page-title { font-size: 20px; }
-  .frow { flex-direction: column !important; }
-  .fg { width: 100% !important; }
-  .modal { width: 95vw !important; max-width: 95vw !important; padding: 16px !important; }
-  .stats-grid { grid-template-columns: 1fr 1fr !important; }
+/* MOBILE */
+@media(max-width:768px){
+  .app-nav{padding:0 14px;}
+  .app-tabs{padding:0 8px;}
+  .app-tab{font-size:11px;padding:12px 10px;}
+  .main-content{padding:16px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .tbl{font-size:12px;display:block;overflow-x:auto;}
+  .tbl th,.tbl td{padding:8px 6px;white-space:nowrap;}
+  .page-header{flex-direction:column;align-items:flex-start;}
+  .frow{grid-template-columns:1fr;}
+  .modal{width:95vw;max-width:95vw;padding:16px;}
+  .photos-grid{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
@@ -214,36 +166,37 @@ textarea{resize:vertical;min-height:72px;}
     <div class="fg"><label>Email admin</label><input type="email" id="adminEmail" placeholder="admin@thedogcircle.fr"></div>
     <div class="fg"><label>Mot de passe</label><input type="password" id="adminPwd" placeholder="••••••••"></div>
     <button class="btn btn-p" id="loginBtn" style="width:100%;padding:11px;justify-content:center;">Accéder au back office</button>
-    <p class="hint"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2b4a4f4642456b5f434e4f444c48425948474e054d59">[email&#160;protected]</a> / admin2026</p>
+    <p class="hint">admin@thedogcircle.fr / admin2026</p>
   </div>
 </div>
 
 <!-- APP -->
-<div id="pg-app" style="display:none;">
-  <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-  <div class="sidebar">
-    <div class="sb-logo">
-      <div class="sb-brand">The Dog <span>Circle</span></div>
-      <div class="sb-sub">Back Office</div>
+<div id="pg-app">
+
+  <!-- TOP NAV -->
+  <nav class="app-nav">
+    <div class="nav-logo">
+      <div class="nav-logo-text">The Dog <span>Circle</span></div>
+      <span class="nav-tag">Back Office</span>
     </div>
-    <div class="sb-nav">
-      <div class="sb-sec">Général</div>
-      <div class="sb-item active" data-sec="dashboard"><span class="sb-icon">📊</span> Dashboard</div>
-      <div class="sb-sec">Club</div>
-      <div class="sb-item" data-sec="candidatures"><span class="sb-icon">📬</span> Candidatures <span class="sb-badge" id="nb-cands">0</span></div>
-      <div class="sb-item" data-sec="membres"><span class="sb-icon">🐾</span> Membres</div>
-      <div class="sb-item" data-sec="events"><span class="sb-icon">🎉</span> Events</div>
-      <div class="sb-item" data-sec="partenaires"><span class="sb-icon">🤝</span> Partenaires</div>
-      <div class="sb-sec">Contenu</div>
-      <div class="sb-item" data-sec="instadog"><span class="sb-icon">📸</span> Photos Instadog</div>
-      <div class="sb-item" data-sec="map"><span class="sb-icon">📍</span> Carte & Villes</div>
-    </div>
-    <div class="sb-footer">
-      <div class="logout-btn" id="logoutBtn">↩ Déconnexion</div>
-    </div>
+    <div class="nav-logout" id="logoutBtn">↩ Déconnexion</div>
+  </nav>
+
+  <!-- TABS HORIZONTAUX -->
+  <div class="app-tabs" id="adminTabs">
+    <div class="app-tab active" data-sec="dashboard">📊 Dashboard</div>
+    <div class="app-tab" data-sec="candidatures">📬 Candidatures <span class="tab-badge" id="nb-cands">0</span></div>
+    <div class="app-tab" data-sec="membres">🐾 Membres</div>
+    <div class="app-tab" data-sec="events">🎉 Events</div>
+    <div class="app-tab" data-sec="partenaires">🤝 Partenaires</div>
+    <div class="app-tab" data-sec="suggestions">💡 Suggestions & Demandes</div>
+    <div class="app-tab" data-sec="escapades">✨ Escapades luxury</div>
+    <div class="app-tab" data-sec="instadog">📸 Photos Instadog</div>
+    <div class="app-tab" data-sec="map">📍 Carte & Villes</div>
+    <div class="app-tab" data-sec="education">📚 Éducation</div>
   </div>
 
+  <!-- CONTENU -->
   <div class="main-content">
 
     <!-- DASHBOARD -->
@@ -305,6 +258,23 @@ textarea{resize:vertical;min-height:72px;}
       <div class="card"><table class="tbl" id="tbl-partenaires"></table></div>
     </div>
 
+    <!-- SUGGESTIONS -->
+    <div id="sec-suggestions" class="sec">
+      <div class="page-header">
+        <div><div class="page-title">Suggestions & Demandes 💡</div><div class="page-sub">Idées d'events et demandes de garde des membres</div></div>
+      </div>
+      <div id="suggestions-content"></div>
+    </div>
+
+    <!-- ESCAPADES -->
+    <div id="sec-escapades" class="sec">
+      <div class="page-header">
+        <div><div class="page-title">Escapades luxury ✨</div><div class="page-sub">Gérer les escapades et devis</div></div>
+        <button class="btn btn-p" id="btn-add-escapade">+ Nouvelle escapade</button>
+      </div>
+      <div id="escapades-content"></div>
+    </div>
+
     <!-- INSTADOG -->
     <div id="sec-instadog" class="sec">
       <div class="page-header">
@@ -313,7 +283,7 @@ textarea{resize:vertical;min-height:72px;}
       <div class="photos-grid" id="photos-grid"></div>
     </div>
 
-    <!-- MAP / VILLES -->
+    <!-- MAP -->
     <div id="sec-map" class="sec">
       <div class="page-header">
         <div><div class="page-title">Carte & Villes 📍</div><div class="page-sub">Communautés locales</div></div>
@@ -322,14 +292,23 @@ textarea{resize:vertical;min-height:72px;}
       <div class="card"><table class="tbl" id="tbl-villes"></table></div>
     </div>
 
+    <!-- EDUCATION -->
+    <div id="sec-education" class="sec">
+      <div class="page-header">
+        <div><div class="page-title">Éducation 📚</div><div class="page-sub">Gérer les ressources éducatives</div></div>
+        <button class="btn btn-p" id="btn-add-education">+ Nouvelle ressource</button>
+      </div>
+      <div id="education-content"></div>
+    </div>
+
   </div>
 </div>
 
-<!-- MODALS — chaque module injecte ses propres modals -->
+<!-- MODALS -->
 <div id="modals-container"></div>
 
 <!-- LIBS -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="upload-helper.js"></script>
 
 <!-- MODULES ADMIN -->
@@ -345,14 +324,13 @@ textarea{resize:vertical;min-height:72px;}
 <script src="admin-escapades.js"></script>
 <script src="admin-education.js"></script>
 
-<!-- SHELL : init TDCA + navigation -->
+<!-- SHELL -->
 <script>
 (function () {
   var SB_URL = 'https://bmqyysilivmxndwhmovw.supabase.co';
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcXl5c2lsaXZteG5kd2htb3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDc2MDYsImV4cCI6MjA4OTUyMzYwNn0.95uvAOXwBEes1lbYti872OErXb6OOwEBt9dQ-mR4MFE';
   var RESEND_KEY = 're_PbvhbeQA_7FZYaxw5DsaJCqvgJdiUD2wT';
 
-  // Étendre TDCA sans écraser les APIs déjà injectées par les modules
   window.TDCA = window.TDCA || {};
   window.TDCA.resendKey = RESEND_KEY;
   window.TDCA.toast     = toast;
@@ -363,21 +341,35 @@ textarea{resize:vertical;min-height:72px;}
     document.dispatchEvent(new Event('TDCA:ready'));
   });
 
-  // Navigation sidebar — délégation pour capturer les items ajoutés dynamiquement
+  // Navigation par tabs
   document.addEventListener('click', function (e) {
-    var item = e.target.closest('.sb-item[data-sec]');
-    if (!item) return;
-    var sec    = item.dataset.sec;
-    var secEl  = document.getElementById('sec-' + sec);
+    var tab = e.target.closest('.app-tab[data-sec]');
+    if (!tab) return;
+    var sec   = tab.dataset.sec;
+    var secEl = document.getElementById('sec-' + sec);
     if (!secEl) return;
-    document.querySelectorAll('.sb-item').forEach(function (i) { i.classList.remove('active'); });
+    document.querySelectorAll('.app-tab').forEach(function (t) { t.classList.remove('active'); });
     document.querySelectorAll('.sec').forEach(function (s) { s.classList.remove('active'); });
-    item.classList.add('active');
+    tab.classList.add('active');
     secEl.classList.add('active');
     document.dispatchEvent(new CustomEvent('TDCA:section', { detail: { sec: sec } }));
   });
 
-  // Toast global
+  // Compatibilité ancienne navigation sidebar (data-sec sur .sb-item)
+  document.addEventListener('click', function (e) {
+    var item = e.target.closest('.sb-item[data-sec]');
+    if (!item) return;
+    var sec   = item.dataset.sec;
+    var secEl = document.getElementById('sec-' + sec);
+    if (!secEl) return;
+    document.querySelectorAll('.app-tab').forEach(function (t) { t.classList.remove('active'); });
+    document.querySelectorAll('.sec').forEach(function (s) { s.classList.remove('active'); });
+    var tab = document.querySelector('.app-tab[data-sec="' + sec + '"]');
+    if (tab) tab.classList.add('active');
+    secEl.classList.add('active');
+    document.dispatchEvent(new CustomEvent('TDCA:section', { detail: { sec: sec } }));
+  });
+
   function toast(msg) {
     var t = document.getElementById('toast');
     t.textContent = msg;
@@ -385,7 +377,6 @@ textarea{resize:vertical;min-height:72px;}
     setTimeout(function () { t.classList.remove('show'); }, 3000);
   }
 
-  // Helpers modals globaux
   window.openModal = function (id) {
     document.getElementById(id).classList.add('open');
   };
@@ -398,7 +389,6 @@ textarea{resize:vertical;min-height:72px;}
     }
   });
 
-  // Helper pills global
   window.pillStatut = function (s) {
     if (s === 'Actif' || s === 'Ouvert' || s === 'actif')    return '<span class="pill pill-green">' + s + '</span>';
     if (s === 'Complet' || s === 'refuse')                   return '<span class="pill pill-red">' + s + '</span>';
@@ -413,25 +403,6 @@ textarea{resize:vertical;min-height:72px;}
   };
 
 })();
-
-  function toggleSidebar() {
-    var sb = document.querySelector('.sidebar');
-    var ov = document.getElementById('sidebarOverlay');
-    sb.classList.toggle('open');
-    ov.classList.toggle('open');
-  }
-
-  // Fermer sidebar après clic sur item
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.sb-item')) {
-      var sb = document.querySelector('.sidebar');
-      var ov = document.getElementById('sidebarOverlay');
-      if (window.innerWidth <= 768) {
-        sb.classList.remove('open');
-        ov.classList.remove('open');
-      }
-    }
-  });
 </script>
 </body>
 </html>
