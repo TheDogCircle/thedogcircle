@@ -64,6 +64,7 @@ textarea{resize:vertical;min-height:72px;}
   display:flex;border-bottom:1px solid var(--b);
   overflow-x:auto;padding:0 24px;background:var(--w);
   flex-shrink:0;
+  position:sticky;top:56px;z-index:99;
 }
 .app-tabs::-webkit-scrollbar{display:none;}
 .app-tab{
@@ -166,7 +167,7 @@ textarea{resize:vertical;min-height:72px;}
     <div class="fg"><label>Email admin</label><input type="email" id="adminEmail" placeholder="admin@thedogcircle.fr"></div>
     <div class="fg"><label>Mot de passe</label><input type="password" id="adminPwd" placeholder="••••••••"></div>
     <button class="btn btn-p" id="loginBtn" style="width:100%;padding:11px;justify-content:center;">Accéder au back office</button>
-    <p class="hint">admin@thedogcircle.fr / admin2026</p>
+    <p class="hint"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1d7c797074735d69757879727a7e746f7e7178337b6f">[email&#160;protected]</a> / admin2026</p>
   </div>
 </div>
 
@@ -308,7 +309,7 @@ textarea{resize:vertical;min-height:72px;}
 <div id="modals-container"></div>
 
 <!-- LIBS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="upload-helper.js"></script>
 
 <!-- MODULES ADMIN -->
@@ -397,12 +398,4 @@ textarea{resize:vertical;min-height:72px;}
   };
   window.pillFormule = function (f) {
     if (!f) return '<span class="pill pill-gray">—</span>';
-    if (f.includes('Fondateur')) return '<span class="pill pill-amber">' + f + '</span>';
-    if (f.includes('Annuel') || f === 'Annuel') return '<span class="pill pill-blue">' + f + '</span>';
-    return '<span class="pill pill-gray">' + f + '</span>';
-  };
-
-})();
-</script>
-</body>
-</html>
+    if (f.includes('Fondateur')) return '<span class="pill p
