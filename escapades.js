@@ -23,7 +23,8 @@
 
     var gridWrap = document.createElement('div');
     gridWrap.id = 'esc-grid-wrap';
-    gridWrap.innerHTML = '<div id="esc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px;"></div>';
+    var isMobile = window.innerWidth <= 768;
+    gridWrap.innerHTML = '<div id="esc-grid" style="display:grid;grid-template-columns:' + (isMobile ? '1fr' : '1fr 1fr') + ';gap:20px;margin-top:16px;"></div>';
     sec.appendChild(gridWrap);
 
     var panelDevis = document.createElement('div');
