@@ -12,7 +12,6 @@
     checkSession();
   });
 
-  // ── Vérifier session existante ───────────────────────
   async function checkSession() {
     var db  = window.TDC.db;
     var res = await db.auth.getSession();
@@ -21,7 +20,6 @@
     }
   }
 
-  // ── Connexion ────────────────────────────────────────
   function bindLogin() {
     document.getElementById('loginBtn').addEventListener('click', doLogin);
     ['loginPwd', 'loginEmail'].forEach(function (id) {
@@ -30,19 +28,12 @@
       });
     });
 
-    // Bouton déconnexion nav
     var lb = document.getElementById('logoutBtn');
     if (lb) lb.addEventListener('click', doLogout);
 
-    // Bouton déconnexion dropdown bulle
-    var lb2 = document.getElementById('logoutBtn2');
+    var lb2 = document.getElementById('logoutBtnParams');
     if (lb2) lb2.addEventListener('click', doLogout);
 
-    // Bouton déconnexion dans Paramètres
-    var lb3 = document.getElementById('logoutBtnParams');
-    if (lb3) lb3.addEventListener('click', doLogout);
-
-    // Mot de passe oublié
     var forgot = document.getElementById('forgotPwd');
     if (forgot) forgot.addEventListener('click', function (e) {
       e.preventDefault();
@@ -62,8 +53,8 @@
       return;
     }
 
-    btn.textContent = 'Connexion...';
-    btn.disabled    = true;
+    btn.textContent   = 'Connexion...';
+    btn.disabled      = true;
     err.style.display = 'none';
 
     var db  = window.TDC.db;
@@ -100,10 +91,11 @@
     var photoProfil = membre && membre.photo_profil ? membre.photo_profil : null;
     updateAvatar(photoProfil, initiale);
 
-    var welcomeMsg = document.getElementById('welcomeMsg');
-    if (welcomeMsg) welcomeMsg.textContent = 'Bienvenue ' + window.TDC.userPrenom + ' 🐾';
-
     window.scrollTo(0, 0);
+
+    // ✅ Atterrir sur l'accueil à la connexion
+    if (window.TDC_switchTab) window.TDC_switchTab('accueil');
+
     document.dispatchEvent(new CustomEvent('TDC:login', {
       detail: { email: window.TDC.userEmail, prenom: window.TDC.userPrenom }
     }));
@@ -119,29 +111,21 @@
     document.getElementById('pg-login').style.display = 'flex';
     document.getElementById('loginEmail').value = '';
     document.getElementById('loginPwd').value   = '';
-    // Fermer le dropdown
     var dd = document.getElementById('profileDd');
     if (dd) dd.style.display = 'none';
     window.scrollTo(0, 0);
     document.dispatchEvent(new Event('TDC:logout'));
   }
 
-  // ── Mot de passe oublié ──────────────────────────────
   async function forgotPassword() {
     var email = document.getElementById('loginEmail').value.trim();
-    if (!email) {
-      alert('Saisis ton email dans le champ ci-dessus puis clique "Mot de passe oublié".');
-      return;
-    }
+    if (!email) { alert('Saisis ton email dans le champ ci-dessus puis clique "Mot de passe oublié".'); return; }
     var db  = window.TDC.db;
-    var res = await db.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://thedogcircle.fr/membres.html'
-    });
+    var res = await db.auth.resetPasswordForEmail(email, { redirectTo: 'https://thedogcircle.fr/membres.html' });
     if (res.error) { alert('Erreur : ' + res.error.message); return; }
     alert('📧 Un email de réinitialisation a été envoyé à ' + email + ' !');
   }
 
-  // ── Avatar ───────────────────────────────────────────
   function updateAvatar(photoUrl, initiale) {
     var btn = document.getElementById('avatarBtn');
     if (!btn) return;
@@ -164,7 +148,6 @@
 
   window.TDC_updateAvatar = updateAvatar;
 
-  // ── Dropdown bulle avatar ────────────────────────────
   function bindAvatar() {
     var avatarBtn = document.getElementById('avatarBtn');
     var dd        = document.getElementById('profileDd');
@@ -174,16 +157,8 @@
       e.stopPropagation();
       dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
     });
-
-    // Clic dans le dropdown : ne pas fermer
-    dd.addEventListener('click', function (e) {
-      e.stopPropagation();
-    });
-
-    // Clic ailleurs : fermer
-    document.addEventListener('click', function () {
-      dd.style.display = 'none';
-    });
+    dd.addEventListener('click', function (e) { e.stopPropagation(); });
+    document.addEventListener('click', function () { dd.style.display = 'none'; });
   }
 
 })();
