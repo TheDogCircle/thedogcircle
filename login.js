@@ -2,12 +2,9 @@
  * =====================================================
  *  THE DOG CIRCLE — Module Login
  *  Fichier : login.js
- *  Auth    : Supabase Auth (email + password)
  * =====================================================
  */
 (function () {
-
-  document.addEventListener('TDCA:ready', function () { /* admin only */ });
 
   document.addEventListener('TDC:ready', function () {
     bindLogin();
@@ -20,31 +17,37 @@
     var db  = window.TDC.db;
     var res = await db.auth.getSession();
     if (res.data && res.data.session) {
-      var user = res.data.session.user;
-      await loginSuccess(user);
+      await loginSuccess(res.data.session.user);
     }
   }
 
   // ── Connexion ────────────────────────────────────────
   function bindLogin() {
     document.getElementById('loginBtn').addEventListener('click', doLogin);
-    ['loginPwd','loginEmail'].forEach(function (id) {
+    ['loginPwd', 'loginEmail'].forEach(function (id) {
       document.getElementById(id).addEventListener('keydown', function (e) {
         if (e.key === 'Enter') doLogin();
       });
     });
-    document.getElementById('logoutBtn').addEventListener('click', doLogout);
 
-    // Lien mot de passe oublié
-    var hint = document.querySelector('.login-hint');
-    if (hint) {
-      hint.insertAdjacentHTML('afterend',
-        '<p class="login-hint" style="margin-top:8px;">'
-          + '<a id="forgotPwd" style="color:var(--t3);cursor:pointer;">Mot de passe oublié ?</a>'
-        + '</p>'
-      );
-      document.getElementById('forgotPwd').addEventListener('click', forgotPassword);
-    }
+    // Bouton déconnexion nav
+    var lb = document.getElementById('logoutBtn');
+    if (lb) lb.addEventListener('click', doLogout);
+
+    // Bouton déconnexion dropdown bulle
+    var lb2 = document.getElementById('logoutBtn2');
+    if (lb2) lb2.addEventListener('click', doLogout);
+
+    // Bouton déconnexion dans Paramètres
+    var lb3 = document.getElementById('logoutBtnParams');
+    if (lb3) lb3.addEventListener('click', doLogout);
+
+    // Mot de passe oublié
+    var forgot = document.getElementById('forgotPwd');
+    if (forgot) forgot.addEventListener('click', function (e) {
+      e.preventDefault();
+      forgotPassword();
+    });
   }
 
   async function doLogin() {
@@ -54,7 +57,7 @@
     var btn   = document.getElementById('loginBtn');
 
     if (!email || !pwd) {
-      err.textContent  = 'Email et mot de passe obligatoires.';
+      err.textContent   = 'Email et mot de passe obligatoires.';
       err.style.display = 'block';
       return;
     }
@@ -82,7 +85,6 @@
   async function loginSuccess(user) {
     var db = window.TDC.db;
 
-    // Charger les infos du membre depuis la table membres
     var memRes = await db.from('membres').select('*').eq('email', user.email).single();
     var membre = memRes.data;
 
@@ -94,10 +96,10 @@
     document.getElementById('pg-login').style.display = 'none';
     document.getElementById('pg-app').style.display   = 'block';
 
-    // Mettre à jour l'avatar et le bandeau
     var initiale    = window.TDC.userPrenom[0].toUpperCase();
     var photoProfil = membre && membre.photo_profil ? membre.photo_profil : null;
     updateAvatar(photoProfil, initiale);
+
     var welcomeMsg = document.getElementById('welcomeMsg');
     if (welcomeMsg) welcomeMsg.textContent = 'Bienvenue ' + window.TDC.userPrenom + ' 🐾';
 
@@ -117,6 +119,9 @@
     document.getElementById('pg-login').style.display = 'flex';
     document.getElementById('loginEmail').value = '';
     document.getElementById('loginPwd').value   = '';
+    // Fermer le dropdown
+    var dd = document.getElementById('profileDd');
+    if (dd) dd.style.display = 'none';
     window.scrollTo(0, 0);
     document.dispatchEvent(new Event('TDC:logout'));
   }
@@ -136,18 +141,16 @@
     alert('📧 Un email de réinitialisation a été envoyé à ' + email + ' !');
   }
 
-  // ── Mettre à jour l'avatar ──────────────────────────
+  // ── Avatar ───────────────────────────────────────────
   function updateAvatar(photoUrl, initiale) {
     var btn = document.getElementById('avatarBtn');
     if (!btn) return;
-    // Supprimer l'ancienne image si présente
     var oldImg = btn.querySelector('img.avatar-photo');
     if (oldImg) oldImg.remove();
-    // Mettre à jour l'initiale ou photo
     var textNode = btn.childNodes[0];
     if (photoUrl) {
       var img = document.createElement('img');
-      img.src = photoUrl;
+      img.src       = photoUrl;
       img.className = 'avatar-photo';
       img.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:50%;';
       btn.style.position = 'relative';
@@ -159,19 +162,27 @@
     }
   }
 
-  // Exposer pour profil.js
   window.TDC_updateAvatar = updateAvatar;
 
-  // ── Avatar dropdown ──────────────────────────────────
+  // ── Dropdown bulle avatar ────────────────────────────
   function bindAvatar() {
-    document.getElementById('avatarBtn').addEventListener('click', function (e) {
+    var avatarBtn = document.getElementById('avatarBtn');
+    var dd        = document.getElementById('profileDd');
+    if (!avatarBtn || !dd) return;
+
+    avatarBtn.addEventListener('click', function (e) {
       e.stopPropagation();
-      var dd = document.getElementById('profileDd');
       dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
     });
+
+    // Clic dans le dropdown : ne pas fermer
+    dd.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+
+    // Clic ailleurs : fermer
     document.addEventListener('click', function () {
-      var dd = document.getElementById('profileDd');
-      if (dd) dd.style.display = 'none';
+      dd.style.display = 'none';
     });
   }
 
