@@ -47,6 +47,11 @@
     if (m) m.style.display = 'none';
   }
 
+  // ── Vérifier si payant — prix est soit "Gratuit" soit "25€" ──
+  function estPayant(prix) {
+    return prix && prix !== 'Gratuit';
+  }
+
   function handleAction(btn) {
     var action  = btn.dataset.action;
     var eventId = btn.dataset.id;
@@ -64,7 +69,7 @@
         .then(function () { loadEvents(); closeModal(); })
         .catch(function (err) { btn.disabled = false; alert('Erreur : ' + err.message); });
     } else if (action === 'annuler-payant') {
-      if (confirm('Cet événement est payant et a lieu dans moins de 24h.\nContacte thedogcircleclub@gmail.com\n\nOuvrir ton client email ?'))
+      if (confirm('Cet événement est payant.\nContacte thedogcircleclub@gmail.com\n\nOuvrir ton client email ?'))
         window.location.href = 'mailto:thedogcircleclub@gmail.com?subject=' + encodeURIComponent('Annulation - ' + btn.dataset.titre);
     }
   }
@@ -103,7 +108,7 @@
     var insc       = mesInscriptions.find(function (i) { return i.event_id === ev.id; });
     var estInscrit = insc && insc.statut === 'confirme';
     var enAttente  = insc && insc.statut === 'liste_attente';
-    var payant     = ev.prix && ev.prix !== 'Gratuit' && ev.prix !== 'Gratuit membres';
+    var payant     = estPayant(ev.prix);
     var heuresRest = (new Date(ev.date_raw || '') - Date.now()) / 3600000;
     var moins24h   = heuresRest < 24 && heuresRest > 0;
 
@@ -211,7 +216,7 @@
     });
   }
 
-  // ── Rendu d'une card event — nouveau design ──────────
+  // ── Rendu d'une card event ───────────────────────────
   function renderEvent(ev) {
     var restantes  = ev.places - (ev.inscrits || 0);
     var complet    = restantes <= 0;
@@ -219,7 +224,7 @@
     var estInscrit = insc && insc.statut === 'confirme';
     var enAttente  = insc && insc.statut === 'liste_attente';
     var parts      = (ev.date || '--/--').split('/');
-    var payant     = ev.prix && ev.prix !== 'Gratuit' && ev.prix !== 'Gratuit membres';
+    var payant     = estPayant(ev.prix);  // ✅ insensible à la casse
     var heuresRest = (new Date(ev.date_raw || '') - Date.now()) / 3600000;
     var moins24h   = heuresRest < 24 && heuresRest > 0;
     var ville      = ev.ville_custom || ev.ville || 'National';
@@ -260,21 +265,13 @@
         + '</div>';
 
     return '<div style="background:var(--w);border:1px solid var(--b);border-radius:16px;margin-bottom:14px;overflow:hidden;display:flex;min-height:130px;">'
-
-      // Côté gauche — photo ou date
       + mediaSide
-
-      // Côté droit — contenu
       + '<div style="flex:1;padding:18px 20px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;">'
-
-        // Ligne 1 : titre + type
         + '<div>'
           + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
             + (ev.type ? '<span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);font-weight:500;">' + ev.type + '</span>' : '')
           + '</div>'
           + '<div style="font-family:\'Playfair Display\',serif;font-size:17px;font-weight:600;color:var(--t);margin-bottom:6px;line-height:1.3;">' + ev.titre + '</div>'
-
-          // Ligne infos
           + '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:10px;">'
             + '<span style="font-size:12px;color:var(--t3);">📍 ' + ville + '</span>'
             + (ev.heure ? '<span style="font-size:12px;color:var(--t3);">⏰ ' + ev.heure + '</span>' : '')
@@ -282,13 +279,10 @@
             + placesBadge
           + '</div>'
         + '</div>'
-
-        // Ligne 2 : actions + détails
         + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">'
           + '<div style="display:flex;align-items:center;gap:8px;">' + actionBtn + '</div>'
           + '<button data-ev-open="' + ev.id + '" style="background:none;border:none;font-size:12px;color:var(--green);cursor:pointer;font-weight:500;font-family:inherit;padding:0;white-space:nowrap;">Voir les détails →</button>'
         + '</div>'
-
       + '</div>'
     + '</div>';
   }
