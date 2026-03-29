@@ -179,16 +179,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
       <div class="app-logo-text">The Dog <span>Circle</span></div>
     </div>
 
-    <!-- ✅ WRAPPER avec position:relative pour que le dropdown soit bien positionné -->
-    <div class="avatar-wrap">
-      <div class="app-avatar" id="avatarBtn">M</div>
-      <div class="profile-dd" id="profileDd">
-        <div id="ddProfil">🪪 Mon espace</div>
-        <div id="ddMap">🗺️ La carte</div>
-        <div onclick="alert('Système de paiement à venir 🐾')">💳 Abonnement</div>
-        <div onclick="alert('Paramètres à venir 🐾')">⚙️ Paramètres</div>
-        <!-- ✅ BOUTON DÉCONNEXION -->
-        <div class="dd-logout" id="logoutBtn">🚪 Se déconnecter</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <!-- ✅ Lien déconnexion toujours visible dans la nav -->
+      <div id="logoutBtn" style="font-size:12px;color:var(--t3);cursor:pointer;white-space:nowrap;">🚪 Déconnexion</div>
+      <div class="avatar-wrap">
+        <div class="app-avatar" id="avatarBtn">M</div>
+        <div class="profile-dd" id="profileDd">
+          <div id="ddProfil">🪪 Mon espace</div>
+          <div id="ddMap">🗺️ La carte</div>
+          <div onclick="alert('Système de paiement à venir 🐾')">💳 Abonnement</div>
+          <div onclick="alert('Paramètres à venir 🐾')">⚙️ Paramètres</div>
+          <div class="dd-logout" id="logoutBtn2">🚪 Se déconnecter</div>
+        </div>
       </div>
     </div>
   </nav>
@@ -202,7 +204,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     <div class="tab" data-tab="map">🗺️ Map</div>
     <div class="tab" data-tab="education">📚 Éducation</div>
     <div class="tab" data-tab="messagerie">💬 Messages</div>
-    <div class="tab" data-tab="profil">👤 Mon espace</div>
   </div>
 
   <div class="content">
@@ -252,7 +253,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
       </div>
       <div id="profPasseport"></div>
       <div id="profAgenda" style="display:none;"></div>
-      <div id="profParams" style="display:none;"></div>
+      <div id="profParams" style="display:none;">
+        <div style="margin-top:24px;padding:20px;border:1px solid var(--b);border-radius:16px;background:var(--w);">
+          <div style="font-size:14px;font-weight:500;margin-bottom:6px;color:var(--t);">Déconnexion</div>
+          <div style="font-size:12px;color:var(--t3);margin-bottom:14px;">Tu seras redirigé vers la page de connexion.</div>
+          <button id="logoutBtnParams" style="background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;border-radius:100px;padding:9px 22px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">🚪 Se déconnecter</button>
+        </div>
+      </div>
     </div>
 
     <!-- Messagerie -->
@@ -373,6 +380,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
   document.getElementById('ddMap').addEventListener('click', function () {
     document.getElementById('profileDd').style.display = 'none';
     document.querySelector('[data-tab="map"]').click();
+  });
+
+  // Bouton déconnexion dans Paramètres
+  document.getElementById('logoutBtnParams').addEventListener('click', function () {
+    document.getElementById('logoutBtn').click();
   });
 })();
 </script>
