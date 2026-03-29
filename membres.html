@@ -27,42 +27,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 .login-hint{font-size:11px;color:var(--t3);text-align:center;margin-top:14px;}
 .login-hint a{color:var(--green);cursor:pointer;text-decoration:underline;}
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 22px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .2s;text-decoration:none;}
-.btn-p{background:var(--green);color:#fff!important;}
-.btn-p:hover{background:var(--greenm);}
+.btn-p{background:var(--green);color:#fff!important;}.btn-p:hover{background:var(--greenm);}
 .btn-o{background:transparent;color:var(--green);border:1.5px solid var(--green);}
 .btn-danger{background:transparent;color:var(--red);border:1.5px solid var(--red);font-size:12px;padding:5px 12px;}
-
-/* NAV */
 .app-nav{position:sticky;top:0;z-index:100;background:var(--w);border-bottom:1px solid var(--b);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;}
-.app-logo{display:flex;align-items:center;gap:8px;}
+.app-logo{display:flex;align-items:center;gap:8px;cursor:pointer;}
 .app-logo-icon{width:32px;height:32px;background:var(--cream2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;}
-.app-logo-text{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;}
+.app-logo-text{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--t);}
 .app-logo-text span{color:var(--gold);}
-
-/* ✅ AVATAR WRAPPER — position:relative ici, pas sur .app-avatar */
 .avatar-wrap{position:relative;}
 .app-avatar{width:36px;height:36px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;cursor:pointer;overflow:hidden;flex-shrink:0;}
-
-/* ✅ DROPDOWN — positionné par rapport à .avatar-wrap */
 .profile-dd{position:absolute;right:0;top:44px;background:var(--w);border:1px solid var(--b);border-radius:14px;min-width:190px;box-shadow:0 8px 32px rgba(42,28,12,0.12);display:none;z-index:200;}
 .profile-dd div{padding:10px 16px;font-size:13px;cursor:pointer;color:var(--t2);}
 .profile-dd div:hover{background:var(--cream);}
 .profile-dd .dd-logout{color:var(--red);border-top:1px solid var(--b);}
 .profile-dd .dd-logout:hover{background:#fee2e2;}
-
-.tabs{display:flex;border-bottom:1px solid var(--b);overflow-x:auto;padding:0;background:var(--w);}
+.tabs{display:flex;border-bottom:1px solid var(--b);overflow-x:auto;padding:0;background:var(--w);align-items:center;}
 .tabs::-webkit-scrollbar{display:none;}
-.tab{padding:14px 0;font-size:13px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;flex:1;text-align:center;}
+.tab{padding:14px 14px;font-size:13px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;text-align:center;}
+.tab:hover{color:var(--t);}
 .tab.active{color:var(--green);border-bottom-color:var(--green);}
+.tab-spacer{flex:1;}
+.tab-sep{width:1px;background:var(--b);height:24px;flex-shrink:0;margin:0 4px;}
+.tab-annuaire{padding:14px 14px;font-size:13px;font-weight:500;color:var(--gold);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;}
+.tab-annuaire.active{border-bottom-color:var(--gold);}
 .content{padding:24px;max-width:900px;margin:0 auto;}
-.tc{display:none;}
-.tc.active{display:block;}
+.tc{display:none;}.tc.active{display:block;}
 .sec-title{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:4px;}
 .sec-sub{font-size:13px;color:var(--t3);margin-bottom:20px;}
-.banner{background:var(--green);border-radius:16px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
-.banner-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--cream);margin-bottom:3px;}
-.banner-sub{font-size:13px;color:rgba(246,240,228,.7);}
-.banner-badge{background:var(--gold);color:#fff;font-size:11px;padding:5px 14px;border-radius:100px;}
 .subtab-row{display:flex;gap:8px;margin-bottom:20px;}
 .subtab{padding:7px 16px;border-radius:100px;font-size:13px;border:1.5px solid var(--b);cursor:pointer;background:var(--w);font-family:inherit;color:var(--t2);transition:all .2s;}
 .subtab.active{background:var(--green);color:#fff;border-color:var(--green);}
@@ -125,7 +117,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 .map-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;}
 .loading{text-align:center;padding:30px;color:var(--t3);}
 .error{color:var(--red);padding:20px;}
-
 @media(max-width:600px){
   .feed-grid,.partners-grid{grid-template-columns:1fr;}
   .garde-grid{grid-template-columns:1fr 1fr;}
@@ -136,23 +127,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 }
 @media(max-width:768px){
   .app-nav{padding:0 12px;}
-  .tabs{padding:0;}
-  .tab{font-size:11px;padding:12px 6px;}
-  .tc{padding:16px 14px;}
-  .sec-title{font-size:22px;}
+  .tab{font-size:11px;padding:12px 8px;}
+  .content{padding:16px;}
+  .sec-title{font-size:20px;}
   .ev-card{padding:14px;}
-  .ev-day{font-size:22px;}
-  .ev-title{font-size:15px;}
   .feed-grid{grid-template-columns:1fr!important;gap:16px;}
-  .feed-card{border-radius:14px;}
   .partner-grid{grid-template-columns:1fr!important;}
-  .params-section{padding:0;}
 }
 </style>
 </head>
 <body>
 
-<!-- PAGE LOGIN -->
 <div id="pg-login">
   <div class="login-box">
     <div class="login-logo">
@@ -170,15 +155,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
   </div>
 </div>
 
-<!-- APP -->
 <div id="pg-app">
-
   <nav class="app-nav">
-    <div class="app-logo">
+    <div class="app-logo" id="logoHome">
       <div class="app-logo-icon">🐾</div>
       <div class="app-logo-text">The Dog <span>Circle</span></div>
     </div>
-
     <div class="avatar-wrap">
       <div class="app-avatar" id="avatarBtn">M</div>
       <div class="profile-dd" id="profileDd">
@@ -191,7 +173,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
   </nav>
 
   <div class="tabs" id="tabsRow">
-    <div class="tab active" data-tab="feed">📸 Instadog</div>
+    <div class="tab active" data-tab="accueil">🏠 Accueil</div>
+    <div class="tab" data-tab="feed">📸 Instadog</div>
     <div class="tab" data-tab="events">🎉 Events</div>
     <div class="tab" data-tab="escapades">✨ Escapades</div>
     <div class="tab" data-tab="partners">🤝 Partenaires</div>
@@ -199,45 +182,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     <div class="tab" data-tab="map">🗺️ Map</div>
     <div class="tab" data-tab="education">📚 Éducation</div>
     <div class="tab" data-tab="messagerie">💬 Messages</div>
+    <div class="tab-spacer"></div>
+    <div class="tab-sep"></div>
+    <div class="tab tab-annuaire" data-tab="annuaire">📋 Annuaire</div>
   </div>
 
   <div class="content">
-
-    <!-- Instadog -->
-    <div id="tc-feed" class="tc active">
-      <div class="sec-title">Instadog 📸</div>
-      <div class="sec-sub">Les moments de nos chiens</div>
-      <div class="feed-grid" id="feedGrid"></div>
-    </div>
-
-    <!-- Events -->
-    <div id="tc-events" class="tc">
-      <div class="sec-title">Events 🎉</div>
-      <div class="sec-sub">Réservés aux membres The Dog Circle</div>
-      <div id="evList"></div>
-    </div>
-
-    <!-- Escapades -->
-    <div id="tc-escapades" class="tc">
-      <div class="sec-title">Escapades luxury ✨</div>
-      <div class="sec-sub">Des expériences d'exception pour vous et votre chien</div>
-    </div>
-
-    <!-- Partenaires -->
-    <div id="tc-partners" class="tc">
-      <div class="sec-title">Partenaires 🤝</div>
-      <div class="sec-sub">Réductions exclusives pour les membres</div>
-      <div class="partners-grid" id="partnersGrid"></div>
-    </div>
-
-    <!-- Dog Sitting -->
-    <div id="tc-garde" class="tc">
-      <div class="sec-title">Dog Sitting 🐕</div>
-      <div class="sec-sub">Trouve un dog sitter parmi les membres du cercle</div>
-      <div class="garde-grid" id="gardeGrid"></div>
-    </div>
-
-    <!-- Profil -->
+    <div id="tc-accueil" class="tc active"></div>
+    <div id="tc-feed" class="tc"><div class="sec-title">Instadog 📸</div><div class="sec-sub">Les moments de nos chiens</div><div class="feed-grid" id="feedGrid"></div></div>
+    <div id="tc-events" class="tc"><div class="sec-title">Events 🎉</div><div class="sec-sub">Réservés aux membres The Dog Circle</div><div id="evList"></div></div>
+    <div id="tc-escapades" class="tc"><div class="sec-title">Escapades luxury ✨</div><div class="sec-sub">Des expériences d'exception pour vous et votre chien</div></div>
+    <div id="tc-partners" class="tc"><div class="sec-title">Partenaires 🤝</div><div class="sec-sub">Réductions exclusives pour les membres</div><div class="partners-grid" id="partnersGrid"></div></div>
+    <div id="tc-garde" class="tc"><div class="sec-title">Dog Sitting 🐕</div><div class="sec-sub">Trouve un dog sitter parmi les membres du cercle</div><div class="garde-grid" id="gardeGrid"></div></div>
     <div id="tc-profil" class="tc">
       <div class="sec-title">Mon espace 👤</div>
       <div class="sec-sub">Passeport, agenda et paramètres</div>
@@ -250,27 +206,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
       <div id="profAgenda" style="display:none;"></div>
       <div id="profParams" style="display:none;">
         <div style="margin-top:24px;padding:20px;border:1px solid var(--b);border-radius:16px;background:var(--w);">
-          <div style="font-size:14px;font-weight:500;margin-bottom:6px;color:var(--t);">Déconnexion</div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:6px;">Déconnexion</div>
           <div style="font-size:12px;color:var(--t3);margin-bottom:14px;">Tu seras redirigé vers la page de connexion.</div>
           <button id="logoutBtnParams" style="background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;border-radius:100px;padding:9px 22px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">🚪 Se déconnecter</button>
         </div>
       </div>
     </div>
-
-    <!-- Messagerie -->
-    <div id="tc-messagerie" class="tc">
-      <div class="sec-title">Messagerie 💬</div>
-      <div class="sec-sub">Chat collectif et messages privés entre membres</div>
-    </div>
-
-    <!-- Education -->
-    <div id="tc-education" class="tc">
-      <div class="sec-title">Conseils & Éducation 📚</div>
-      <div class="sec-sub">Guides, conseils et ressources pour toi et ton chien</div>
-      <div id="educationGrid"></div>
-    </div>
-
-    <!-- Map -->
+    <div id="tc-messagerie" class="tc"><div class="sec-title">Messagerie 💬</div><div class="sec-sub">Chat collectif et messages privés entre membres</div></div>
+    <div id="tc-education" class="tc"><div class="sec-title">Conseils & Éducation 📚</div><div class="sec-sub">Guides, conseils et ressources pour toi et ton chien</div><div id="educationGrid"></div></div>
     <div id="tc-map" class="tc">
       <div class="sec-title">La carte 🗺️</div>
       <div class="sec-sub">Events, gardes et partenaires près de toi</div>
@@ -281,17 +224,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
         <span><span class="map-dot" style="background:#587A5C;"></span>Partenaires</span>
       </div>
     </div>
-
+    <div id="tc-annuaire" class="tc">
+      <div class="sec-title">Annuaire 📋</div>
+      <div class="sec-sub">Tous les membres du cercle</div>
+      <div id="annuaireGrid"></div>
+    </div>
   </div>
 </div>
 
-<!-- LIBS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="upload-helper.js"></script>
-
-<!-- MODULES -->
 <script src="login.js"></script>
+<script src="accueil.js"></script>
+<script src="annuaire.js"></script>
 <script src="events.js"></script>
 <script src="escapades.js"></script>
 <script src="instadog.js"></script>
@@ -302,100 +248,81 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 <script src="education.js"></script>
 <script src="messagerie.js"></script>
 
-<!-- SHELL -->
 <script>
 (function () {
   var SB_URL = 'https://bmqyysilivmxndwhmovw.supabase.co';
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtcXl5c2lsaXZteG5kd2htb3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDc2MDYsImV4cCI6MjA4OTUyMzYwNn0.95uvAOXwBEes1lbYti872OErXb6OOwEBt9dQ-mR4MFE';
-
   window.TDC = { db: null, userEmail: '', userPrenom: '' };
 
   window.addEventListener('load', function () {
     window.TDC.db = window.supabase.createClient(SB_URL, SB_KEY);
     document.dispatchEvent(new Event('TDC:ready'));
-
-    var hash = window.location.hash;
-    if (hash && hash.includes('type=recovery')) {
-      showResetPasswordModal();
-    }
+    if (window.location.hash.includes('type=recovery')) showResetPasswordModal();
   });
 
-  document.getElementById('tabsRow').addEventListener('click', function (e) {
-    var tab = e.target.closest('.tab');
-    if (!tab) return;
-    var name = tab.dataset.tab;
+  function switchTab(name) {
     document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
-    document.querySelectorAll('.tc').forEach(function (t)  { t.classList.remove('active'); });
-    tab.classList.add('active');
-    document.getElementById('tc-' + name).classList.add('active');
+    document.querySelectorAll('.tc').forEach(function (t) { t.classList.remove('active'); });
+    var tab = document.querySelector('.tab[data-tab="' + name + '"]');
+    var tc  = document.getElementById('tc-' + name);
+    if (tab) tab.classList.add('active');
+    if (tc)  tc.classList.add('active');
     document.dispatchEvent(new CustomEvent('TDC:tab', { detail: { tab: name } }));
+  }
+  window.TDC_switchTab = switchTab;
+
+  document.getElementById('tabsRow').addEventListener('click', function (e) {
+    var tab = e.target.closest('[data-tab]');
+    if (tab) switchTab(tab.dataset.tab);
+  });
+
+  // Logo → retour accueil
+  document.getElementById('logoHome').addEventListener('click', function () {
+    switchTab('accueil');
+  });
+
+  // Dropdown
+  document.getElementById('ddProfil').addEventListener('click', function () {
+    document.getElementById('profileDd').style.display = 'none';
+    switchTab('profil');
+  });
+  document.getElementById('ddParams').addEventListener('click', function () {
+    document.getElementById('profileDd').style.display = 'none';
+    switchTab('profil');
+    setTimeout(function () { var b = document.getElementById('profTabParams'); if (b) b.click(); }, 50);
+  });
+  document.getElementById('logoutBtnParams').addEventListener('click', function () {
+    document.getElementById('logoutBtn').click();
   });
 
   function showResetPasswordModal() {
-    var modal = document.getElementById('modal-reset-pwd');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id    = 'modal-reset-pwd';
-      modal.style = 'display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;';
-      modal.innerHTML =
-        '<div style="background:var(--w);border-radius:20px;padding:32px;width:100%;max-width:420px;">'
-          + '<div style="font-family:\'Playfair Display\',serif;font-size:22px;margin-bottom:8px;">🔑 Nouveau mot de passe</div>'
-          + '<div style="font-size:13px;color:var(--t3);margin-bottom:20px;">Choisis un mot de passe sécurisé pour ton compte.</div>'
-          + '<div class="fg"><label>Nouveau mot de passe</label><input type="password" id="new-pwd" placeholder="••••••••" style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);color:var(--t);outline:none;"></div>'
-          + '<div class="fg"><label>Confirmer le mot de passe</label><input type="password" id="new-pwd-confirm" placeholder="••••••••" style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);color:var(--t);outline:none;"></div>'
-          + '<div id="pwd-err" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;"></div>'
-          + '<button id="pwd-submit" class="btn btn-p" style="width:100%;padding:12px;font-size:14px;">Enregistrer mon mot de passe</button>'
-          + '<div id="pwd-ok" style="display:none;background:#d1fae5;color:#065f46;border-radius:10px;padding:12px;text-align:center;font-size:13px;margin-top:12px;">✓ Mot de passe mis à jour ! 🐾</div>'
-        + '</div>';
-      document.body.appendChild(modal);
-
-      document.getElementById('pwd-submit').addEventListener('click', async function () {
-        var pwd     = document.getElementById('new-pwd').value;
-        var confirm = document.getElementById('new-pwd-confirm').value;
-        var err     = document.getElementById('pwd-err');
-        err.style.display = 'none';
-        if (pwd.length < 8) { err.textContent = 'Minimum 8 caractères.'; err.style.display = 'block'; return; }
-        if (pwd !== confirm) { err.textContent = 'Les mots de passe ne correspondent pas.'; err.style.display = 'block'; return; }
-        var res = await window.TDC.db.auth.updateUser({ password: pwd });
-        if (res.error) { err.textContent = 'Erreur : ' + res.error.message; err.style.display = 'block'; return; }
-        document.getElementById('pwd-ok').style.display = 'block';
-        setTimeout(function () { modal.style.display = 'none'; }, 2500);
-        window.history.replaceState(null, '', window.location.pathname);
-      });
-    }
-    modal.style.display = 'flex';
+    var modal = document.createElement('div');
+    modal.style = 'display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;';
+    modal.innerHTML = '<div style="background:var(--w);border-radius:20px;padding:32px;width:100%;max-width:420px;">'
+      + '<div style="font-family:\'Playfair Display\',serif;font-size:22px;margin-bottom:8px;">🔑 Nouveau mot de passe</div>'
+      + '<div style="font-size:13px;color:var(--t3);margin-bottom:20px;">Choisis un mot de passe sécurisé.</div>'
+      + '<div class="fg"><label>Nouveau mot de passe</label><input type="password" id="new-pwd" style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);outline:none;"></div>'
+      + '<div class="fg"><label>Confirmer</label><input type="password" id="new-pwd-confirm" style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid var(--b);font-family:inherit;font-size:14px;background:var(--cream);outline:none;"></div>'
+      + '<div id="pwd-err" style="display:none;color:var(--red);font-size:12px;margin-bottom:12px;"></div>'
+      + '<button id="pwd-submit" class="btn btn-p" style="width:100%;padding:12px;">Enregistrer</button>'
+      + '<div id="pwd-ok" style="display:none;background:#d1fae5;color:#065f46;border-radius:10px;padding:12px;text-align:center;font-size:13px;margin-top:12px;">✓ Mot de passe mis à jour !</div>'
+      + '</div>';
+    document.body.appendChild(modal);
+    modal.querySelector('#pwd-submit').addEventListener('click', async function () {
+      var pwd = modal.querySelector('#new-pwd').value;
+      var conf = modal.querySelector('#new-pwd-confirm').value;
+      var err = modal.querySelector('#pwd-err');
+      err.style.display = 'none';
+      if (pwd.length < 8) { err.textContent = 'Minimum 8 caractères.'; err.style.display = 'block'; return; }
+      if (pwd !== conf) { err.textContent = 'Les mots de passe ne correspondent pas.'; err.style.display = 'block'; return; }
+      var res = await window.TDC.db.auth.updateUser({ password: pwd });
+      if (res.error) { err.textContent = res.error.message; err.style.display = 'block'; return; }
+      modal.querySelector('#pwd-ok').style.display = 'block';
+      setTimeout(function () { modal.remove(); }, 2500);
+      window.history.replaceState(null, '', window.location.pathname);
+    });
   }
-
   window.TDC_showResetPassword = showResetPasswordModal;
-
-  // Mon espace → affiche tc-profil directement (l'onglet n'est plus dans la barre)
-  document.getElementById('ddProfil').addEventListener('click', function () {
-    document.getElementById('profileDd').style.display = 'none';
-    document.querySelectorAll('.tc').forEach(function (t) { t.classList.remove('active'); });
-    document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
-    document.getElementById('tc-profil').classList.add('active');
-    document.dispatchEvent(new CustomEvent('TDC:tab', { detail: { tab: 'profil' } }));
-  });
-
-  // Paramètres → affiche tc-profil sur l'onglet Paramètres
-  document.getElementById('ddParams').addEventListener('click', function () {
-    document.getElementById('profileDd').style.display = 'none';
-    document.querySelectorAll('.tc').forEach(function (t) { t.classList.remove('active'); });
-    document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
-    document.getElementById('tc-profil').classList.add('active');
-    document.dispatchEvent(new CustomEvent('TDC:tab', { detail: { tab: 'profil' } }));
-    // Activer l'onglet Paramètres dans le sous-menu profil
-    setTimeout(function () {
-      var btn = document.getElementById('profTabParams');
-      if (btn) btn.click();
-    }, 50);
-  });
-
-  // Bouton déconnexion dans Paramètres
-  var lbp = document.getElementById('logoutBtnParams');
-  if (lbp) lbp.addEventListener('click', function () {
-    document.getElementById('logoutBtn').click();
-  });
 })();
 </script>
 </body>
