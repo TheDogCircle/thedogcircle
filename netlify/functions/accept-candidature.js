@@ -52,7 +52,12 @@ exports.handler = async function (event) {
     const authData = await authRes.json();
     if (!authRes.ok) {
       console.error('Auth error:', JSON.stringify(authData));
-      if (authData.code !== 'email_exists' && !String(authData.msg || '').includes('already')) {
+      // Continuer si l'utilisateur existe déjà (error_code ou msg)
+      var isAlreadyExists = authData.error_code === 'email_exists'
+        || authData.code === 'email_exists'
+        || String(authData.msg || '').toLowerCase().includes('already')
+        || String(authData.message || '').toLowerCase().includes('already');
+      if (!isAlreadyExists) {
         throw new Error('Auth: ' + (authData.msg || authData.message || JSON.stringify(authData)));
       }
     }
