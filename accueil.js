@@ -26,7 +26,7 @@
         db.from('inscriptions').select('event_id,statut').eq('membre_email', email),
         db.from('membres').select('prenom,chien,ville,race,photo_profil,photo_chien,date_naissance,date_naissance_chien,situation_amoureuse,created_at,formule,numero_membre').eq('statut', 'actif').order('created_at', { ascending: false }),
         db.from('partenaires').select('nom,type,offre,code,photo_url').eq('statut', 'Actif').limit(3),
-        db.from('photos').select('photo_url,chien,membre_prenom').eq('statut', 'actif').order('id', { ascending: false }).limit(6),
+        db.from('photos').select('photo_url,chien,membre_prenom').order('id', { ascending: false }).limit(6),
         db.from('chat_collectif').select('membre_prenom,message,created_at').order('created_at', { ascending: false }).limit(1),
         db.from('messages_prives').select('id').eq('destinataire_email', email).eq('lu', false)
       ]);
