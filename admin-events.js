@@ -2,7 +2,6 @@
  * =====================================================
  *  THE DOG CIRCLE — Admin Events
  *  Fichier : admin-events.js
- *  Table   : events — photo, heure_fin, ville_custom, description
  * =====================================================
  */
 (function () {
@@ -31,7 +30,20 @@
         + '<div class="fg"><label>Lieu / Point de RDV</label><input type="text" id="ev-lieu" placeholder="Ex: RDV parking principal, entrée nord"></div>'
 
         + '<div class="frow">'
-          + '<div class="fg"><label>Prix membres</label><input type="text" id="ev-prix" placeholder="Gratuit ou 39€"></div>'
+
+          // ✅ TOGGLE GRATUIT / PAYANT
+          + '<div class="fg"><label>Tarif</label>'
+            + '<div style="display:flex;gap:8px;">'
+              + '<button type="button" id="ev-prix-gratuit" onclick="window.TDCA.events.togglePrix(\'gratuit\')" style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;border:1.5px solid var(--green);background:var(--green);color:#fff;font-weight:500;">Gratuit</button>'
+              + '<button type="button" id="ev-prix-payant"  onclick="window.TDCA.events.togglePrix(\'payant\')"  style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;border:1.5px solid var(--b);background:transparent;color:var(--t2);font-weight:500;">Payant</button>'
+            + '</div>'
+            + '<div id="ev-prix-montant-wrap" style="display:none;margin-top:8px;">'
+              + '<input type="number" id="ev-prix-montant" placeholder="Ex: 25" min="0" step="1" style="width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--b);font-family:inherit;font-size:13px;">'
+              + '<div style="font-size:11px;color:var(--t3);margin-top:4px;">Prix par personne en €</div>'
+            + '</div>'
+            + '<input type="hidden" id="ev-prix-type" value="gratuit">'
+          + '</div>'
+
           + '<div class="fg"><label>Type</label>'
             + '<select id="ev-type"><option>Balade</option><option>Évasion</option><option>Apéro canin</option><option>Atelier éducation</option><option>Shooting photo</option><option>Dîner dog-friendly</option><option>Autre</option></select>'
           + '</div>'
@@ -52,7 +64,7 @@
           + '<input type="file" id="ev-photo" accept="image/*" style="font-size:13px;width:100%;">'
           + '<img id="ev-preview" style="display:none;width:100%;height:140px;object-fit:cover;border-radius:10px;margin-top:8px;" src="" alt="">'
           + '<div id="ev-photo-actuelle" style="font-size:11px;color:var(--t3);margin-top:4px;"></div>'
-        + '<div id="ev-photo-suppr" style="display:none;margin-top:6px;"><button type="button" class="btn-xs btn-xs-r" onclick="window.TDCA.events.removePhoto()">🗑️ Supprimer la photo actuelle</button></div>'
+          + '<div id="ev-photo-suppr" style="display:none;margin-top:6px;"><button type="button" class="btn-xs btn-xs-r" onclick="window.TDCA.events.removePhoto()">🗑️ Supprimer la photo actuelle</button></div>'
         + '</div>'
 
         + '<div class="modal-footer">'
@@ -83,6 +95,32 @@
       reader.readAsDataURL(file);
     });
   });
+
+  // ── Toggle Gratuit / Payant ──────────────────────────
+  function togglePrix(mode) {
+    document.getElementById('ev-prix-type').value = mode;
+    var btnG = document.getElementById('ev-prix-gratuit');
+    var btnP = document.getElementById('ev-prix-payant');
+    var wrap = document.getElementById('ev-prix-montant-wrap');
+    if (mode === 'gratuit') {
+      btnG.style.background    = 'var(--green)';
+      btnG.style.color         = '#fff';
+      btnG.style.borderColor   = 'var(--green)';
+      btnP.style.background    = 'transparent';
+      btnP.style.color         = 'var(--t2)';
+      btnP.style.borderColor   = 'var(--b)';
+      wrap.style.display       = 'none';
+    } else {
+      btnP.style.background    = 'var(--green)';
+      btnP.style.color         = '#fff';
+      btnP.style.borderColor   = 'var(--green)';
+      btnG.style.background    = 'transparent';
+      btnG.style.color         = 'var(--t2)';
+      btnG.style.borderColor   = 'var(--b)';
+      wrap.style.display       = 'block';
+      document.getElementById('ev-prix-montant').focus();
+    }
+  }
 
   document.addEventListener('TDCA:login', loadEvents);
   document.addEventListener('TDCA:section', function (e) { if (e.detail.sec === 'events') loadEvents(); });
@@ -115,13 +153,15 @@
           var ville = e.ville_custom || e.ville || '—';
           var heures = e.heure || '—';
           if (e.heure && e.heure_fin) heures = e.heure + ' → ' + e.heure_fin;
+          // Affichage prix lisible
+          var prixAff = prixLabel(e.prix);
           return '<tr>'
             + '<td>' + thumb + '</td>'
             + '<td><div class="tbl-name">' + e.titre + '</div>'
               + (e.description ? '<div style="font-size:11px;color:var(--t3);">' + e.description.substring(0,50) + (e.description.length>50?'…':'') + '</div>' : '') + '</td>'
             + '<td>' + (e.date||'—') + '<div style="font-size:11px;color:var(--t3);">' + heures + '</div></td>'
             + '<td><span class="pill pill-gray">' + ville + '</span></td>'
-            + '<td>' + (e.prix||'Gratuit') + '</td>'
+            + '<td>' + prixAff + '</td>'
             + '<td><strong>' + (e.inscrits||0) + '</strong> / ' + e.places + '</td>'
             + '<td style="' + spotsStyle + '">' + (complet ? 'COMPLET' : restantes + ' restante' + (restantes>1?'s':'')) + '</td>'
             + '<td>' + window.pillStatut(e.statut) + '</td>'
@@ -132,6 +172,12 @@
             + '</div></td>'
           + '</tr>';
         }).join('');
+  }
+
+  // ── Lecture du prix stocké en base ──────────────────
+  function prixLabel(prix) {
+    if (!prix || prix.toLowerCase().trim() === 'gratuit') return '<span class="pill pill-green">Gratuit</span>';
+    return '<span class="pill pill-amber">' + prix + '</span>';
   }
 
   async function voirInscrits(eventId, eventTitre) {
@@ -176,10 +222,20 @@
     document.getElementById('ev-date').value     = e.date_raw || '';
     document.getElementById('ev-time').value     = e.heure    || '10:00';
     document.getElementById('ev-time-fin').value = e.heure_fin|| '';
-    document.getElementById('ev-prix').value     = e.prix     || '';
     document.getElementById('ev-places').value   = e.places   || '';
     document.getElementById('ev-lieu').value     = e.lieu     || '';
     document.getElementById('ev-desc').value     = e.description || '';
+
+    // ✅ Restituer Gratuit / Payant
+    var prixVal = (e.prix || '').toLowerCase().trim();
+    if (!prixVal || prixVal === 'gratuit') {
+      togglePrix('gratuit');
+      document.getElementById('ev-prix-montant').value = '';
+    } else {
+      togglePrix('payant');
+      // Extraire le montant numérique (ex: "25€" → "25")
+      document.getElementById('ev-prix-montant').value = prixVal.replace(/[^0-9.]/g, '');
+    }
 
     // Ville custom
     var villeSelect = document.getElementById('ev-ville');
@@ -200,6 +256,7 @@
       var img = document.getElementById('ev-preview'); img.src = e.photo_url; img.style.display = 'block';
     } else {
       document.getElementById('ev-photo-actuelle').textContent = '';
+      document.getElementById('ev-preview').style.display = 'none';
     }
     openModal('modal-event');
   }
@@ -222,6 +279,17 @@
     var villeFinale = villeSelect === 'Autre' ? null : villeSelect;
     var villeCustomFinale = villeSelect === 'Autre' ? villeCustom : null;
 
+    // ✅ Construire le prix proprement
+    var prixType   = document.getElementById('ev-prix-type').value;
+    var prixMontant = document.getElementById('ev-prix-montant').value.trim();
+    var prixFinal;
+    if (prixType === 'gratuit') {
+      prixFinal = 'Gratuit';
+    } else {
+      if (!prixMontant || isNaN(prixMontant)) { window.TDCA.toast('Indique le prix en €.'); btn.textContent = 'Enregistrer'; btn.disabled = false; return; }
+      prixFinal = prixMontant + '€';
+    }
+
     var payload = {
       titre:        titre,
       date:         dateStr,
@@ -229,7 +297,7 @@
       heure:        document.getElementById('ev-time').value    || null,
       heure_fin:    document.getElementById('ev-time-fin').value || null,
       lieu:         document.getElementById('ev-lieu').value,
-      prix:         document.getElementById('ev-prix').value     || 'Gratuit',
+      prix:         prixFinal,
       places:       parseInt(document.getElementById('ev-places').value) || 10,
       ville:        villeFinale,
       ville_custom: villeCustomFinale,
@@ -237,7 +305,6 @@
       statut:       'Ouvert'
     };
 
-    // Upload photo
     var file = document.getElementById('ev-photo').files[0];
     if (file) {
       try { payload.photo_url = await window.TDCUpload.upload(db, file, 'events'); }
@@ -265,7 +332,7 @@
   function resetForm() {
     document.getElementById('ev-modal-title').textContent = 'Nouvel event';
     document.getElementById('ev-edit-id').value = '';
-    ['ev-title','ev-date','ev-lieu','ev-prix','ev-places','ev-desc','ev-time-fin','ev-ville-custom'].forEach(function (id) {
+    ['ev-title','ev-date','ev-lieu','ev-places','ev-desc','ev-time-fin','ev-ville-custom','ev-prix-montant'].forEach(function (id) {
       document.getElementById(id).value = '';
     });
     document.getElementById('ev-time').value = '10:00';
@@ -273,9 +340,9 @@
     document.getElementById('ev-preview').style.display = 'none';
     document.getElementById('ev-photo-actuelle').textContent = '';
     document.getElementById('ev-ville-custom-wrap').style.display = 'none';
+    togglePrix('gratuit');
   }
 
-  // ── Supprimer photo d'un event ──────────────────────
   async function removeEventPhoto() {
     var editId = document.getElementById('ev-edit-id').value;
     if (!editId) return;
@@ -291,6 +358,6 @@
   }
 
   window.TDCA = window.TDCA || {};
-  window.TDCA.events = { load: loadEvents, save: saveEvent, edit: editEvent, delete: deleteEvent, inscrits: voirInscrits, removePhoto: removeEventPhoto };
+  window.TDCA.events = { load: loadEvents, save: saveEvent, edit: editEvent, delete: deleteEvent, inscrits: voirInscrits, removePhoto: removeEventPhoto, togglePrix: togglePrix };
 
 })();
