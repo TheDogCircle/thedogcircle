@@ -31,16 +31,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 .btn-p:hover{background:var(--greenm);}
 .btn-o{background:transparent;color:var(--green);border:1.5px solid var(--green);}
 .btn-danger{background:transparent;color:var(--red);border:1.5px solid var(--red);font-size:12px;padding:5px 12px;}
+
+/* NAV */
 .app-nav{position:sticky;top:0;z-index:100;background:var(--w);border-bottom:1px solid var(--b);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;}
 .app-logo{display:flex;align-items:center;gap:8px;}
 .app-logo-icon{width:32px;height:32px;background:var(--cream2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;}
 .app-logo-text{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;}
 .app-logo-text span{color:var(--gold);}
-.app-avatar{width:36px;height:36px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;cursor:pointer;position:relative;overflow:hidden;}
-.profile-dd{position:absolute;right:0;top:44px;background:var(--w);border:1px solid var(--b);border-radius:14px;min-width:180px;box-shadow:0 8px 32px rgba(42,28,12,0.12);display:none;z-index:200;}
+
+/* ✅ AVATAR WRAPPER — position:relative ici, pas sur .app-avatar */
+.avatar-wrap{position:relative;}
+.app-avatar{width:36px;height:36px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;cursor:pointer;overflow:hidden;flex-shrink:0;}
+
+/* ✅ DROPDOWN — positionné par rapport à .avatar-wrap */
+.profile-dd{position:absolute;right:0;top:44px;background:var(--w);border:1px solid var(--b);border-radius:14px;min-width:190px;box-shadow:0 8px 32px rgba(42,28,12,0.12);display:none;z-index:200;}
 .profile-dd div{padding:10px 16px;font-size:13px;cursor:pointer;color:var(--t2);}
 .profile-dd div:hover{background:var(--cream);}
-.profile-dd .logout{color:var(--red);border-top:1px solid var(--b);}
+.profile-dd .dd-logout{color:var(--red);border-top:1px solid var(--b);}
+.profile-dd .dd-logout:hover{background:#fee2e2;}
+
 .tabs{display:flex;border-bottom:1px solid var(--b);overflow-x:auto;padding:0;background:var(--w);}
 .tabs::-webkit-scrollbar{display:none;}
 .tab{padding:14px 0;font-size:13px;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;flex:1;text-align:center;}
@@ -116,6 +125,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 .map-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;}
 .loading{text-align:center;padding:30px;color:var(--t3);}
 .error{color:var(--red);padding:20px;}
+
 @media(max-width:600px){
   .feed-grid,.partners-grid{grid-template-columns:1fr;}
   .garde-grid{grid-template-columns:1fr 1fr;}
@@ -124,22 +134,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
   .ev-card{flex-direction:column;}
   .login-box{padding:28px 20px;margin:16px;}
 }
-
-/* ── MOBILE RESPONSIVE ─────────────────────────── */
-@media (max-width: 768px) {
-  .app-nav { padding: 0 12px; }
-  .app-logo { font-size: 16px; }
-  .tabs { padding: 0; }
-  .tab { font-size: 11px; padding: 12px 6px; }
-  .tc { padding: 16px 14px; }
-  .sec-title { font-size: 22px; }
-  .ev-card { padding: 14px; }
-  .ev-day { font-size: 22px; }
-  .ev-title { font-size: 15px; }
-  .feed-grid { grid-template-columns: 1fr !important; gap: 16px; }
-  .feed-card { border-radius: 14px; }
-  .partner-grid { grid-template-columns: 1fr !important; }
-  .params-section { padding: 0; }
+@media(max-width:768px){
+  .app-nav{padding:0 12px;}
+  .tabs{padding:0;}
+  .tab{font-size:11px;padding:12px 6px;}
+  .tc{padding:16px 14px;}
+  .sec-title{font-size:22px;}
+  .ev-card{padding:14px;}
+  .ev-day{font-size:22px;}
+  .ev-title{font-size:15px;}
+  .feed-grid{grid-template-columns:1fr!important;gap:16px;}
+  .feed-card{border-radius:14px;}
+  .partner-grid{grid-template-columns:1fr!important;}
+  .params-section{padding:0;}
 }
 </style>
 </head>
@@ -171,13 +178,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
       <div class="app-logo-icon">🐾</div>
       <div class="app-logo-text">The Dog <span>Circle</span></div>
     </div>
-    <div class="app-avatar" id="avatarBtn">M
+
+    <!-- ✅ WRAPPER avec position:relative pour que le dropdown soit bien positionné -->
+    <div class="avatar-wrap">
+      <div class="app-avatar" id="avatarBtn">M</div>
       <div class="profile-dd" id="profileDd">
         <div id="ddProfil">🪪 Mon espace</div>
         <div id="ddMap">🗺️ La carte</div>
-        <div style="padding:10px 16px;font-size:13px;cursor:pointer;color:var(--t2);" onclick="alert('Système de paiement à venir 🐾')">💳 Abonnement</div>
-        <div style="padding:10px 16px;font-size:13px;cursor:pointer;color:var(--t2);" onclick="alert('Paramètres à venir 🐾')">⚙️ Paramètres</div>
-        <div class="logout" id="logoutBtn">🚪 Déconnexion</div>
+        <div onclick="alert('Système de paiement à venir 🐾')">💳 Abonnement</div>
+        <div onclick="alert('Paramètres à venir 🐾')">⚙️ Paramètres</div>
+        <!-- ✅ BOUTON DÉCONNEXION -->
+        <div class="dd-logout" id="logoutBtn">🚪 Se déconnecter</div>
       </div>
     </div>
   </nav>
@@ -195,8 +206,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
   </div>
 
   <div class="content">
-
-
 
     <!-- Instadog -->
     <div id="tc-feed" class="tc active">
@@ -291,7 +300,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 <script src="education.js"></script>
 <script src="messagerie.js"></script>
 
-<!-- SHELL : init TDC + navigation -->
+<!-- SHELL -->
 <script>
 (function () {
   var SB_URL = 'https://bmqyysilivmxndwhmovw.supabase.co';
@@ -303,7 +312,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     window.TDC.db = window.supabase.createClient(SB_URL, SB_KEY);
     document.dispatchEvent(new Event('TDC:ready'));
 
-    // Gérer le retour depuis un lien de réinitialisation de mot de passe
     var hash = window.location.hash;
     if (hash && hash.includes('type=recovery')) {
       showResetPasswordModal();
@@ -321,7 +329,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     document.dispatchEvent(new CustomEvent('TDC:tab', { detail: { tab: name } }));
   });
 
-  // Modal changement de mot de passe (reset depuis email ou depuis profil)
   function showResetPasswordModal() {
     var modal = document.getElementById('modal-reset-pwd');
     if (!modal) {
@@ -345,13 +352,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
         var confirm = document.getElementById('new-pwd-confirm').value;
         var err     = document.getElementById('pwd-err');
         err.style.display = 'none';
-
         if (pwd.length < 8) { err.textContent = 'Minimum 8 caractères.'; err.style.display = 'block'; return; }
         if (pwd !== confirm) { err.textContent = 'Les mots de passe ne correspondent pas.'; err.style.display = 'block'; return; }
-
         var res = await window.TDC.db.auth.updateUser({ password: pwd });
         if (res.error) { err.textContent = 'Erreur : ' + res.error.message; err.style.display = 'block'; return; }
-
         document.getElementById('pwd-ok').style.display = 'block';
         setTimeout(function () { modal.style.display = 'none'; }, 2500);
         window.history.replaceState(null, '', window.location.pathname);
@@ -360,7 +364,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
     modal.style.display = 'flex';
   }
 
-  // Exposer pour le module profil
   window.TDC_showResetPassword = showResetPasswordModal;
 
   document.getElementById('ddProfil').addEventListener('click', function () {
