@@ -179,18 +179,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
       <div class="app-logo-text">The Dog <span>Circle</span></div>
     </div>
 
-    <div style="display:flex;align-items:center;gap:12px;">
-      <!-- ✅ Lien déconnexion toujours visible dans la nav -->
-      <div id="logoutBtn" style="font-size:12px;color:var(--t3);cursor:pointer;white-space:nowrap;">🚪 Déconnexion</div>
-      <div class="avatar-wrap">
-        <div class="app-avatar" id="avatarBtn">M</div>
-        <div class="profile-dd" id="profileDd">
-          <div id="ddProfil">🪪 Mon espace</div>
-          <div id="ddMap">🗺️ La carte</div>
-          <div onclick="alert('Système de paiement à venir 🐾')">💳 Abonnement</div>
-          <div onclick="alert('Paramètres à venir 🐾')">⚙️ Paramètres</div>
-          <div class="dd-logout" id="logoutBtn2">🚪 Se déconnecter</div>
-        </div>
+    <div class="avatar-wrap">
+      <div class="app-avatar" id="avatarBtn">M</div>
+      <div class="profile-dd" id="profileDd">
+        <div id="ddProfil">🪪 Mon espace</div>
+        <div onclick="alert('Système de paiement à venir 🐾')">💳 Abonnement</div>
+        <div id="ddParams">⚙️ Paramètres</div>
+        <div class="dd-logout" id="logoutBtn">🚪 Se déconnecter</div>
       </div>
     </div>
   </nav>
@@ -373,17 +368,32 @@ body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--t);}
 
   window.TDC_showResetPassword = showResetPasswordModal;
 
+  // Mon espace → affiche tc-profil directement (l'onglet n'est plus dans la barre)
   document.getElementById('ddProfil').addEventListener('click', function () {
     document.getElementById('profileDd').style.display = 'none';
-    document.querySelector('[data-tab="profil"]').click();
+    document.querySelectorAll('.tc').forEach(function (t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+    document.getElementById('tc-profil').classList.add('active');
+    document.dispatchEvent(new CustomEvent('TDC:tab', { detail: { tab: 'profil' } }));
   });
-  document.getElementById('ddMap').addEventListener('click', function () {
+
+  // Paramètres → affiche tc-profil sur l'onglet Paramètres
+  document.getElementById('ddParams').addEventListener('click', function () {
     document.getElementById('profileDd').style.display = 'none';
-    document.querySelector('[data-tab="map"]').click();
+    document.querySelectorAll('.tc').forEach(function (t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+    document.getElementById('tc-profil').classList.add('active');
+    document.dispatchEvent(new CustomEvent('TDC:tab', { detail: { tab: 'profil' } }));
+    // Activer l'onglet Paramètres dans le sous-menu profil
+    setTimeout(function () {
+      var btn = document.getElementById('profTabParams');
+      if (btn) btn.click();
+    }, 50);
   });
 
   // Bouton déconnexion dans Paramètres
-  document.getElementById('logoutBtnParams').addEventListener('click', function () {
+  var lbp = document.getElementById('logoutBtnParams');
+  if (lbp) lbp.addEventListener('click', function () {
     document.getElementById('logoutBtn').click();
   });
 })();
