@@ -103,24 +103,25 @@
             + photoChien
           + '</div>'
 
-          // Nom + numéro
-          + '<div style="font-size:14px;font-weight:500;color:var(--t);margin-bottom:2px;">'
+          // ✅ Chien en premier
+          + (m.chien
+            ? '<div style="font-size:15px;font-weight:500;color:var(--t);margin-bottom:1px;">🐾 ' + m.chien + '</div>'
+            : '')
+          + (m.race
+            ? '<div style="font-size:11px;color:var(--t3);margin-bottom:4px;">' + m.race + (ageChien ? ' · ' + ageChien : '') + '</div>'
+            : '')
+
+          // Maître + numéro
+          + '<div style="font-size:12px;color:var(--t2);margin-bottom:4px;">'
             + m.prenom + (m.nom ? ' ' + m.nom[0] + '.' : '')
-            + (num ? ' <span style="font-size:10px;color:var(--t3);font-weight:400;">' + num + '</span>' : '')
+            + (num ? ' <span style="font-size:10px;color:var(--t3);">' + num + '</span>' : '')
           + '</div>'
 
           // Ville
-          + (m.ville ? '<div style="font-size:11px;color:var(--t3);margin-bottom:6px;">📍 ' + m.ville + '</div>' : '')
+          + (m.ville ? '<div style="font-size:11px;color:var(--t3);margin-bottom:8px;">📍 ' + m.ville + '</div>' : '')
 
-          // Chien + race + âge
-          + (m.chien ? '<div style="font-size:12px;color:var(--t2);margin-bottom:8px;">🐾 ' + m.chien
-              + (m.race ? ' <span style="color:var(--t3);">· ' + m.race + '</span>' : '')
-              + (ageChien ? ' <span style="color:var(--t3);">· ' + ageChien + '</span>' : '')
-            + '</div>' : '')
-
-          // Tags : situation amoureuse + formule
+          // ✅ Situation amoureuse uniquement (plus de formule)
           + '<div style="display:flex;flex-wrap:wrap;gap:5px;">'
-            + (m.formule ? '<span style="font-size:9px;padding:2px 8px;border-radius:100px;' + formuleStyle + '">' + m.formule + '</span>' : '')
             + (siEmoji ? '<span style="font-size:9px;padding:2px 8px;border-radius:100px;background:var(--cream);color:var(--t2);">' + siEmoji + ' ' + m.situation_amoureuse + '</span>' : '')
           + '</div>'
 
