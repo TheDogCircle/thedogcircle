@@ -4,7 +4,7 @@
  *  Fichier : admin-candidatures.js
  *  Auth    : via Netlify Function accept-candidature
  *  Numéro  : auto-incrémenté (#001, #002...)
- *  Parrain : code unique TDC-XXXX
+ *  Parrain : code unique TDC_NOMCHIEN
  * =====================================================
  */
 (function () {
@@ -94,11 +94,11 @@
 
       // 2. Générer mot de passe temporaire et code parrain
       var tempPassword = 'TDC-' + Math.random().toString(36).slice(2,8).toUpperCase() + '!';
-      // Code parrain basé sur le prénom du chien
       var nomChien     = (c.chien || 'CERCLE').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
       var codeParrain  = 'TDC_' + nomChien;
 
-      // 3. Appeler la Netlify Function (crée Auth + envoie email)
+      // 3. Appeler la Netlify Function
+      //    → crée le compte Auth, insère dans membres, met à jour candidature, envoie email
       var fnRes = await fetch('/.netlify/functions/accept-candidature', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,27 +111,7 @@
       });
 
       var fnData = await fnRes.json();
-      if (!fnRes.ok) throw new Error(fnData.error || 'Erreur fonction');
-
-      // 4. Créer le membre dans la table
-      var memRes = await db.from('membres').insert([{
-        prenom:        c.prenom,
-        nom:           c.nom || null,
-        email:         c.email,
-        ville:         c.ville,
-        chien:         c.chien,
-        race:          c.race,
-        formule:       c.formule,
-        statut:        'actif',
-        numero_membre: numero,
-        code_parrain:  codeParrain,
-        parrain1:      c.parrain1 || null,
-        parrain2:      c.parrain2 || null
-      }]);
-      if (memRes.error) throw new Error('Membre: ' + memRes.error.message);
-
-      // 5. Marquer candidature comme acceptée
-      await db.from('candidatures').update({ statut: 'accepte' }).eq('id', id);
+      if (!fnRes.ok) throw new Error(fnData.error || 'Erreur fonction Netlify');
 
       var numeroStr = String(numero).padStart(3, '0');
       window.TDCA.toast('✅ ' + c.prenom + ' accepté(e) — membre #' + numeroStr + ' ! Email envoyé 📧');
